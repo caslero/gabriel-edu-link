@@ -1,0 +1,42 @@
+:root {
+  --blue-dark: #1e3a8a; /* chevron inferior */
+}
+
+body {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  background: #fff;
+}
+
+.logo-stage {
+  position: relative;
+  width: 220px;
+  height: 260px;
+  overflow: hidden;
+}
+
+/* Chevron como bloque sólido */
+.chevron {
+  position: absolute;
+  left: 50%;
+  top: 160px; /* posición final */
+  transform: translateX(-50%) translateY(-140px) scaleX(0.2);
+  width: 140px;
+  height: 40px;
+  background: var(--blue-dark);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transition: transform 0.6s ease-in-out;
+  opacity: 0;
+}
+
+/* Llega a su posición */
+.chevron.at-rest {
+  transform: translateX(-50%) translateY(0) scaleX(0.2);
+  opacity: 1;
+}
+
+/* Se abre */
+.chevron.open {
+  transform: translateX(-50%) translateY(0) scaleX(1);
+}
