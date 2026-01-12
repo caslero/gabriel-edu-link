@@ -1,13 +1,98 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %></title>
-</head>
-<body>
-  <h1>Bienvenido a Gabriel Edu Link</h1>
-  <p>Proyecto con Express, EJS, JWT, bcryptjs, MVC, SOLID y SQLite.</p>
-  <a href="/auth/login">Login</a> | <a href="/auth/register">Registro</a>
-</body>
-</html>
+
+<!-- Carrusel de bienvenida -->
+<div class="relative w-full mb-10">
+  <div class="overflow-hidden relative rounded-lg shadow-lg">
+    <!-- Slides -->
+    <div class="flex transition-transform duration-700 ease-in-out" id="carousel-slides">
+      <div class="w-full flex-shrink-0">
+        <img src="/../img/carruselle/img 1-bienvenida.png" alt="carrusele-1" class="w-full h-64 md:h-[710px] object-cover">
+      </div>
+      <div class="w-full flex-shrink-0">
+        <img src="/img/carruselle/img 2-solicitud de inscripcion.png" alt="carrusele-2" class="w-full h-64 md:h-[710px] object-cover">
+      </div>
+      <div class="w-full flex-shrink-0">
+        <img src="/img/carruselle/img 3-Adicion y Retiro.png" alt="carrusele-3" class="w-full h-64 md:h-[710px] object-cover">
+      </div>
+      <div class="w-full flex-shrink-0">
+        <img src="/img/carruselle/img 4-Actas Especiales.png" alt="carrusele-4" class="w-full h-64 md:h-[710px] object-cover">
+      </div>
+      <div class="w-full flex-shrink-0">
+        <img src="/img/carruselle/img 5-Encuestas.png" alt="carrusele-5" class="w-full h-64 md:h-[710px] object-cover">
+      </div>
+    </div>
+
+    <!-- Botones de navegación -->
+    <button onclick="moveSlide(-1)" class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 hover:bg-opacity-100">◀</button>
+    <button onclick="moveSlide(1)" class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 hover:bg-opacity-100">▶</button>
+  </div>
+</div>
+
+<!-- Sección de tarjetas -->
+
+<h2 class="text-3xl font-bold text-blue-900 mb-6">Realiza tus gestiones con nosotros</h2>
+
+
+<!-- Tarjetas -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+  <!-- Tarjeta 1 -->
+  <div class="bg-white shadow-md rounded-lg p-6 hover:scale-105 hover:shadow-xl transition transform">
+    <div class="mb-4">
+      <img src="/img/inscripcion.jpg" alt="Solicitud de inscripción" class="w-full h-40 object-cover rounded-md">
+    </div>
+    <h3 class="text-xl font-semibold text-blue-800 mb-2">Solicitud de Inscripción</h3>
+    <p class="text-gray-600 mb-4">Realiza tu inscripción en línea de manera rápida y segura.</p>
+    <a href="/estudiante/inscripcion" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-gradient-to-r from-cyan-200 to-blue-500 to-blue-700 transition">Inscribirme</a>
+  </div>
+
+  <!-- Tarjeta 2 -->
+  <div class="bg-white shadow-md rounded-lg p-6 hover:scale-105 hover:shadow-xl transition transform">
+    <div class="mb-4">
+      <img src="/img/adicion y retiro.jpg" alt="Adición y retiro de materias" class="w-full h-40 object-cover rounded-md">
+    </div>
+    <h3 class="text-xl font-semibold text-blue-800 mb-2">Adición y Retiro</h3>
+    <p class="text-gray-600 mb-4">Gestiona la adición y retiro de tus materias sin filas.</p>
+    <a href="/estudiante/adicion-retiro" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-gradient-to-r from-cyan-200 to-blue-500 to-blue-700 transition">Gestionar</a>
+  </div>
+
+  <!-- Tarjeta 3 -->
+  <div class="bg-white shadow-md rounded-lg p-6 hover:scale-105 hover:shadow-xl transition transform">
+    <div class="mb-4">
+      <img src="/img/actas especiales.jpg"" alt="Solicitud de actas especiales" class="w-full h-40 object-cover rounded-md">
+    </div>
+    <h3 class="text-xl font-semibold text-blue-800 mb-2">Actas Especiales</h3>
+    <p class="text-gray-600 mb-4">Solicita actas especiales de manera digital y simplificada.</p>
+    <a href="/estudiante/acta-especial" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-gradient-to-r from-cyan-200 to-blue-500 to-blue-700 transition">Solicitar</a>
+  </div>
+
+  <!-- Tarjeta 4 -->
+  <div class="bg-white shadow-md rounded-lg p-6 hover:scale-105 hover:shadow-xl transition transform">
+    <div class="mb-4">
+      <img src="/img/encuestas.jpg" alt="Encuestas académicas" class="w-full h-40 object-cover rounded-md">
+    </div>
+    <h3 class="text-xl font-semibold text-blue-800 mb-2">Encuestas</h3>
+    <p class="text-gray-600 mb-4">Participa en encuestas para habilitar materias y mejorar la gestión académica.</p>
+    <a href="/estudiante/encuestas" class="inline-block bg-blue-600 text-white px-4 py-2 rounded hover:bg-gradient-to-r from-cyan-200 to-blue-500 to-blue-700 transition">Responder</a>
+  </div>
+</div>
+
+
+<!-- Script carrusel -->
+<script>
+  let currentSlide = 0;
+  const slides = document.getElementById("carousel-slides");
+  const totalSlides = slides.children.length;
+
+  function moveSlide(direction) {
+    currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
+    updateSlide();
+  }
+
+  function updateSlide() {
+    slides.style.transform = `translateX(-${currentSlide * 100}%)`;
+  }
+
+  // Cambio automático cada 10 segundos
+  setInterval(() => {
+    moveSlide(1);
+  }, 10000);
+</script>

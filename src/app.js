@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { initDatabase } from "./config/database.js";
 import rutas from "./routes/route.js";
+import expressLayouts from "express-ejs-layouts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,8 +19,12 @@ app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
 
+// Configuración de layouts
+app.use(expressLayouts);
+app.set("layout", "partials/layout");
+
 // Archivos estáticos
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // Inicializar base de datos
 initDatabase();
@@ -43,3 +48,5 @@ app.listen(PORT, () => {
 });
 
 export default app;
+
+
