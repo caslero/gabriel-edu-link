@@ -1,8 +1,6 @@
-import prisma from "#root/config/prisma.js";
-import validarLogin from "#root/services/login/validarLogin.js";
-import { respuestaAlFront } from "#root/utils/respuestaAlFront.js";
-import nombreToken from "#root/libs/nombreToken.js";
-import { emitirUsuarioOnline } from "#root/config/socket/usuarios/emitirUsuarioOnline.js";
+import nombreToken from "../libs/nombreToken";
+import validarLogin from "../services/login/validarLogin";
+import { respuestaAlFront } from "../utils/respuestaAlFront";
 
 export default class LoginController {
   static async login(req, res) {
@@ -24,30 +22,15 @@ export default class LoginController {
         );
       }
 
-      await prisma.sesion.create({
-        data: {
-          usuarioId: validaciones.usuarioId,
-          token: validaciones.token,
-          activo: true,
-          ip: req.ip || req.headers["x-forwarded-for"], // Captura la IP
-          device: req.headers["user-agent"], // Captura el dispositivo/navegador
-          expiresAt: validaciones.cookie.expires,
-        },
-      });
-
       // 5. Configura la cookie y responde (Express usa res.cookie)
       res.cookie(nombreToken, validaciones.token, validaciones.cookieOption);
-
-      emitirUsuarioOnline({
-        usuarioId: validaciones.usuarioId,
-      });
 
       return respuestaAlFront(
         res,
         "ok",
         "Iniciando sesión...",
         {
-          redirect: "/chat",
+          redirect: validaciones.redirect,
         },
         200
       );
@@ -67,11 +50,6 @@ export default class LoginController {
   static async logout(req, res) {
     try {
       // 1. Elimina la cookie en Express
-      // res.clearCookie(nombreToken, {
-      //   path: "/", // Asegura que se borre en todo el sitio
-      //   httpOnly: true,
-      // });
-
       res.clearCookie(nombreToken, {
         path: "/",
         httpOnly: true,

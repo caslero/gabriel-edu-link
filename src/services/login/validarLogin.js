@@ -5,11 +5,11 @@
  y una utilidad para estructurar respuestas internas. @module services/login/validarLogin
 */
 
-import CifrarDescifrarClaves from "#root/libs/CifrarDescifrarClaves.js"; // Servicio para comparar contraseñas
-import AuthTokens from "#root/libs/AuthTokens.js"; // Servicio para generar tokens de sesión
-import respuestasAlBack from "#root/utils/respuestasAlBack.js"; // Utilidad para estructurar respuestas internas
-import validarCamposLogin from "#root/services/login/validarCamposLogin.js";
-import prisma from "#root/config/prisma.js";
+import CifrarDescifrarClaves from "../../libs/CifrarDescifrarClaves";
+import { UserModel } from "../../models/UserModel";
+import AuthTokens from "../../libs/AuthTokens";
+import validarCamposLogin from "./validarCamposLogin";
+import respuestasAlBack from "../../utils/respuestasAlBack";
 
 /**
  Valida el proceso de inicio de sesión de un usuario. Comprueba los campos, verifica credenciales,
@@ -31,18 +31,9 @@ export default async function validarLogin(correo, clave) {
     }
 
     // 3. Buscar usuario en la base de datos
-    const datosInicioSesion = await prisma.usuario.findFirst({
-      where: { correo: validandoCampos.correo },
-      select: {
-        id: true,
-        nombre: true,
-        correo: true,
-        clave: true,
-        rolId: true,
-        borrado: true,
-        createdAt: true,
-      },
-    });
+    const datosInicioSesion = await UserModel.buscarUsuarioPorCorreo(
+      validandoCampos.correo
+    );
 
     // 4. Verificar si el usuario existe
     if (!datosInicioSesion) {
@@ -51,17 +42,12 @@ export default async function validarLogin(correo, clave) {
       });
     }
 
-    // 5. Verificar si el usuario está validado
-    // if (!datosInicioSesion.validado) {
-    //   return respuestasAlBack("error", "Usuario no autorizado");
-    // }
-
-    // 6. Verificar si el usuario está eliminado o suspendido
+    // 5. Verificar si el usuario está eliminado o suspendido
     if (datosInicioSesion.borrado) {
       return respuestasAlBack("error", "Usuario eliminado o suspendido");
     }
 
-    // 7. Comparar la contraseña ingresada con la almacenada
+    // 6. Comparar la contraseña ingresada con la almacenada
     const claveEncriptada = await CifrarDescifrarClaves.compararClave(
       validandoCampos.clave,
       datosInicioSesion.clave
@@ -80,12 +66,12 @@ export default async function validarLogin(correo, clave) {
     };
 
     // 10. Tomamos la direccion por el id_rol o la raiz
-    const redirect = redirecciones[datosInicioSesion.id_rol] || "/";
+    const redirect = redirecciones[datosInicioSesion.rol] || "/";
 
     // 11. Generar token de sesión
     const crearTokenInicioSesion = AuthTokens.tokenInicioSesion(
       validandoCampos.correo,
-      datosInicioSesion.rolId
+      datosInicioSesion.rol
     );
 
     // 12. Si la validación falla retornamos una respuesta
@@ -101,13 +87,10 @@ export default async function validarLogin(correo, clave) {
       token: crearTokenInicioSesion.token,
       cookie: crearTokenInicioSesion.cookieOption,
       redirect: redirect,
-      usuarioId: datosInicioSesion.id,
-      nombre: datosInicioSesion.nombre,
       correo: datosInicioSesion.correo,
       clave: datosInicioSesion.clave,
-      rolId: datosInicioSesion.rolId,
+      rol: datosInicioSesion.rol,
       borrado: datosInicioSesion.borrado,
-      createdAt: datosInicioSesion.createdAt,
     });
   } catch (error) {
     // 14. Manejo de errores inesperados

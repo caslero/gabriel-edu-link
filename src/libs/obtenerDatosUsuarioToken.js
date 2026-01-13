@@ -4,9 +4,9 @@
  * @module controllers/usuarios/obtenerDatosUsuarioToken
  */
 
-import prisma from "#root/config/prisma.js";
-import respuestasAlBack from "#root/utils/respuestasAlBack.js";
-import obtenerCorreoToken from "#root/libs/obtenerCorreoToken.js";
+import { UserModel } from "../models/UserModel";
+import respuestasAlBack from "../utils/respuestasAlBack";
+import obtenerCorreoToken from "./obtenerCorreoToken";
 
 /**
  * Controlador Express que obtiene los datos del usuario activo utilizando su correo extraído del token.
@@ -27,13 +27,7 @@ export default async function obtenerDatosUsuarioToken(req) {
     }
 
     // 3. Consultar en la base de datos los datos del usuario por correo.
-    const datosUsuario = await prisma.usuario.findFirst({
-      where: { correo: validaciones.correo },
-      select: {
-        id: true,
-        nombre: true,
-      },
-    });
+    const datosUsuario = await UserModel.buscarUsuarioPorCorreo(correo);
 
     // 4. Si no se encuentra el usuario, retornar error.
     if (!datosUsuario) {
@@ -47,7 +41,7 @@ export default async function obtenerDatosUsuarioToken(req) {
       usuarioId: datosUsuario.id,
       nombre: datosUsuario.nombre,
       correo: validaciones.correo,
-      rolId: validaciones.id_rol,
+      rolId: validaciones.rol,
     });
   } catch (error) {
     console.error("Error interno obtener datos usuario:", error);

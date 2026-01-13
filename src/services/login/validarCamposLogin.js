@@ -1,6 +1,6 @@
 // src/utils/validarCamposRegistro.js
-import respuestasAlBack from "#root/utils/respuestasAlBack.js";
-import ValidarCampos from "#root/services/ValidarCampos.js";
+import respuestasAlBack from "../../utils/respuestasAlBack";
+import ValidarCampos from "../ValidarCampos";
 
 export default function validarCamposLogin(correo, clave) {
   try {
