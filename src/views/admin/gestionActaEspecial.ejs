@@ -1,0 +1,157 @@
+<div class="container mx-auto px-6 py-8">
+  <h1 class="text-2xl font-bold text-blue-700 mb-6"><%= title %></h1>
+
+  <!-- Mensajes flash -->
+  <% if (flash && flash.success) { %>
+    <div class="bg-green-100 text-green-700 p-3 rounded mb-4"><%= flash.success %></div>
+  <% } %>
+  <% if (flash && flash.error) { %>
+    <div class="bg-red-100 text-red-700 p-3 rounded mb-4"><%= flash.error %></div>
+  <% } %>
+
+  <!-- Formulario de creación -->
+  <div class="bg-gray-50 p-6 rounded shadow mb-8">
+    <h3 class="text-lg font-semibold text-blue-700 mb-4">Crear nueva Acta Especial</h3>
+    <form action="/api/admin/actas-especiales" method="POST" class="space-y-4">
+      <div>
+        <label for="titulo" class="block font-semibold">Título</label>
+        <input type="text" id="titulo" name="titulo" class="w-full border p-2 rounded" required>
+      </div>
+      <div>
+        <label for="descripcion" class="block font-semibold">Descripción</label>
+        <textarea id="descripcion" name="descripcion" class="w-full border p-2 rounded"></textarea>
+      </div>
+      <div>
+        <label for="tipo" class="block font-semibold">Tipo</label>
+        <select id="tipo" name="tipo" class="w-full border p-2 rounded" required>
+          <option value="Solicitud">Solicitud</option>
+          <option value="Acta Directa">Acta Directa</option>
+        </select>
+      </div>
+      <div>
+        <label for="docente_id" class="block font-semibold">Docente destinatario</label>
+        <select id="docente_id" name="docente_id" class="w-full border p-2 rounded" required>
+          <option value="">Seleccione un docente</option>
+          <% docentes.forEach(doc => { %>
+            <option value="<%= doc.id %>"><%= doc.nombre %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div>
+        <label for="estudiante_id" class="block font-semibold">Estudiante (opcional)</label>
+        <select id="estudiante_id" name="estudiante_id" class="w-full border p-2 rounded">
+          <option value="">Seleccione un estudiante</option>
+          <% estudiantes.forEach(est => { %>
+            <option value="<%= est.id %>"><%= est.nombre %></option>
+          <% }) %>
+        </select>
+      </div>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-gradient-to-r from-cyan-200 to-blue-500 to-blue-700 transition w-full">
+        Crear Acta
+      </button>
+    </form>
+  </div>
+
+  <!-- Lista de solicitudes pendientes -->
+<div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
+  <h3 class="text-lg font-semibold text-blue-700 mb-4">Solicitudes pendientes</h3>
+  <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+    <thead class="bg-yellow-500 text-white">
+      <tr>
+        <th class="px-4 py-2 text-center">ID</th>
+        <th class="px-4 py-2 text-center">Título</th>
+        <th class="px-4 py-2 text-center">Estudiante</th>
+        <th class="px-4 py-2 text-center">Docente</th>
+        <th class="px-4 py-2 text-center">Estado</th>
+        <th class="px-4 py-2 text-center">Fecha</th>
+        <th class="px-4 py-2 text-center">Acciones</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      <% if (!solicitudes || solicitudes.length === 0) { %>
+        <tr>
+          <td colspan="7" class="text-center py-6 text-gray-500">No hay solicitudes pendientes.</td>
+        </tr>
+      <% } else { %>
+        <% solicitudes.forEach(sol => { %>
+          <tr>
+            <td class="px-4 py-2 text-center"><%= sol.id %></td>
+            <td class="px-4 py-2 text-center"><%= sol.titulo %></td>
+            <td class="px-4 py-2 text-center"><%= sol.estudiante %></td>
+            <td class="px-4 py-2 text-center"><%= sol.docente %></td>
+            <td class="px-4 py-2 text-center"><%= sol.estado %></td>
+            <td class="px-4 py-2 text-center"><%= sol.creado_en %></td>
+            <td class="px-4 py-2 text-center">
+              <div class="flex flex-col items-center space-y-2">
+                <form action="/admin/actas-especiales/<%= sol.id %>/aprobar" method="POST" class="w-full">
+                  <button type="submit" class="w-32 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">
+                    Aprobar
+                  </button>
+                </form>
+                <form action="/admin/actas-especiales/<%= sol.id %>/rechazar" method="POST" class="w-full">
+                  <button type="submit" class="w-32 bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition">
+                    Rechazar
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- Lista de actas procesadas -->
+<div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
+  <h3 class="text-lg font-semibold text-blue-700 mb-4">Actas procesadas</h3>
+  <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+    <thead class="bg-blue-600 text-white">
+      <tr>
+        <th class="px-4 py-2 text-center">ID</th>
+        <th class="px-4 py-2 text-center">Título</th>
+        <th class="px-4 py-2 text-center">Docente</th>
+        <th class="px-4 py-2 text-center">Estudiante</th>
+        <th class="px-4 py-2 text-center">Tipo</th>
+        <th class="px-4 py-2 text-center">Estado</th>
+        <th class="px-4 py-2 text-center">Fecha</th>
+        <th class="px-4 py-2 text-center">Acciones</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      <% if (!actas || actas.length === 0) { %>
+        <tr>
+          <td colspan="8" class="text-center py-6 text-gray-500">No hay actas procesadas.</td>
+        </tr>
+      <% } else { %>
+        <% actas.forEach(acta => { %>
+          <tr>
+            <td class="px-4 py-2 text-center"><%= acta.id %></td>
+            <td class="px-4 py-2 text-center"><%= acta.titulo %></td>
+            <td class="px-4 py-2 text-center"><%= acta.docente || 'N/A' %></td>
+            <td class="px-4 py-2 text-center"><%= acta.estudiante || 'N/A' %></td>
+            <td class="px-4 py-2 text-center"><%= acta.tipo %></td>
+            <td class="px-4 py-2 text-center">
+              <span class="px-3 py-1 rounded-full text-sm 
+                <%= acta.estado === 'ProcesadaAdmin' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %>">
+                <%= acta.estado %>
+              </span>
+            </td>
+            <td class="px-4 py-2 text-center"><%= acta.creado_en %></td>
+            <td class="px-4 py-2 text-center">
+              <form action="/admin/actas-especiales/<%= acta.id %>/eliminar" method="POST" class="inline">
+                <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                        onclick="return confirm('¿Seguro que deseas eliminar esta acta?')">
+                  Eliminar
+                </button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+</div>

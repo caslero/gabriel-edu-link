@@ -46,7 +46,7 @@
         </div>
         <div>
           <label for="confirmClave" class="block text-sm font-medium text-gray-700 mt-4">Confirmar contraseña</label>
-          <input type="password" id="confirmClave" placeholder="**********" required
+          <input type="password" id="confirmarClave" placeholder="**********" required
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow focus:outline-none focus:ring focus:border-blue-500"/>
         </div>
         <div class="mt-6">
@@ -76,15 +76,7 @@
               class="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring focus:border-blue-500"/>
           </div>
         </div>
-        <div>
-          <label for="rol" class="block text-sm font-medium text-gray-700 mt-4">Rol</label>
-          <select id="rol" name="rol" required
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow focus:outline-none focus:ring focus:border-blue-500">
-            <option value="" disabled selected>Seleccione un rol</option>
-            <option value="Estudiante">Estudiante</option>
-            <option value="Docente">Docente</option>
-          </select>
-        </div>
+        
         <div class="flex justify-between mt-6">
           <button type="button" id="step2Prev"
             class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400">Atrás</button>
@@ -101,7 +93,7 @@
         <div class="space-y-2">
           <p><strong>Correo:</strong> <span id="summaryEmail"></span></p>
           <p><strong>Nombre:</strong> <span id="summaryName"></span></p>
-          <p><strong>Rol:</strong> <span id="summaryRole"></span></p>
+          <p><strong>Rol:</strong> <span id="summaryRol"></span></p>
         </div>
         <div class="mt-4">
           <label class="inline-flex items-center">

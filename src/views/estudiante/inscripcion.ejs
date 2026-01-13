@@ -1,0 +1,152 @@
+<div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
+  <h2 class="text-2xl font-bold mb-4 text-blue-700">Formulario de Inscripción</h2>
+
+  <form action="/api/estudiante/inscripcion" method="POST" class="bg-white p-6 rounded shadow space-y-4">
+    <!-- Campo oculto para estudiante -->
+    <input type="hidden" name="estudiante_id" value="<%= user.id %>">
+
+    <!-- Select de semestre -->
+    <div>
+      <label for="semestre" class="block font-semibold">Semestre</label>
+      <select id="semestre" name="semestre" class="w-full border p-2 rounded" required>
+        <option value="">Seleccione un semestre</option>
+        <% semestres.forEach(sem => { %>
+          <option value="<%= sem.semestre %>"><%= sem.semestre %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <!-- Select de materia -->
+    <div>
+      <label for="materia_id" class="block font-semibold">Materia</label>
+      <select id="materia_id" name="materia_id" class="w-full border p-2 rounded" disabled required>
+        <option value="">Seleccione una materia</option>
+        <% materias.forEach(mat => { %>
+          <option value="<%= mat.id %>" data-semestre="<%= mat.semestre %>"><%= mat.nombre %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <!-- Select de sección -->
+    <div>
+      <label for="seccion_id" class="block font-semibold">Sección</label>
+      <select id="seccion_id" name="seccion_id" class="w-full border p-2 rounded" disabled required>
+        <option value="">Seleccione una sección</option>
+        <% secciones.forEach(sec => { %>
+          <option value="<%= sec.id %>" data-materia="<%= sec.materia_id %>"><%= sec.nombre %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <button type="submit" class="bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-800">
+      Enviar solicitud
+    </button>
+  </form>
+
+  <!-- Listado de solicitudes del estudiante-->
+   <h3 class="text-lg font-semibold text-blue-700 mt-8 mb-4">Mis solicitudes</h3>
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+      <thead class="bg-blue-600 text-white">
+        <tr>
+          <th class="px-4 py-2">Materia</th>
+          <th class="px-4 py-2">Sección</th>
+          <th class="px-4 py-2">Estado</th>
+          <th class="px-4 py-2">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% if (!solicitudes || solicitudes.length === 0) { %>
+          <tr>
+            <td colspan="4" class="text-center py-6 text-gray-500">No has enviado solicitudes.</td>
+          </tr>
+        <% } else { %>
+          <% solicitudes.forEach(sol => { %>
+            <tr>
+              <td class="px-4 py-2"><%= sol.materia %></td>
+              <td class="px-4 py-2"><%= sol.seccion %></td>
+              <td class="px-4 py-2">
+                <% if (sol.estado === 'Pendiente') { %>
+                  <span class="text-yellow-600 font-semibold">En proceso</span>
+                <% } else if (sol.estado === 'Rechazada') { %>
+                  <span class="text-red-600 font-semibold">Rechazada</span>
+                <% } else if (sol.estado === 'Aprobada') { %>
+                  <span class="text-green-600 font-semibold">Aprobada</span>
+                <% } else { %>
+                  <span class="text-gray-600">Desconocido</span>
+                <% } %>
+              </td>
+              <td class="px-4 py-2 text-center">
+                <% if (sol.estado !== 'Pendiente') { %>
+                  <button 
+                    type="button" 
+                    onclick="document.getElementById('detalle-solicitud-<%= sol.id %>').classList.remove('hidden')" 
+                    class="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700">
+                    Ver detalles
+                  </button>
+                <% } else { %>
+                  <span class="text-gray-500">En revisión</span>
+                <% } %>
+              </td>
+            </tr>
+
+            <!-- Modal de detalles -->
+            <div id="detalle-solicitud-<%= sol.id %>" 
+                 class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+                <h3 class="text-lg font-semibold text-blue-700 mb-4">Solicitud #<%= sol.id %></h3>
+                <p><strong>Materia:</strong> <%= sol.materia %></p>
+                <p><strong>Sección:</strong> <%= sol.seccion %></p>
+                <p><strong>Estado:</strong> <%= sol.estado %></p>
+                <p><strong>Comentario del administrador:</strong> <%= sol.comentario || '-' %></p>
+                <button type="button" 
+                        onclick="document.getElementById('detalle-solicitud-<%= sol.id %>').classList.add('hidden')" 
+                        class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 w-full mt-4">
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const semestreSelect = document.getElementById('semestre');
+  const materiaSelect = document.getElementById('materia_id');
+  const seccionSelect = document.getElementById('seccion_id');
+
+  semestreSelect.addEventListener('change', () => {
+    const semestre = semestreSelect.value;
+    materiaSelect.value = '';
+    seccionSelect.value = '';
+    seccionSelect.disabled = true;
+
+    if (semestre) {
+      [...materiaSelect.options].forEach(opt => {
+        if (!opt.value) return;
+        opt.hidden = opt.getAttribute('data-semestre') !== semestre;
+      });
+      materiaSelect.disabled = false;
+    } else {
+      materiaSelect.disabled = true;
+    }
+  });
+
+  materiaSelect.addEventListener('change', () => {
+    const materiaId = materiaSelect.value;
+    seccionSelect.value = '';
+
+    if (materiaId) {
+      [...seccionSelect.options].forEach(opt => {
+        if (!opt.value) return;
+        opt.hidden = opt.getAttribute('data-materia') !== materiaId;
+      });
+      seccionSelect.disabled = false;
+    } else {
+      seccionSelect.disabled = true;
+    }
+  });
+</script>

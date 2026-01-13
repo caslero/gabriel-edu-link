@@ -1,0 +1,219 @@
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+  <!-- Formulario de Adición -->
+<div class="bg-white p-6 rounded shadow flex flex-col h-full">
+  <h2 class="text-2xl font-bold text-blue-700 mb-4">Solicitud de Adición</h2>
+  <form action="/api/estudiante/adicion" method="POST" class="flex flex-col flex-grow space-y-4">
+    
+    <!-- Selección de semestre -->
+    <div>
+      <label for="semestreAdicion" class="block font-semibold">Semestre</label>
+      <select id="semestreAdicion" name="semestre" class="w-full border p-2 rounded" required>
+        <option value="">Seleccione un semestre</option>
+          <% semestres.forEach(sem => { %>
+            <option value="<%= sem.semestre %>"><%= sem.semestre %></option>
+          <% }) %>
+        </select>
+    </div>
+
+    <!-- Selección de materia -->
+    <div>
+      <label for="materiaAdicion" class="block font-semibold">Materia</label>
+      <select id="materiaAdicion" name="materia_id" class="w-full border p-2 rounded" required disabled>
+        <option value="">Seleccione una materia</option>
+          <% materias.forEach(mat => { %>
+            <option value="<%= mat.id %>" data-semestre="<%= mat.semestre %>">
+              <%= mat.nombre %></option>
+          <% }) %>
+        </select>
+    </div>
+
+    <!-- Selección de sección -->
+    <div>
+      <label for="seccionAdicion" class="block font-semibold">Sección</label>
+      <select id="seccionAdicion" name="seccion_id" class="w-full border p-2 rounded" required disabled>
+        <option value="">Seleccione una sección</option>
+        <% secciones.forEach(sec => { %>
+          <option value="<%= sec.id %>" data-materia="<%= sec.materia_id %>"><%= sec.nombre %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <!-- Botón -->
+    <div class="mt-auto">
+      <button type="submit" class="bg-blue-700 text-white px-4 py-2  rounded hover:bg-blue-800 w-full">
+        Enviar solicitud de adición
+      </button>
+    </div>
+  </form>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const semestreSelect = document.getElementById("semestreAdicion");
+  const materiaSelect = document.getElementById("materiaAdicion");
+  const seccionSelect = document.getElementById("seccionAdicion");
+
+  semestreSelect.addEventListener("change", () => {
+    const semestreId = semestreSelect.value;
+
+    // Reset materia y seccion
+    materiaSelect.disabled = true;
+    seccionSelect.disabled = true;
+    materiaSelect.value = "";
+    seccionSelect.value = "";
+
+    if (semestreId) {
+      // Mostrar solo materias del semestre seleccionado
+      [...materiaSelect.options].forEach(opt => {
+        if (!opt.value) return; // skip placeholder
+        opt.hidden = opt.getAttribute("data-semestre") !== semestreId;
+      });
+      materiaSelect.disabled = false;
+    }
+  });
+
+  materiaSelect.addEventListener("change", () => {
+    const materiaId = materiaSelect.value;
+
+    // Reset seccion
+    seccionSelect.disabled = true;
+    seccionSelect.value = "";
+
+    if (materiaId) {
+      // Mostrar solo secciones de la materia seleccionada
+      [...seccionSelect.options].forEach(opt => {
+        if (!opt.value) return;
+        opt.hidden = opt.getAttribute("data-materia") !== materiaId;
+      });
+      seccionSelect.disabled = false;
+    }
+  });
+});
+</script>
+
+
+ <!-- Formulario de Retiro -->
+<div class="bg-white p-6 rounded shadow flex flex-col h-full">
+  <h2 class="text-2xl font-bold text-red-700 mb-4">Solicitud de Retiro</h2>
+  <form action="/api/estudiante/retiro" method="POST" class="flex flex-col flex-grow space-y-4">
+    
+    <!-- Selección de semestre -->
+    <div>
+      <label for="semestreRetiro" class="block font-semibold">Semestre</label>
+      <select id="semestreRetiro" name="semestre" class="w-full border p-2 rounded" required>
+        <option value="">Seleccione un semestre</option>
+          <% semestres.forEach(sem => { %>
+            <option value="<%= sem.semestre %>"><%= sem.semestre %></option>
+          <% }) %>
+        </select>
+    </div>
+
+    <!-- Selección de materia -->
+    <div>
+      <label for="materiaRetiro" class="block font-semibold">Materia</label>
+      <select id="materiaRetiro" name="materia_id" class="w-full border p-2 rounded" required disabled>
+        <option value="">Seleccione una materia</option>
+          <% materias.forEach(mat => { %>
+            <option value="<%= mat.id %>" data-semestre="<%= mat.semestre %>">
+              <%= mat.nombre %></option>
+          <% }) %>
+        </select>
+    </div>
+
+    <!-- Selección de sección -->
+    <div>
+      <label for="seccionRetiro" class="block font-semibold">Sección</label>
+      <select id="seccionRetiro" name="seccion_id" class="w-full border p-2 rounded" required disabled>
+        <option value="">Seleccione una sección</option>
+        <% secciones.forEach(sec => { %>
+          <option value="<%= sec.id %>" data-materia="<%= sec.materia_id %>"><%= sec.nombre %></option>
+        <% }) %>
+      </select>
+    </div>
+
+    <!-- Motivo -->
+    <div>
+      <label for="motivoRetiro" class="block font-semibold">Motivo</label>
+      <textarea id="motivoRetiro" name="descripcion" class="w-full border p-2 rounded" required></textarea>
+    </div>
+
+    <!-- Botón -->
+    <div class="mt-auto">
+      <button type="submit" class="bg-red-700 text-white px-4 py-2 rounded hover:bg-red-800 w-full">
+        Enviar solicitud de retiro
+      </button>
+    </div>
+  </form>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const semestreSelect = document.getElementById("semestreRetiro");
+  const materiaSelect = document.getElementById("materiaRetiro");
+  const seccionSelect = document.getElementById("seccionRetiro");
+
+  semestreSelect.addEventListener("change", () => {
+    const semestre = semestreSelect.value;
+    materiaSelect.value = "";
+    seccionSelect.value = "";
+    materiaSelect.disabled = true;
+    seccionSelect.disabled = true;
+
+    if (semestre) {
+      [...materiaSelect.options].forEach(opt => {
+        if (!opt.value) return;
+        opt.hidden = opt.getAttribute("data-semestre") !== semestre;
+      });
+      materiaSelect.disabled = false;
+    }
+  });
+
+  materiaSelect.addEventListener("change", () => {
+    const materiaId = materiaSelect.value;
+    seccionSelect.value = "";
+    seccionSelect.disabled = true;
+
+    if (materiaId) {
+      [...seccionSelect.options].forEach(opt => {
+        if (!opt.value) return;
+        opt.hidden = opt.getAttribute("data-materia") !== materiaId;
+      });
+      seccionSelect.disabled = false;
+    }
+  });
+});
+</script>
+
+
+<!-- Lista de solicitudes -->
+<div class="bg-gray-50 p-6 rounded shadow mt-5 col-span-1 md:col-span-2">
+  <h3 class="text-lg font-semibold text-blue-700 mb-4">Solicitudes realizadas</h3>
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+      <thead class="bg-blue-600 text-white">
+        <tr>
+          <th class="px-4 py-2 text-left">Semestre</th>
+          <th class="px-4 py-2 text-left">Materia</th>
+          <th class="px-4 py-2 text-left">Sección</th>
+          <th class="px-4 py-2 text-left">Tipo</th>
+          <th class="px-4 py-2 text-left">Estado</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% if (!solicitudes || solicitudes.length === 0) { %>
+          <tr>
+            <td colspan="5" class="text-center py-6 text-gray-500">No hay solicitudes realizadas.</td>
+          </tr>
+        <% } else { %>
+          <% solicitudes.forEach(sol => { %>
+            <tr>
+              <td class="px-4 py-2"><%= sol.semestre %></td>
+              <td class="px-4 py-2"><%= sol.materia %></td>
+              <td class="px-4 py-2"><%= sol.seccion %></td>
+              <td class="px-4 py-2"><%= sol.tipo %></td>
+              <td class="px-4 py-2"><%= sol.estado %></td>
+            </tr>
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

@@ -1,0 +1,142 @@
+<div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
+  <h2 class="text-2xl font-bold text-blue-700 mb-6">Gestión de Materias</h2>
+
+  <!-- Formulario de creación -->
+  <div class="bg-gray-50 p-6 rounded shadow mb-8">
+    <h3 class="text-lg font-semibold text-blue-700 mb-4">Registrar nueva sección</h3>
+    <form action="/api/admin/crear-materia" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- Select de semestre -->
+      <div>
+        <label for="semestre" class="block font-semibold">Semestre</label>
+        <select id="semestre" name="semestre" class="w-full border p-2 rounded" required>
+          <option value="">Seleccione un semestre</option>
+          <% semestres.forEach(sem => { %>
+            <option value="<%= sem.semestre %>"><%= sem.semestre %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Select de materia -->
+      <div>
+        <label for="materia_id" class="block font-semibold">Materia</label>
+        <select id="materia_id" name="materia_id" class="w-full border p-2 rounded" disabled required>
+          <option value="">Seleccione una materia</option>
+          <% materias.forEach(mat => { %>
+            <option value="<%= mat.id %>" data-semestre="<%= mat.semestre %>">
+              <%= mat.nombre %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Input de sección -->
+      <div>
+        <label for="seccion_nombre" class="block font-semibold">Sección</label>
+        <input type="text" id="seccion_nombre" name="seccion_nombre" class="w-full border p-2 rounded" disabled required>
+      </div>
+
+      <div class="md:col-span-3">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-gradient-to-r from-cyan-200 to-blue-500 to-blue-700 transition w-full">
+          Registrar Sección
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Listado de secciones -->
+  <h3 class="text-lg font-semibold text-blue-700 mb-4">Secciones registradas</h3>
+  <div class="overflow-x-auto mb-10">
+    <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+      <thead class="bg-blue-600 text-white">
+        <tr>
+          <th class="px-4 py-2 text-center">ID</th>
+          <th class="px-4 py-2 text-center">Semestre</th>
+          <th class="px-4 py-2 text-center">Materia</th>
+          <th class="px-4 py-2 text-center">Sección</th>
+          <th class="px-4 py-2 text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% if (!secciones || secciones.length === 0) { %>
+          <tr>
+            <td colspan="5" class="text-center py-6 text-gray-500">No hay secciones registradas.</td>
+          </tr>
+        <% } else { %>
+          <% secciones.forEach(sec => { %>
+            <tr>
+              <td class="px-4 py-2 text-center"><%= sec.id %></td>
+              <td class="px-4 py-2 text-center"><%= sec.semestre %></td>
+              <td class="px-4 py-2 text-center"><%= sec.materia %></td>
+              <td class="px-4 py-2 text-center"><%= sec.seccion %></td>
+              <td class="px-4 py-2 text-center space-x-2">
+                <!-- Botón para abrir modal -->
+                <button type="button" 
+                        onclick="document.getElementById('modal-<%= sec.id %>').classList.remove('hidden')" 
+                        class="bg-yellow-600 text-white px-3 py-1 rounded hover:bg-yellow-700">
+                  Editar
+                </button>
+
+                <!-- Eliminar -->
+                <form action="/admin/secciones/<%= sec.id %>/eliminar" method="POST" class="inline">
+                  <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Eliminar</button>
+                </form>
+              </td>
+            </tr>
+
+            <!-- Modal de edición -->
+            <div id="modal-<%= sec.id %>" 
+                 class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+                <h3 class="text-lg font-semibold text-blue-700 mb-4">Editar Sección</h3>
+                <form action="/admin/secciones/<%= sec.id %>/editar" method="POST" class="space-y-4">
+                  <div>
+                    <label class="block font-semibold">Nombre de Sección</label>
+                    <input type="text" name="seccion_nombre" value="<%= sec.seccion %>" class="w-full border p-2 rounded" required>
+                  </div>
+                  <div class="flex mt-2 justify-between space-x-2">
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">
+                      Guardar cambios
+                    </button>
+                    <button type="button" 
+                            onclick="document.getElementById('modal-<%= sec.id %>').classList.add('hidden')" 
+                            class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 w-full">
+                      Cancelar
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Script para habilitar selects -->
+<script>
+  const semestreSelect = document.getElementById('semestre');
+  const materiaSelect = document.getElementById('materia_id');
+  const seccionInput = document.getElementById('seccion_nombre');
+
+  semestreSelect.addEventListener('change', () => {
+    const semestre = semestreSelect.value;
+    materiaSelect.value = '';
+    seccionInput.value = '';
+    seccionInput.disabled = true;
+
+    if (semestre) {
+      // Filtrar materias por semestre
+      [...materiaSelect.options].forEach(opt => {
+        if (!opt.value) return; // saltar el placeholder
+        opt.hidden = opt.getAttribute('data-semestre') !== semestre;
+      });
+      materiaSelect.disabled = false;
+    } else {
+      materiaSelect.disabled = true;
+    }
+  });
+
+  materiaSelect.addEventListener('change', () => {
+    seccionInput.disabled = !materiaSelect.value;
+  });
+</script>

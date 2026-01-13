@@ -37,7 +37,8 @@ export const initDatabase = () => {
       correo TEXT UNIQUE NOT NULL,
       clave TEXT NOT NULL,
       cedula TEXT NOT NULL,
-      rol TEXT NOT NULL,
+      rol TEXT NOT NULL 
+        CHECK (rol IN ('Admin', 'Docente', 'Estudiante')) DEFAULT 'Estudiante',
       foto TEXT,
       token TEXT NOT NULL CHECK (LENGTH(token) == 16),
       borrado TEXT NOT NULL 

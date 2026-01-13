@@ -1,0 +1,171 @@
+<div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
+  <h2 class="text-2xl font-bold text-blue-700 mb-6">Gestión de Actas Especiales</h2>
+
+  <!-- Formulario de creación de acta -->
+  <div class="bg-gray-50 p-6 rounded shadow mb-8">
+    <h3 class="text-lg font-semibold text-blue-700 mb-4">Crear nueva Acta Especial</h3>
+    <form action="/api/docente/actas" method="POST" class="space-y-4">
+      
+      <!-- Buscar estudiante por cédula -->
+      <div class="md:col-span-2">
+        <label for="buscarCedula" class="block font-semibold">Buscar estudiante por cédula</label>
+        <div class="flex mb-2 rounded overflow-hidden border">
+          <!-- Prefijo -->
+          <select id="prefijoCedula" class="border-none px-3 py-2 bg-gray-100 focus:outline-none">
+            <option value="V-">V-</option>
+            <option value="E-">E-</option>
+          </select>
+
+          <!-- Input de cédula -->
+          <input type="text" id="buscarCedula" placeholder="Ej: 28051690" 
+                 class="flex-1 px-3 py-2 focus:outline-none">
+
+          <!-- Botón con ícono de lupa -->
+          <button type="button" id="btnBuscarCedula" 
+                  class="bg-blue-600 text-white px-4 flex items-center justify-center hover:bg-blue-700">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" 
+                 viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                    d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Select de estudiantes -->
+      <div>
+        <label for="estudiante_id" class="block font-semibold">Estudiante</label>
+        <select id="estudiante_id" name="estudiante_id" class="w-full border p-2 rounded" required>
+          <option value="">Seleccione un estudiante</option>
+          <% estudiantes.forEach(est => { %>
+            <option value="<%= est.id %>"><%= est.nombre %> - <%= est.cedula %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Script buscador -->
+      <script>
+        const buscarCedula = document.getElementById('buscarCedula');
+        const prefijoCedula = document.getElementById('prefijoCedula');
+        const selectEstudiante = document.getElementById('estudiante_id');
+        const btnBuscarCedula = document.getElementById('btnBuscarCedula');
+
+        async function buscarEstudiante() {
+          const cedula = prefijoCedula.value + buscarCedula.value.trim();
+          if (!buscarCedula.value.trim()) {
+            alert("Debe ingresar una cédula válida");
+            return;
+          }
+
+          const res = await fetch(`/docente/buscar-estudiante/${cedula}`);
+          const data = await res.json();
+
+          if (data.success) {
+            selectEstudiante.innerHTML = '';
+            const opt = document.createElement('option');
+            opt.value = data.estudiante.id;
+            opt.textContent = `${data.estudiante.nombre} - ${data.estudiante.cedula}`;
+            selectEstudiante.appendChild(opt);
+            selectEstudiante.disabled = false;
+          } else {
+            alert(data.message);
+            selectEstudiante.innerHTML = '<option value="">No encontrado</option>';
+            selectEstudiante.disabled = true;
+          }
+        }
+
+        buscarCedula.addEventListener('keydown', async (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            buscarEstudiante();
+          }
+        });
+
+        btnBuscarCedula.addEventListener('click', async () => {
+          buscarEstudiante();
+        });
+      </script>
+
+      <!-- Título -->
+      <div>
+        <label for="titulo" class="block font-semibold">Título</label>
+        <input type="text" id="titulo" name="titulo" class="w-full border p-2 rounded" required>
+      </div>
+
+      <!-- Descripción -->
+      <div>
+        <label for="descripcion" class="block font-semibold">Descripción</label>
+        <textarea id="descripcion" name="descripcion" class="w-full border p-2 rounded"></textarea>
+      </div>
+
+      <!-- Tipo -->
+      <div>
+        <label for="tipo" class="block font-semibold">Tipo</label>
+        <select id="tipo" name="tipo" class="w-full border p-2 rounded" required>
+          <option value="Solicitud">Solicitud</option>
+          <option value="Acta Directa">Acta Directa</option>
+        </select>
+      </div>
+
+      <!-- Botón -->
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition w-full">
+        Crear Acta
+      </button>
+    </form>
+  </div>
+
+  <!-- Tabla de solicitudes dirigidas al docente -->
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+      <thead class="bg-blue-600 text-white">
+        <tr>
+          <th class="px-4 py-2 text-left">ID</th>
+          <th class="px-4 py-2 text-left">Estudiante</th>
+          <th class="px-4 py-2 text-left">Tipo</th>
+          <th class="px-4 py-2 text-left">Descripción</th>
+          <th class="px-4 py-2 text-left">Estado</th>
+          <th class="px-4 py-2 text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% if (!actas || actas.length === 0) { %>
+          <tr>
+            <td colspan="6" class="text-center py-6 text-gray-500">
+              No hay actas registradas.
+            </td>
+          </tr>
+        <% } else { %>
+          <% actas.forEach(acta => { %>
+            <tr>
+              <td class="px-4 py-2"><%= acta.id %></td>
+              <td class="px-4 py-2"><%= acta.estudiante || 'N/A' %></td>
+              <td class="px-4 py-2"><%= acta.tipo %></td>
+              <td class="px-4 py-2"><%= acta.descripcion %></td>
+              <td class="px-4 py-2">
+                <span class="px-3 py-1 rounded-full text-sm 
+                  <%= acta.estado === 'AprobadaDocente' ? 'bg-green-100 text-green-700' : 
+                      acta.estado === 'RechazadaDocente' ? 'bg-red-100 text-red-700' : 
+                      'bg-yellow-100 text-yellow-700' %>">
+                  <%= acta.estado %>
+                </span>
+              </td>
+              <td class="px-4 py-2 text-center space-x-2">
+                <!-- Botones de acción -->
+                <form action="/docente/actas/<%= acta.id %>/aprobar" method="POST" class="inline">
+                  <button type="submit" class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">
+                    Aprobar
+                  </button>
+                </form>
+                <form action="/docente/actas/<%= acta.id %>/rechazar" method="POST" class="inline">
+                  <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition">
+                    Rechazar
+                  </button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>

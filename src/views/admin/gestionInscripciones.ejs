@@ -1,0 +1,304 @@
+<div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
+  <h2 class="text-2xl font-bold text-blue-700 mb-6">Gestión de Inscripciones</h2>
+
+  <!-- Formulario de creación de inscripción -->
+<div class="bg-gray-50 p-6 rounded shadow mb-8">
+  <h3 class="text-lg font-semibold text-blue-700 mb-4">Registrar nueva inscripción</h3>
+  <form action="/api/admin/inscripciones" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="md:col-span-2">
+      <label for="buscarCedula" class="block font-semibold">Buscar estudiante por cédula</label>
+      <div class="flex mb-2 rounded overflow-hidden border">
+        <!-- Prefijo -->
+        <select id="prefijoCedula" 
+                class="border-none px-3 py-2 bg-gray-100 focus:outline-none">
+          <option value="V-">V-</option>
+          <option value="E-">E-</option>
+        </select>
+
+        <!-- Input de cédula -->
+        <input type="text" id="buscarCedula" placeholder="Ej: 12345678" 
+              class="flex-1 px-3 py-2 focus:outline-none">
+
+        <!-- Botón con ícono de lupa -->
+        <button type="button" id="btnBuscarCedula" 
+                class="bg-blue-600 text-white px-4 flex items-center justify-center hover:bg-gradient-to-r from-cyan-200 to-blue-500 to-blue-700 transition">
+          <!-- Ícono de lupa (SVG) -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" 
+              viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                  d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Estudiante -->
+    <div>
+      <label for="estudiante_id" class="block font-semibold">Estudiante</label>
+      <select id="estudiante_id" name="estudiante_id" class="w-full border p-2 rounded" required disabled>
+        <!-- Se llenará dinámicamente -->
+      </select>
+    </div>
+
+    <!-- Semestre -->
+    <div>
+      <label for="semestre_id" class="block font-semibold">Semestre</label>
+      <select id="semestre_id" name="semestre_id" class="w-full border p-2 rounded" required disabled>
+        <option value="">Selecciona el Semestre</option>
+        <% semestres.forEach(sem => { %>
+          <option value="<%= sem.semestre %>">Semestre <%= sem.semestre %></option>
+        <% }) %>
+      </select>
+
+    </div>
+
+    <!-- Materia -->
+    <div>
+      <label for="materia_id" class="block font-semibold">Materia</label>
+      <select id="materia_id" name="materia_id" class="w-full border p-2 rounded" required disabled>
+        <option value="">Selecciona la Materia</option>
+        <!-- Se llenará dinámicamente según semestre -->
+      </select>
+    </div>
+
+    <!-- Sección -->
+    <div>
+      <label for="seccion_id" class="block font-semibold">Sección</label>
+      <select id="seccion_id" name="seccion_id" class="w-full border p-2 rounded" required disabled>
+        <option value="">Selecciona la Sección</option>
+        <!-- Se llenará dinámicamente según materia -->
+      </select>
+    </div>
+
+    <div class="md:col-span-2">
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-gradient-to-r from-cyan-200 to-blue-500 to-blue-700 transition w-full">
+        Registrar inscripción
+      </button>
+    </div>
+  </form>
+</div>
+
+
+
+
+  <!-- Listado de solicitudes -->
+  <h3 class="text-lg font-semibold text-blue-700 mb-4">Solicitudes de inscripción</h3>
+  <div class="overflow-x-auto mb-8">
+    <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+      <thead class="bg-yellow-600 text-center text-white">
+        <tr>
+          <th class="px-4 py-2">ID</th>
+          <th class="px-4 py-2">Estudiante</th>
+          <th class="px-4 py-2">Materia</th>
+          <th class="px-4 py-2">Sección</th>
+          <th class="px-4 py-2">Fecha</th>
+          <th class="px-4 py-2">Estado</th>
+          <th class="px-4 py-2 text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 ">
+        <% if (!solicitudes || solicitudes.length === 0) { %>
+          <tr>
+            <td colspan="7" class="text-center py-6 text-gray-500">No hay solicitudes registradas.</td>
+          </tr>
+        <% } else { %>
+          <% solicitudes.forEach(sol => { %>
+            <tr>
+              <td class="px-4 py-2 text-center"><%= sol.id %></td>
+              <td class="px-4 py-2 text-center"><%= sol.estudiante_nombre %> - <%= sol.cedula %></td>
+              <td class="px-4 py-2 text-center"><%= sol.materia %></td>
+              <td class="px-4 py-2 text-center"><%= sol.seccion %></td>
+              <td class="px-4 py-2 text-center"><%= sol.creado_en %></td>
+              <td class="px-4 py-2">
+                <% if (sol.estado === 'Pendiente') { %>
+                  <span class="text-yellow-600 font-semibold">En proceso</span>
+                <% } else if (sol.estado === 'Aprobada') { %>
+                  <span class="text-green-600 font-semibold">Aprobada</span>
+                <% } else if (sol.estado === 'Rechazada') { %>
+                  <span class="text-red-600 font-semibold">Rechazada</span>
+                <% } %>
+              </td>
+              <td class="px-4 py-2 text-center">
+                <button type="button" onclick="document.getElementById('modal-<%= sol.id %>').classList.remove('hidden')" 
+                        class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition">
+                  Ver solicitud
+                </button>
+              </td>
+            </tr>
+
+            <!-- Modal -->
+            <div id="modal-<%= sol.id %>" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+                <h3 class="text-lg font-semibold text-blue-700 mb-4">Solicitud #<%= sol.id %></h3>
+                <p><strong>Estudiante:</strong> <%= sol.estudiante_nombre %> - <%= sol.cedula %></p>
+                <p><strong>Materia:</strong> <%= sol.materia %></p>
+                <p><strong>Fecha:</strong> <%= sol.creado_en %></p>
+                <p><strong>Estado actual:</strong> <%= sol.estado %></p>
+                <p><strong>Comentario:</strong> <%= sol.comentario || '-' %></p>
+
+                <% if (sol.estado === 'Pendiente') { %>
+                  <!-- Aprobar -->
+                  <form action="/api/admin/inscripciones/<%= sol.id %>/estado" method="POST" class="mt-4">
+                    <input type="hidden" name="estado" value="Aprobada">
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 w-full">
+                      Aprobar inscripción
+                    </button>
+                  </form>
+
+                  <!-- Rechazar -->
+                  <form action="/api/admin/inscripciones/<%= sol.id %>/estado" method="POST" class="mt-4 space-y-2">
+                    <input type="hidden" name="estado" value="Rechazada">
+                    <label class="block text-sm font-semibold">Comentario de rechazo</label>
+                    <textarea name="comentario" class="w-full border p-2 rounded"></textarea>
+                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 w-full">
+                      Rechazar solicitud
+                    </button>
+                  </form>
+                <% } %>
+
+                <button type="button" onclick="document.getElementById('modal-<%= sol.id %>').classList.add('hidden')" 
+                        class="mt-4 bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 w-full">
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- Lista de inscripciones aprobadas -->
+  <h3 class="text-lg font-semibold text-blue-700 mb-4">Inscripciones registradas</h3>
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+      <thead class="bg-blue-600 text-white">
+        <tr>
+          <th class="px-4 py-2">ID</th>
+          <th class="px-4 py-2">Estudiante</th>
+          <th class="px-4 py-2">Materia</th>
+          <th class="px-4 py-2">Sección</th>
+          <th class="px-4 py-2">Fecha</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200 text-center">
+        <% if (!inscripciones || inscripciones.length === 0) { %>
+          <tr>
+            <td colspan="5" class="text-center py-6 text-gray-500">No hay inscripciones registradas.</td>
+          </tr>
+        <% } else { %>
+          <% inscripciones.forEach(ins => { %>
+            <tr>
+              <td class="px-4 py-2"><%= ins.id %></td>
+              <td class="px-4 py-2"><%= ins.estudiante_nombre %> - <%= ins.cedula %></td>
+              <td class="px-4 py-2"><%= ins.materia %></td>
+              <td class="px-4 py-2"><%= ins.seccion %></td>
+              <td class="px-4 py-2"><%= ins.creado_en %></td>
+            </tr>
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+  const buscarCedula = document.getElementById('buscarCedula');
+  const prefijoCedula = document.getElementById('prefijoCedula');
+  const selectEstudiante = document.getElementById('estudiante_id');
+  const selectSemestre = document.getElementById('semestre_id');
+  const selectMateria = document.getElementById('materia_id');
+  const selectSeccion = document.getElementById('seccion_id');
+  const btnBuscarCedula = document.getElementById('btnBuscarCedula');
+
+  // Función reutilizable para buscar estudiante
+  async function buscarEstudiante() {
+    const cedula = prefijoCedula.value + buscarCedula.value.trim();
+
+    if (!buscarCedula.value.trim()) {
+      alert("Debe ingresar una cédula válida");
+      return;
+    }
+
+    const res = await fetch(`/admin/buscar-estudiante/${cedula}`);
+    const data = await res.json();
+
+    if (data.success) {
+      // Limpiar y agregar estudiante encontrado
+      selectEstudiante.innerHTML = '';
+      const opt = document.createElement('option');
+      opt.value = data.estudiante.id;
+      opt.textContent = `${data.estudiante.nombre} - ${data.estudiante.id_usuario}`;
+      selectEstudiante.appendChild(opt);
+
+      selectEstudiante.disabled = false;
+      selectSemestre.disabled = false;
+    } else {
+      alert(data.message);
+      selectEstudiante.disabled = true;
+      selectSemestre.disabled = true;
+      selectMateria.disabled = true;
+      selectSeccion.disabled = true;
+    }
+  }
+
+  // Buscar estudiante al presionar Enter
+  buscarCedula.addEventListener('keydown', async (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      buscarEstudiante();
+    }
+  });
+
+  // Buscar estudiante al hacer clic en el botón con la lupa
+  btnBuscarCedula.addEventListener('click', async () => {
+    buscarEstudiante();
+  });
+
+  // Al seleccionar semestre, cargar materias
+  selectSemestre.addEventListener('change', async () => {
+    const semestre = selectSemestre.value;
+    if (!semestre) return;
+
+    const res = await fetch(`/admin/materias/${semestre}`);
+    const data = await res.json();
+
+    if (data.success) {
+      selectMateria.innerHTML = '<option value="">Selecciona la Materia</option>';
+      data.materias.forEach(mat => {
+        const opt = document.createElement('option');
+        opt.value = mat.id;
+        opt.textContent = mat.nombre;
+        selectMateria.appendChild(opt);
+      });
+      selectMateria.disabled = false;
+    } else {
+      alert(data.message);
+      selectMateria.disabled = true;
+      selectSeccion.disabled = true;
+    }
+  });
+
+  // Al seleccionar materia, cargar secciones
+  selectMateria.addEventListener('change', async () => {
+    const materiaId = selectMateria.value;
+    if (!materiaId) return;
+
+    const res = await fetch(`/admin/secciones/${materiaId}`);
+    const data = await res.json();
+
+    if (data.success) {
+      selectSeccion.innerHTML = '<option value="">Selecciona la Sección</option>';
+      data.secciones.forEach(sec => {
+        const opt = document.createElement('option');
+        opt.value = sec.id;
+        opt.textContent = sec.nombre;
+        selectSeccion.appendChild(opt);
+      });
+      selectSeccion.disabled = false;
+    } else {
+      alert(data.message);
+      selectSeccion.disabled = true;
+    }
+  });
+</script>

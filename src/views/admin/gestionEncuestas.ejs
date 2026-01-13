@@ -1,0 +1,310 @@
+<div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
+  <h2 class="text-2xl font-bold text-blue-700 mb-6">Gestión de Encuestas</h2>
+
+  <!-- Formulario de creación de encuesta -->
+  <div class="bg-gray-50 p-6 rounded shadow mb-8">
+    <h3 class="text-lg font-semibold text-blue-700 mb-4">Crear nueva encuesta</h3>
+    <form action="/api/admin/encuestas" method="POST" class="space-y-4">
+      <div>
+        <label for="titulo" class="block font-semibold">Título</label>
+        <input type="text" id="titulo" name="titulo" class="w-full border p-2 rounded" required>
+      </div>
+      <div>
+        <label for="descripcion" class="block font-semibold">Descripción</label>
+        <textarea id="descripcion" name="descripcion" class="w-full border p-2 rounded"></textarea>
+      </div>
+      <div>
+        <label for="semestre" class="block font-semibold">Semestre</label>
+        <select id="semestre" name="semestre" class="w-full border p-2 rounded" required onchange="mostrarMaterias(this.value)">
+          <option value="">Seleccione un semestre</option>
+          <% semestres.forEach(sem => { %>
+            <option value="<%= sem.semestre %>"><%= sem.semestre %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Contenedor dinámico de materias -->
+      <div id="materias-container" class="mt-4 hidden">
+        <label class="block font-semibold">Materias asociadas</label>
+        <div id="materias-list" class="space-y-2">
+          <% materias.forEach(mat => { %>
+            <div class="materia-item hidden" data-semestre="<%= mat.semestre %>">
+              <input type="checkbox" id="mat-<%= mat.id %>" name="materias[]" value="<%= mat.id %>" class="mr-2">
+              <label for="mat-<%= mat.id %>"><%= mat.nombre %> (<%= mat.semestre %>)</label>
+            </div>
+          <% }) %>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">Seleccione las materias que estarán en la encuesta.</p>
+      </div>
+
+      <div class="flex space-x-4">
+        <div class="flex-1">
+          <label for="fecha_inicio" class="block font-semibold">Fecha de inicio</label>
+          <input type="date" id="fecha_inicio" name="fecha_inicio" class="w-full border p-2 rounded" required>
+        </div>
+        <div class="flex-1">
+          <label for="fecha_fin" class="block font-semibold">Fecha de fin</label>
+          <input type="date" id="fecha_fin" name="fecha_fin" class="w-full border p-2 rounded" required>
+        </div>
+      </div>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-gradient-to-r from-cyan-200 to-blue-500 to-blue-700 transition w-full">
+        Crear encuesta
+      </button>
+    </form>
+  </div>
+
+  <!-- Lista de encuestas -->
+  <h3 class="text-lg font-semibold text-blue-700 mb-4">Encuestas registradas</h3>
+  <div class="overflow-x-auto">
+    <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+      <thead class="bg-blue-600 text-white">
+        <tr>
+          <th class="px-4 py-2 text-center">ID</th>
+          <th class="px-4 py-2 text-center">Título</th>
+          <th class="px-4 py-2 text-center">Semestre</th>
+          <th class="px-4 py-2 text-center">Inicio</th>
+          <th class="px-4 py-2 text-center">Fin</th>
+          <th class="px-4 py-2 text-center">Estado</th>
+          <th class="px-4 py-2 text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <% if (!encuestas || encuestas.length === 0) { %>
+          <tr>
+            <td colspan="7" class="text-center py-6 text-gray-500">
+              No hay encuestas registradas.
+            </td>
+          </tr>
+        <% } else { %>
+          <% encuestas.forEach(encuesta => { %>
+            <tr>
+              <td class="px-4 py-2 text-center"><%= encuesta.id %></td>
+              <td class="px-4 py-2 text-center"><%= encuesta.titulo %></td>
+              <td class="px-4 py-2 text-center"><%= encuesta.semestre %></td>
+              <td class="px-4 py-2 text-center"><%= encuesta.fecha_inicio %></td>
+              <td class="px-4 py-2 text-center"><%= encuesta.fecha_fin %></td>
+              <td class="px-4 py-2 text-center">
+                <span class="px-3 py-1 rounded-full text-sm 
+                  <%= encuesta.estado === 'Activa' ? 'bg-green-100 text-green-700' : 
+                      encuesta.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-700' : 
+                      'bg-red-100 text-red-700' %>">
+                  <%= encuesta.estado %>
+                </span>
+              </td>
+              <td class="px-4 py-2 text-center space-x-2">
+              <!-- Editar -->
+              <button onclick="document.getElementById('modal-<%= encuesta.id %>').classList.remove('hidden')" 
+                      class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition">
+                Editar
+              </button>
+
+              <!-- Eliminar -->
+              <form action="/api/admin/encuestas/<%= encuesta.id %>/eliminar" method="POST" class="inline">
+                <button type="submit" 
+                        class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                        onclick="return confirm('¿Seguro que deseas eliminar esta encuesta?')">
+                  Eliminar
+                </button>
+              </form>
+
+              <!-- Resultados -->
+              <% if (encuesta.estado === 'Finalizada') { %>
+                <button onclick="document.getElementById('modal-resultados-<%= encuesta.id %>').classList.remove('hidden')" 
+                        class="w-30 mt-2 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">
+                  Resultados
+                </button>
+              <% } %>
+
+              <!-- Modal Resultados -->
+              <div id="modal-resultados-<%= encuesta.id %>" 
+                  class="hidden fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+                
+                <!-- Contenedor Principal: Controla el ancho y el alto máximo -->
+                <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col max-h-[85vh]">
+                  
+                  <!-- Encabezado Fijo -->
+                  <div class="p-6 border-b">
+                    <h3 class="text-xl font-bold text-blue-700">Resultados - <%= encuesta.titulo %></h3>
+                  </div>
+
+                  <!-- Área de Contenido con Scroll -->
+                  <div class="flex-1 overflow-y-auto p-6">
+                    <% if (encuesta.resultados && encuesta.resultados.length > 0) { %>
+                      <div class="relative">
+                        <table class="w-full border-collapse bg-white">
+                          <thead class="sticky top-0 bg-gray-100 z-10 shadow-sm">
+                            <tr>
+                              <th class="border-b px-4 py-3 text-left text-sm font-bold text-gray-700">Materia</th>
+                              <th class="border-b px-4 py-3 text-left text-sm font-bold text-gray-700">Semestre</th>
+                              <th class="border-b px-4 py-3 text-center text-sm font-bold text-gray-700">Total votos</th>
+                            </tr>
+                          </thead>
+                          <tbody class="divide-y divide-gray-200">
+                            <% encuesta.resultados.forEach(r => { %>
+                              <tr class="hover:bg-gray-50 transition-colors">
+                                <td class="px-4 py-3 text-sm text-gray-800"><%= r.materia %></td>
+                                <td class="px-4 py-3 text-sm text-gray-600"><%= r.semestre %></td>
+                                <td class="px-4 py-3 text-center font-bold text-green-700"><%= r.total_votos %></td>
+                              </tr>
+                            <% }) %>
+                          </tbody>
+                        </table>
+                      </div>
+                    <% } else { %>
+                      <div class="text-center py-10">
+                        <p class="text-gray-500 font-medium">No hay votos registrados para esta encuesta.</p>
+                      </div>
+                    <% } %>
+                  </div>
+
+                  <!-- Footer Fijo -->
+                  <div class="p-4 border-t bg-gray-50 flex justify-center rounded-b-lg">
+                    <button type="button" 
+                            onclick="document.getElementById('modal-resultados-<%= encuesta.id %>').classList.add('hidden')" 
+                            class="bg-gray-500 text-white px-6 py-2 rounded-md hover:bg-gray-600 transition-all font-medium shadow-sm">
+                      Cerrar
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+          <!-- Modal Editar -->
+          <div id="modal-<%= encuesta.id %>" 
+              class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+            
+            <!-- Contenedor Principal: Se añade max-h-full para que no se salga de la pantalla -->
+            <div class="bg-white rounded-lg shadow-lg w-full max-w-[500px] flex flex-col max-h-[90vh]">
+              
+              <!-- Encabezado Fijo -->
+              <div class="p-6 pb-2">
+                <h3 class="text-lg font-semibold text-blue-700">Editar Encuesta</h3>
+              </div>
+
+              <!-- Cuerpo con Scroll: overflow-y-auto y flex-1 -->
+              <form action="/api/admin/encuestas/<%= encuesta.id %>/editar" method="POST" class="flex-1 overflow-y-auto p-6 pt-2 space-y-3">
+                <div>
+                  <label class="block text-sm font-semibold">Título</label>
+                  <input type="text" name="titulo" value="<%= encuesta.titulo %>" 
+                        class="w-full border p-2 rounded" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold">Descripción</label>
+                  <textarea name="descripcion" class="w-full border p-2 rounded"><%= encuesta.descripcion %></textarea>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold">Semestre</label>
+                  <select name="semestre" class="w-full border p-2 rounded" required 
+                          onchange="mostrarMateriasEditar('<%= encuesta.id %>', this.value)">
+                    <% semestres.forEach(sem => { %>
+                      <option value="<%= sem.semestre %>" <%= encuesta.semestre == sem.semestre ? 'selected' : '' %>>
+                        Semestre <%= sem.semestre %>
+                      </option>
+                    <% }) %>
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold">Fecha inicio</label>
+                  <input type="date" name="fecha_inicio" value="<%= encuesta.fecha_inicio %>" 
+                        class="w-full border p-2 rounded" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold">Fecha fin</label>
+                  <input type="date" name="fecha_fin" value="<%= encuesta.fecha_fin %>" 
+                        class="w-full border p-2 rounded" required>
+                </div>
+                <div>
+                  <label class="block text-sm font-semibold">Estado</label>
+                  <select name="estado" class="w-full border p-2 rounded">
+                    <option value="Pendiente" <%= encuesta.estado === 'Pendiente' ? 'selected' : '' %>>Pendiente</option>
+                    <option value="Activa" <%= encuesta.estado === 'Activa' ? 'selected' : '' %>>Activa</option>
+                    <option value="Finalizada" <%= encuesta.estado === 'Finalizada' ? 'selected' : '' %>>Finalizada</option>
+                  </select>
+                </div>
+
+                <!-- Materias asociadas -->
+                <div id="materias-container-<%= encuesta.id %>" class="mt-3">
+                  <label class="block text-sm font-semibold text-gray-700">Materias asociadas</label>
+                  <div id="materias-list-<%= encuesta.id %>" class="space-y-2 mt-2 bg-gray-50 p-3 rounded border">
+                    <% materias.forEach(mat => { %>
+                      <div class="materia-item-<%= encuesta.id %> flex items-center gap-2" data-semestre="<%= mat.semestre %>">
+                        <input type="checkbox" id="mat-<%= encuesta.id %>-<%= mat.id %>" 
+                              name="materias[]" value="<%= mat.id %>"
+                              class="rounded text-blue-600"
+                              <%= encuesta.materias && encuesta.materias.some(m => m.id === mat.id) ? 'checked' : '' %>>
+                        <label for="mat-<%= encuesta.id %>-<%= mat.id %>" class="text-sm">
+                          <%= mat.nombre %> <span class="text-gray-400">(Sem. <%= mat.semestre %>)</span>
+                        </label>
+                      </div>
+                    <% }) %>
+                  </div>
+                  <p class="text-xs text-gray-500 mt-1 italic">Solo se mostrarán materias del semestre seleccionado.</p>
+                </div>
+
+                <!-- Footer de botones dentro del formulario pero al final -->
+                <div class="flex justify-center mt-6 pt-4 border-t space-x-2">
+                  <button type="button" 
+                          onclick="document.getElementById('modal-<%= encuesta.id %>').classList.add('hidden')" 
+                          class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition">
+                    Cancelar
+                  </button>
+                  <button type="submit" 
+                          class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
+                    Guardar Cambios
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <% }) %>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+<script>
+  const semestreSelect = document.getElementById('semestre');
+  const materiaSelect = document.getElementById('materia_id');
+  const seccionInput = document.getElementById('seccion_nombre');
+
+  semestreSelect.addEventListener('change', () => {
+    const semestre = semestreSelect.value;
+    materiaSelect.value = '';
+    seccionInput.value = '';
+    seccionInput.disabled = true;
+
+    if (semestre) {
+      // Filtrar materias por semestre
+      [...materiaSelect.options].forEach(opt => {
+        if (!opt.value) return; // saltar el placeholder
+        opt.hidden = opt.getAttribute('data-semestre') !== semestre;
+      });
+      materiaSelect.disabled = false;
+    } else {
+      materiaSelect.disabled = true;
+    }
+  });
+
+  materiaSelect.addEventListener('change', () => {
+    seccionInput.disabled = !materiaSelect.value;
+  });
+  
+ // Función para mostrar/ocultar materias en el formulario de creación de encuesta
+  function mostrarMaterias(semestreSeleccionado) {
+    const contenedor = document.getElementById('materias-container');
+    const items = document.querySelectorAll('.materia-item');
+
+    // Mostrar el contenedor
+    contenedor.classList.remove('hidden');
+
+    // Filtrar materias
+    items.forEach(item => {
+      if (item.getAttribute('data-semestre') === semestreSeleccionado) {
+        item.classList.remove('hidden');
+      } else {
+        item.classList.add('hidden');
+        item.querySelector('input').checked = false; // deseleccionar si estaba marcado
+      }
+    });
+  }
+</script>

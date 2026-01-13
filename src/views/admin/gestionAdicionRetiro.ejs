@@ -1,0 +1,244 @@
+<div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
+  <h2 class="text-2xl font-bold text-blue-700 mb-6">Gestión de Adición y Retiro</h2>
+
+  <!-- Formulario de nueva solicitud (admin) -->
+  <div class="bg-gray-50 p-6 rounded shadow mb-8">
+    <h3 class="text-lg font-semibold text-blue-700 mb-4">Registrar nueva solicitud</h3>
+    <form action="/api/admin/adicion-retiro" method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Estudiante -->
+      <div>
+        <label for="estudiante_id" class="block font-semibold">Estudiante</label>
+        <select id="estudiante_id" name="estudiante_id" class="w-full border p-2 rounded" required>
+          <option value="">Seleccione un estudiante</option>
+          <% estudiantes.forEach(est => { %>
+            <option value="<%= est.id %>"><%= est.nombre %> - <%= est.cedula %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Semestre -->
+      <div>
+        <label for="semestre_id" class="block font-semibold">Semestre</label>
+        <select id="semestre_id" name="semestre_id" class="w-full border p-2 rounded" required disabled>
+          <option value="">Selecciona el Semestre</option>
+          <% semestres.forEach(sem => { %>
+            <option value="<%= sem.semestre %>">Semestre <%= sem.semestre %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Materia -->
+      <div>
+        <label for="materia_id" class="block font-semibold">Materia</label>
+        <select id="materia_id" name="materia_id" class="w-full border p-2 rounded" required disabled>
+          <option value="">Seleccione una materia</option>
+          <% materias.forEach(mat => { %>
+            <option value="<%= mat.id %>" data-semestre="<%= mat.semestre %>">
+              <%= mat.nombre %>
+            </option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Sección -->
+      <div>
+        <label for="seccion_id" class="block font-semibold">Sección</label>
+        <select id="seccion_id" name="seccion_id" class="w-full border p-2 rounded" required disabled>
+          <option value="">Seleccione una sección</option>
+          <% secciones.forEach(sec => { %>
+            <option value="<%= sec.id %>" data-materia="<%= sec.materia_id %>"><%= sec.nombre %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Tipo -->
+      <div>
+        <label for="tipo" class="block font-semibold">Tipo de solicitud</label>
+        <select id="tipo" name="tipo" class="w-full border p-2 rounded" required disabled>
+          <option value="Adicion">Adición</option>
+          <option value="Retiro">Retiro</option>
+        </select>
+      </div>
+
+      <!-- Botón -->
+      <div class="md:col-span-2">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-gradient-to-r from-cyan-200 to-blue-500 to-blue-700 transition w-full">
+          Registrar solicitud aprobada
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Lista de solicitudes pendientes -->
+<div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
+  <h3 class="text-lg font-semibold text-blue-700 mb-4">Solicitudes pendientes</h3>
+  <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+    <thead class="bg-yellow-500 text-white">
+      <tr>
+        <th class="px-4 py-2 text-center">ID</th>
+        <th class="px-4 py-2 text-center">Estudiante</th>
+        <th class="px-4 py-2 text-center">Semestre</th>
+        <th class="px-4 py-2 text-center">Materia</th>
+        <th class="px-4 py-2 text-center">Sección</th>
+        <th class="px-4 py-2 text-center">Tipo</th>
+        <th class="px-4 py-2 text-center">Fecha</th>
+        <th class="px-4 py-2 text-center">Acciones</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      <% if (!pendientes || pendientes.length === 0) { %>
+        <tr>
+          <td colspan="8" class="text-center py-6 text-gray-500">No hay solicitudes pendientes.</td>
+        </tr>
+      <% } else { %>
+        <% pendientes.forEach(sol => { %>
+          <tr>
+            <td class="px-4 py-2 text-center"><%= sol.id %></td>
+            <td class="px-4 py-2 text-center"><%= sol.estudiante_nombre %> - <%= sol.cedula %></td>
+            <td class="px-4 py-2 text-center"><%= sol.semestre_nombre || '' %></td>
+            <td class="px-4 py-2 text-center"><%= sol.materia || '' %></td>
+            <td class="px-4 py-2 text-center"><%= sol.seccion || '' %></td>
+            <td class="px-4 py-2 font-semibold text-center"><%= sol.tipo %></td>
+            <td class="px-4 py-2 text-center"><%= sol.creado_en %></td>
+            <td class="px-4 py-2 text-center">
+            <div class="flex flex-col items-center space-y-2">
+              <!-- Formulario aprobar -->
+              <form action=/api/admin/adicion-retiro/<%= sol.id %>/estado" method="POST" class="w-full">
+                <input type="hidden" name="estado" value="Aprobada">
+                <button type="submit" 
+                        class="w-32 bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">
+                  Aprobar
+                </button>
+              </form>
+              <!-- Formulario rechazar -->
+              <form action="/api/admin/adicion-retiro/<%= sol.id %>/estado" method="POST" class="w-full">
+                <input type="hidden" name="estado" value="Rechazada">
+                <button type="submit" 
+                        class="w-32 bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition">
+                  Rechazar
+                </button>
+              </form>
+            </div>
+          </td>
+          </tr>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- Lista de solicitudes procesadas -->
+<div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
+  <h3 class="text-lg font-semibold text-blue-700 mb-4">Solicitudes procesadas</h3>
+  <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
+    <thead class="bg-blue-600 text-white">
+      <tr>
+        <th class="px-4 py-2 text-center">ID</th>
+        <th class="px-4 py-2 text-center">Estudiante</th>
+        <th class="px-4 py-2 text-center">Semestre</th>
+        <th class="px-4 py-2 text-center">Materia</th>
+        <th class="px-4 py-2 text-center">Sección</th>
+        <th class="px-4 py-2 text-center">Tipo</th>
+        <th class="px-4 py-2 text-center">Estado</th>
+        <th class="px-4 py-2 text-center">Fecha</th>
+        <th class="px-4 py-2 text-center">Acciones</th>
+      </tr>
+    </thead>
+    <tbody class="divide-y divide-gray-200">
+      <% if (!procesadas || procesadas.length === 0) { %>
+        <tr>
+          <td colspan="9" class="text-center py-6 text-gray-500">No hay solicitudes procesadas.</td>
+        </tr>
+      <% } else { %>
+        <% procesadas.forEach(sol => { %>
+          <tr>
+            <td class="px-4 py-2 text-center"><%= sol.id %></td>
+            <td class="px-4 py-2 text-center"><%= sol.estudiante_nombre %> - <%= sol.cedula %></td>
+            <td class="px-4 py-2 text-center"><%= sol.semestre_nombre || '' %></td>
+            <td class="px-4 py-2 text-center"><%= sol.materia || '' %></td>
+            <td class="px-4 py-2 text-center"><%= sol.seccion || '' %></td>
+            <td class="px-4 py-2 font-semibold text-center"><%= sol.tipo %></td>
+            <td class="px-4 py-2">
+              <span class="px-3 py-1 rounded-full text-sm 
+                <%= sol.estado === 'Aprobada' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %>">
+                <%= sol.estado %>
+              </span>
+            </td>
+            <td class="px-4 py-2"><%= sol.creado_en %></td>
+            <td class="px-4 py-2 text-center">
+              <form action="/api/admin/adicion-retiro/<%= sol.id %>/eliminar" method="POST" class="inline">
+                <button type="submit" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                        onclick="return confirm('¿Seguro que deseas eliminar esta solicitud?')">
+                  Eliminar
+                </button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const estudianteSelect = document.getElementById("estudiante_id");
+  const semestreSelect   = document.getElementById("semestre_id");
+  const materiaSelect    = document.getElementById("materia_id");
+  const seccionSelect    = document.getElementById("seccion_id");
+  const tipoSelect       = document.getElementById("tipo");
+  const descripcionInput = document.getElementById("descripcion");
+
+  // Al seleccionar estudiante, habilitar semestre
+  estudianteSelect.addEventListener("change", () => {
+    const hasEstudiante = !!estudianteSelect.value;
+    semestreSelect.disabled   = !hasEstudiante;
+    materiaSelect.disabled    = true;
+    seccionSelect.disabled    = true;
+    tipoSelect.disabled       = !hasEstudiante;
+    descripcionInput.disabled = !hasEstudiante;
+
+    semestreSelect.value   = "";
+    materiaSelect.value    = "";
+    seccionSelect.value    = "";
+    tipoSelect.value       = "";
+    descripcionInput.value = "";
+  });
+
+  // Al seleccionar semestre, filtrar materias
+  semestreSelect.addEventListener("change", () => {
+    const semestre = semestreSelect.value;
+    materiaSelect.value = "";
+    seccionSelect.value = "";
+    materiaSelect.disabled = true;
+    seccionSelect.disabled = true;
+
+    if (semestre) {
+      [...materiaSelect.options].forEach(opt => {
+        if (!opt.value) return;
+        opt.hidden = opt.getAttribute("data-semestre") !== semestre;
+      });
+      materiaSelect.disabled = false;
+    }
+  });
+
+  // Al seleccionar materia, filtrar secciones
+  materiaSelect.addEventListener("change", () => {
+    const materiaId = materiaSelect.value;
+    seccionSelect.value = "";
+    seccionSelect.disabled = true;
+
+    if (materiaId) {
+      [...seccionSelect.options].forEach(opt => {
+        if (!opt.value) return;
+        opt.hidden = opt.getAttribute("data-materia") !== materiaId;
+      });
+      seccionSelect.disabled = false;
+    }
+  });
+});
+</script>
+
+
