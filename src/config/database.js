@@ -33,9 +33,15 @@ export const initDatabase = () => {
   const sql = `
     CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      username TEXT UNIQUE NOT NULL,
-      email TEXT UNIQUE NOT NULL,
-      password TEXT NOT NULL,
+      nombre TEXT UNIQUE NOT NULL,
+      correo TEXT UNIQUE NOT NULL,
+      clave TEXT NOT NULL,
+      cedula TEXT NOT NULL,
+      rol TEXT NOT NULL,
+      foto TEXT,
+      token TEXT NOT NULL CHECK (LENGTH(token) == 16),
+      borrado TEXT NOT NULL 
+        CHECK (borrado IN ('true', 'false')) DEFAULT 'false',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
   `;
