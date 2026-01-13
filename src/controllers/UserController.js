@@ -1,31 +1,73 @@
-import { UserService } from '../services/UserService.js';
+import { UserModel } from "../models/UserModel";
+import validarCrearUsuario from "../services/usuarios/validarCrearUsuario";
+import { respuestaAlFront } from "../utils/respuestaAlFront";
 
-export class UserController {
-  static async register(req, res) {
+export default class UserController {
+  static async crearUsuario(req, res) {
     try {
-      const user = await UserService.register(req.body);
-      res.status(201).json({ message: 'Usuario registrado', user });
-    } catch (err) {
-      res.status(400).json({ message: err.message });
-    }
-  }
+      const { cedula, nombre, correo, clave, confirmarClave, rol, texto } =
+        req.body;
 
-  static async login(req, res) {
-    try {
-      const { email, password } = req.body;
-      const result = await UserService.login(email, password);
-      res.json(result);
-    } catch (err) {
-      res.status(401).json({ message: err.message });
-    }
-  }
+      const validaciones = await validarCrearUsuario(
+        cedula,
+        nombre,
+        correo,
+        clave,
+        confirmarClave,
+        rol,
+        texto
+      );
 
-  static async getProfile(req, res) {
-    try {
-      const user = await UserService.getUserById(req.user.id);
-      res.json(user);
-    } catch (err) {
-      res.status(404).json({ message: err.message });
+      if (validaciones.status === "error") {
+        return respuestaAlFront(
+          res,
+          validaciones.status,
+          validaciones.message,
+          {},
+          validaciones.codigo ? validaciones.codigo : 400
+        );
+      }
+
+      const creandoUsuario = await UserModel.crearUsuario({
+        cedula: validaciones.cedula,
+        nombre: validaciones.nombre,
+        correo: validaciones.correo,
+        clave: validaciones.claveEncriptada,
+        rol: validaciones.id_rol,
+        texto: validaciones.pathImg,
+        token: validaciones.token,
+        borrado: validaciones.borrado,
+      });
+
+      if (!creandoUsuario) {
+        return respuestaAlFront(
+          res,
+          "error",
+          "Error al crear usuario",
+          {},
+          400
+        );
+      }
+
+      return respuestaAlFront(
+        res,
+        "ok",
+        "Usuario creado con exito",
+        {
+          redirect: "/login",
+        },
+        201
+      );
+    } catch (error) {
+      console.error("Error interno crear usuario:", error);
+
+      return respuestaAlFront(
+        res,
+        "error",
+        "Error interno crear contacto",
+        {},
+        500
+      );
     }
   }
 }
