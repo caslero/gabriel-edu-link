@@ -1,0 +1,122 @@
+<section class="w-full max-w-[550px] mx-auto bg-white shadow-lg rounded-lg p-6">
+
+    <!-- Logo + Título -->
+    <div class="text-center mb-6">
+      <div class="flex items-center justify-center gap-2 mb-2">
+        <img src="/img/isotipo.png" alt="Logo EduLink" class="rounded-full shadow-sm w-12 h-12 object-contain" />
+        <h1 class="text-xl font-bold">
+          <span class="text-blue-900">Edu</span><span class="text-blue-500">Link</span>
+        </h1>
+      </div>
+      <p class="text-gray-600">Registro de usuario</p>
+    </div>
+
+    <!-- Contenedor de alertas -->
+    <div id="alertContainer" class="mb-4"></div>
+
+    <!-- Pasos del registro -->
+    <div class="flex justify-between items-center mb-6">
+      <div class="flex flex-col items-center gap-1" id="step1Item">
+        <div class="step-circle w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold transition">1</div>
+        <span class="text-sm text-gray-700">Datos</span>
+      </div>
+      <div class="flex flex-col items-center gap-1" id="step2Item">
+        <div class="step-circle w-8 h-8 rounded-full bg-gray-300 text-gray-700 flex items-center justify-center font-bold transition">2</div>
+        <span class="text-sm text-gray-700">Perfil</span>
+      </div>
+      <div class="flex flex-col items-center gap-1" id="step3Item">
+        <div class="step-circle w-8 h-8 rounded-full bg-gray-300 text-gray-700 flex items-center justify-center font-bold transition">3</div>
+        <span class="text-sm text-gray-700">Confirmar</span>
+      </div>
+    </div>
+
+    <!-- Formulario -->
+    <form id="registroUsuario" method="POST" action="/api/usuario/crear-usuario" class="space-y-6">
+      <!-- Paso 1 -->
+      <div id="step1" class="register-step">
+        <div>
+          <label for="correo" class="block text-sm font-medium text-gray-700">Correo electrónico</label>
+          <input type="email" id="correo" name="correo" placeholder="ejemplo@ejemplo.com" required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow focus:outline-none focus:ring focus:border-blue-500"/>
+        </div>
+        <div>
+          <label for="clave" class="block text-sm font-medium text-gray-700 mt-4">Contraseña</label>
+          <input type="password" id="clave" name="clave" placeholder="**********" required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow focus:outline-none focus:ring focus:border-blue-500"/>
+        </div>
+        <div>
+          <label for="confirmClave" class="block text-sm font-medium text-gray-700 mt-4">Confirmar contraseña</label>
+          <input type="password" id="confirmClave" placeholder="**********" required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow focus:outline-none focus:ring focus:border-blue-500"/>
+        </div>
+        <div class="mt-6">
+          <button type="button" id="step1Next"
+            class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-gradient-to-r from-cyan-200 to-blue-500 transition">
+            Siguiente
+          </button>
+        </div>
+      </div>
+
+      <!-- Paso 2 -->
+      <div id="step2" class="register-step hidden">
+        <div>
+          <label for="nombre" class="block text-sm font-medium text-gray-700">Nombre completo</label>
+          <input type="text" id="nombre" name="nombre" placeholder="Gabriel Bolívar" required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow focus:outline-none focus:ring focus:border-blue-500"/>
+        </div>
+        <div>
+          <label for="idUsuario" class="block text-sm font-medium text-gray-700 mt-4">Nro de Cédula</label>
+          <div class="mt-1 flex rounded-md shadow-sm">
+            <select name="pais" id="pais"
+              class="inline-flex items-center px-3 rounded-l-md border border-gray-300 bg-gray-50 text-gray-700 text-sm focus:outline-none">
+              <option value="V">V-</option>
+              <option value="E">E-</option>
+            </select>
+            <input type="text" id="cedula" name="cedula" placeholder="28051690" required
+              class="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring focus:border-blue-500"/>
+          </div>
+        </div>
+        <div>
+          <label for="rol" class="block text-sm font-medium text-gray-700 mt-4">Rol</label>
+          <select id="rol" name="rol" required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow focus:outline-none focus:ring focus:border-blue-500">
+            <option value="" disabled selected>Seleccione un rol</option>
+            <option value="Estudiante">Estudiante</option>
+            <option value="Docente">Docente</option>
+          </select>
+        </div>
+        <div class="flex justify-between mt-6">
+          <button type="button" id="step2Prev"
+            class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400">Atrás</button>
+          <button type="button" id="step2Next"
+            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-gradient-to-r from-cyan-200 to-blue-500">Siguiente</button>
+        </div>
+      </div>
+
+      <!-- Paso 3 -->
+      <div id="step3" class="register-step hidden">
+        <div class="bg-blue-50 border border-blue-300 text-blue-800 px-4 py-3 rounded mb-4">
+          <p class="text-sm">Por favor revisa tus datos antes de finalizar el registro:</p>
+        </div>
+        <div class="space-y-2">
+          <p><strong>Correo:</strong> <span id="summaryEmail"></span></p>
+          <p><strong>Nombre:</strong> <span id="summaryName"></span></p>
+          <p><strong>Rol:</strong> <span id="summaryRole"></span></p>
+        </div>
+        <div class="mt-4">
+          <label class="inline-flex items-center">
+            <input type="checkbox" id="termsCheck" class="form-checkbox text-blue-600" required />
+            <span class="ml-2 text-sm text-gray-700">Acepto los términos y condiciones</span>
+          </label>
+        </div>
+        <div class="flex justify-between mt-6">
+          <button type="button" id="step3Prev"
+            class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400">Atrás</button>
+          <button type="submit"
+            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-gradient-to-r from-cyan-200 to-blue-500">Completar registro</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <script src="/js/registroUsuario.js" defer></script>

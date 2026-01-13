@@ -26,12 +26,15 @@ rutas.get('/partials/footer', (req, res) => {
 
 //esta y la siguiente ruta debes crear la vista y modificarla aqui.
 //es decir cambias el nombre del archivo y el titulo
-rutas.get("/registro-usuario", (req, res) => {
-  res.render("index", { title: "Inicio - EduLink", user: null });
+
+// Registro de Usuario
+rutas.get('/registro-usuario', (req, res) => {
+  res.render('auth/registro', { title: 'Registro de Usuario - EduLink', user: null });
 });
 
-rutas.get("/login", (req, res) => {
-  res.render("index", { title: "Inicio - EduLink", user: null });
+// login de Usuario
+rutas.get('/login', (req, res) => {
+  res.render('auth/login', { title: 'Login - EduLink', user: null });
 });
 
 export default rutas;

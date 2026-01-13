@@ -1,0 +1,44 @@
+<div class="flex items-center justify-center min-h-screen">
+  <div class="w-full max-w-[550px] mx-auto bg-white shadow-lg rounded-lg p-6">
+    <!-- Logo + Nombre -->
+    <div class="flex justify-center items-center space-x-3 mb-6">
+      <img src="/img/isotipo.png" alt="Logo EduLink" class="w-10 h-10">
+      <h1 class="text-2xl font-bold">
+        <span class="text-blue-900">Edu</span><span class="text-blue-500">Link</span>
+      </h1>
+    </div>
+
+    <!-- Mensajes de error -->
+    <% if (typeof error !== 'undefined') { %>
+      <div class="bg-red-100 text-red-700 p-2 rounded mb-4">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <!-- Formulario de login -->
+    <form action="/api/login/iniciar-sesion" method="POST" class="space-y-4">
+      <div>
+        <label for="email" class="block text-sm font-medium text-gray-700">Correo electrónico</label>
+        <input type="email" id="correo" name="correo" required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-300"/>
+      </div>
+
+
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+            <input type="password" id="clave" name="clave" required
+                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring focus:border-blue-300"/>
+        </div>
+
+      <button type="submit"
+        class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-gradient-to-r from-cyan-200 to-blue-500 to-blue-700 transition">
+        Acceder
+      </button>
+    </form>
+
+    <!-- Enlace a registro -->
+    <p class="mt-4 text-sm text-gray-600 text-center">
+      ¿No tienes cuenta? <a href="/registro-usuario" class="text-blue-500 hover:underline">Regístrate aquí</a>
+    </p>
+  </div>
+</div>
