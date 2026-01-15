@@ -36,6 +36,7 @@ export const initDatabase = () => {
       nombre TEXT UNIQUE NOT NULL,
       correo TEXT UNIQUE NOT NULL,
       clave TEXT NOT NULL,
+      pais TEXT NOT NULL CHECK (LENGTH(pais) == 1),
       cedula TEXT NOT NULL,
       rol TEXT NOT NULL 
         CHECK (rol IN ('Admin', 'Docente', 'Estudiante')) DEFAULT 'Estudiante',

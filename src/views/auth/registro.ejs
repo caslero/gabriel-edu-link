@@ -31,7 +31,7 @@
     </div>
 
     <!-- Formulario -->
-    <form id="registroUsuario" method="POST" action="/api/usuario/crear-usuario" class="space-y-6">
+    <form id="registroUsuario" class="space-y-6" novalidate>
       <!-- Paso 1 -->
       <div id="step1" class="register-step">
         <div>
@@ -39,19 +39,38 @@
           <input type="email" id="correo" name="correo" placeholder="ejemplo@ejemplo.com" required
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow focus:outline-none focus:ring focus:border-blue-500"/>
         </div>
+        
         <div>
           <label for="clave" class="block text-sm font-medium text-gray-700 mt-4">Contraseña</label>
-          <input type="password" id="clave" name="clave" placeholder="**********" required
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow focus:outline-none focus:ring focus:border-blue-500"/>
+          <div class="relative">
+            <input type="password" id="clave" name="clave" placeholder="**********" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow focus:outline-none focus:ring focus:border-blue-500 pr-10"/>
+            <button type="button" class="toggle-password absolute inset-y-0 right-0 pr-3 flex items-center mt-1" data-target="clave">
+              <svg class="h-5 w-5 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </button>
+          </div>
         </div>
+
         <div>
-          <label for="confirmClave" class="block text-sm font-medium text-gray-700 mt-4">Confirmar contraseña</label>
-          <input type="password" id="confirmarClave" placeholder="**********" required
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow focus:outline-none focus:ring focus:border-blue-500"/>
+          <label for="confirmarClave" class="block text-sm font-medium text-gray-700 mt-4">Confirmar contraseña</label>
+          <div class="relative">
+            <input type="password" id="confirmarClave" name="confirmarClave" placeholder="**********" required
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow focus:outline-none focus:ring focus:border-blue-500 pr-10"/>
+            <button type="button" class="toggle-password absolute inset-y-0 right-0 pr-3 flex items-center mt-1" data-target="confirmarClave">
+              <svg class="h-5 w-5 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </button>
+          </div>
         </div>
+
         <div class="mt-6">
           <button type="button" id="step1Next"
-            class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-gradient-to-r from-cyan-200 to-blue-500 transition">
+            class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-gradient-to-r from-cyan-200 to-blue-500 transition font-semibold">
             Siguiente
           </button>
         </div>
@@ -64,8 +83,9 @@
           <input type="text" id="nombre" name="nombre" placeholder="Gabriel Bolívar" required
             class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow focus:outline-none focus:ring focus:border-blue-500"/>
         </div>
+
         <div>
-          <label for="idUsuario" class="block text-sm font-medium text-gray-700 mt-4">Nro de Cédula</label>
+          <label for="cedula" class="block text-sm font-medium text-gray-700 mt-4">Nro de Cédula</label>
           <div class="mt-1 flex rounded-md shadow-sm">
             <select name="pais" id="pais"
               class="inline-flex items-center px-3 rounded-l-md border border-gray-300 bg-gray-50 text-gray-700 text-sm focus:outline-none">
@@ -78,10 +98,8 @@
         </div>
         
         <div class="flex justify-between mt-6">
-          <button type="button" id="step2Prev"
-            class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400">Atrás</button>
-          <button type="button" id="step2Next"
-            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-gradient-to-r from-cyan-200 to-blue-500">Siguiente</button>
+          <button type="button" id="step2Prev" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400">Atrás</button>
+          <button type="button" id="step2Next" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Siguiente</button>
         </div>
       </div>
 
@@ -105,7 +123,9 @@
           <button type="button" id="step3Prev"
             class="bg-gray-300 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-400">Atrás</button>
           <button type="submit"
-            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-gradient-to-r from-cyan-200 to-blue-500">Completar registro</button>
+            class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-gradient-to-r from-cyan-200 to-blue-500">
+            Completar registro
+          </button>
         </div>
       </div>
     </form>
