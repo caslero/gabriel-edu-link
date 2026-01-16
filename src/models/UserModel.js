@@ -12,8 +12,8 @@ export class UserModel {
       // 1. Preparamos la sentencia SQL
       // Nota: Asegúrate de que los nombres de columnas coincidan con tu tabla
       const sql = `
-      INSERT INTO usuarios (cedula, nombre, correo, clave, rol, texto, token, borrado) 
-      VALUES (?, ?, ?, ?, ?, ?, ?)
+      INSERT INTO users (cedula, nombre, correo, clave, pais, rol_id, foto, token) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
       const params = [
@@ -21,8 +21,10 @@ export class UserModel {
         datos.nombre,
         datos.correo,
         datos.clave,
+        datos.pais,
+        datos.rol_id,
+        datos.foto,
         datos.token,
-        datos.borrado,
       ];
 
       // 2. Ejecutamos la inserción

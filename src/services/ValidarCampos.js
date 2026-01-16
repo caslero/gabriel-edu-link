@@ -2,7 +2,7 @@ import { emailRegex } from "../utils/regex/correoRegex.js";
 import { fechaFormatoIsoRegex } from "../utils/regex/fechaFormatoIsoRegex.js";
 import { textRegex } from "../utils/regex/textRegex.js";
 import respuestasAlBack from "../utils/respuestasAlBack.js";
-import { claveRegex } from "../utils/regex/claveRegex";
+import { claveRegex } from "../utils/regex/claveRegex.js";
 import { quitarCaracteres } from "../utils/quitarCaracteres.js";
 import { cedulaRegex } from "../utils/regex/cedulaRegex.js";
 

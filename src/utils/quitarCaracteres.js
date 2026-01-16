@@ -4,7 +4,7 @@
  datos antes de procesarlos. @module utils/quitarCaracteres
 */
 
-import { sinCaracteresRegex } from "./regex/sinCaracteresRegex"; // Expresión regular para filtrar caracteres no permitidos
+import { sinCaracteresRegex } from "./regex/sinCaracteresRegex.js"; // Expresión regular para filtrar caracteres no permitidos
 
 /**
  Elimina caracteres no deseados de una cadena utilizando una expresión regular. Retorna la cadena

@@ -1,7 +1,7 @@
 // src/utils/validarCamposRegistro.js
-import CifrarDescifrarClaves from "../../libs/CifrarDescifrarClaves";
-import respuestasAlBack from "../../utils/respuestasAlBack";
-import ValidarCampos from "../ValidarCampos";
+import CifrarDescifrarClaves from "../../libs/CifrarDescifrarClaves.js";
+import respuestasAlBack from "../../utils/respuestasAlBack.js";
+import ValidarCampos from "../ValidarCampos.js";
 
 export default async function validarCamposCrearUsuario(
   cedula,
@@ -10,7 +10,8 @@ export default async function validarCamposCrearUsuario(
   claveUno,
   claveDos,
   rol,
-  pathImg
+  pathImg,
+  pais
 ) {
   try {
     // 1. Validaciones individuales usando la clase
@@ -33,6 +34,10 @@ export default async function validarCamposCrearUsuario(
       return respuestasAlBack(claveCifrada.status, claveCifrada.message);
     }
 
+    if (pais !== 1 && pais !== 0) {
+      return respuestasAlBack("error", "Nacionalidad vacia");
+    }
+
     // 3. Retorna respuesta exitosa con todos los datos validados
     return respuestasAlBack("ok", "Campos validados...", {
       cedula: validarCedula.cedula,
@@ -41,6 +46,7 @@ export default async function validarCamposCrearUsuario(
       claveEncriptada: claveCifrada.claveEncriptada,
       id_rol: validarIdRol.id,
       pathImg: pathImg,
+      pais: pais,
     });
   } catch (error) {
     console.log("Error interno, campos registro usuario:", error);

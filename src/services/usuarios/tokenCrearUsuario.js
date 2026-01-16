@@ -1,6 +1,6 @@
-import AuthTokens from "../../libs/AuthTokens";
-import { UserModel } from "../../models/UserModel";
-import respuestasAlBack from "../../utils/respuestasAlBack";
+import AuthTokens from "../../libs/AuthTokens.js";
+import { UserModel } from "../../models/UserModel.js";
+import respuestasAlBack from "../../utils/respuestasAlBack.js";
 
 export default async function tokenCrearUsuario() {
   let tokenGenerado;

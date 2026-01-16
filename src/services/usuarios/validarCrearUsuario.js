@@ -1,7 +1,7 @@
-import { UserModel } from "../../models/UserModel";
-import respuestasAlBack from "../../utils/respuestasAlBack";
-import tokenCrearUsuario from "./tokenCrearUsuario";
-import validarCamposCrearUsuario from "./validarCamposCrearUsuario";
+import { UserModel } from "../../models/UserModel.js";
+import respuestasAlBack from "../../utils/respuestasAlBack.js";
+import tokenCrearUsuario from "./tokenCrearUsuario.js";
+import validarCamposCrearUsuario from "./validarCamposCrearUsuario.js";
 
 export default async function validarCrearUsuario(
   cedula,
@@ -10,7 +10,8 @@ export default async function validarCrearUsuario(
   claveUno,
   claveDos,
   rol,
-  pathImg
+  pathImg,
+  pais
 ) {
   try {
     const validarCampos = await validarCamposCrearUsuario(
@@ -20,7 +21,8 @@ export default async function validarCrearUsuario(
       claveUno,
       claveDos,
       rol,
-      pathImg
+      pathImg,
+      pais
     );
 
     if (validarCampos.status === "error") {

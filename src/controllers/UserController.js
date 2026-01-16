@@ -1,12 +1,22 @@
-import { UserModel } from "../models/UserModel";
-import validarCrearUsuario from "../services/usuarios/validarCrearUsuario";
-import { respuestaAlFront } from "../utils/respuestaAlFront";
+import { UserModel } from "../models/UserModel.js";
+import validarCrearUsuario from "../services/usuarios/validarCrearUsuario.js";
+import { respuestaAlFront } from "../utils/respuestaAlFront.js";
 
 export default class UserController {
   static async crearUsuario(req, res) {
     try {
-      const { cedula, nombre, correo, clave, confirmarClave, rol, texto } =
-        req.body;
+      const {
+        cedula,
+        nombre,
+        correo,
+        clave,
+        confirmarClave,
+        rol,
+        texto,
+        pais,
+      } = req.body;
+
+      //Esta colocado el 3 q es la representacion del rol
 
       const validaciones = await validarCrearUsuario(
         cedula,
@@ -14,8 +24,9 @@ export default class UserController {
         correo,
         clave,
         confirmarClave,
-        rol,
-        texto
+        3,
+        texto,
+        pais === "v" ? 1 : 0
       );
 
       if (validaciones.status === "error") {
@@ -33,8 +44,9 @@ export default class UserController {
         nombre: validaciones.nombre,
         correo: validaciones.correo,
         clave: validaciones.claveEncriptada,
-        rol: validaciones.id_rol,
+        rol_id: validaciones.id_rol,
         texto: validaciones.pathImg,
+        pais: validaciones.pais === 1 ? true : false,
         token: validaciones.token,
         borrado: validaciones.borrado,
       });
