@@ -3,7 +3,7 @@
   <!-- Contenedor adaptable -->
   <div class="flex flex-col md:flex-row items-center md:items-start md:space-x-6 mb-6 space-y-4 md:space-y-0">
     <!-- Imagen de perfil clickable -->
-    <form id="formFotoAdmin" action="/admin/cargar-foto" method="POST" enctype="multipart/form-data">
+    <form id="formFotoAdmin" enctype="multipart/form-data">
       <label for="fotoInputAdmin" class="cursor-pointer">
         <img src="<%= user.foto || '/uploads/default.png' %>"
              alt="Foto de perfil administrador" 
@@ -41,7 +41,7 @@
     <!-- Cambiar contraseña -->
     <div class="bg-gray-50 p-6 rounded shadow-sm">
       <h3 class="text-lg font-semibold text-blue-700 mb-4">Cambiar contraseña</h3>
-      <form action="/admin/cambiar-clave" method="POST" class="space-y-4">
+      <form class="space-y-4">
         <div>
           <label for="claveActualAdmin" class="block font-semibold">Contraseña actual</label>
           <input type="password" id="claveActualAdmin" name="claveActual" 

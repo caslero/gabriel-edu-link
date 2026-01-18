@@ -1,21 +1,24 @@
-
 document.addEventListener('DOMContentLoaded', () => {
     const semestreSelect = document.getElementById('semestre');
     const materiaSelect = document.getElementById('materia_id');
     const seccionInput = document.getElementById('seccion_nombre');
-    const formRegistro = document.querySelector('form');
+    const formRegistro = document.getElementById('formRegistroSeccion');
 
-    // 1. Lógica de filtros en los selectores
-    semestreSelect.addEventListener('change', () => {
+    // 1. Lógica de filtros en cascada (Local)
+    semestreSelect?.addEventListener('change', () => {
         const semestre = semestreSelect.value;
+        
+        // Resetear siguientes niveles
         materiaSelect.value = '';
         seccionInput.value = '';
         seccionInput.disabled = true;
 
         if (semestre) {
-            [...materiaSelect.options].forEach(opt => {
+            Array.from(materiaSelect.options).forEach(opt => {
                 if (!opt.value) return; 
-                opt.hidden = opt.getAttribute('data-semestre') !== semestre;
+                const coincide = opt.getAttribute('data-semestre') === semestre;
+                opt.hidden = !coincide;
+                opt.disabled = !coincide;
             });
             materiaSelect.disabled = false;
         } else {
@@ -23,43 +26,79 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    materiaSelect.addEventListener('change', () => {
+    materiaSelect?.addEventListener('change', () => {
         seccionInput.disabled = !materiaSelect.value;
+        if (!materiaSelect.value) seccionInput.value = '';
     });
 
-    // 2. Petición Fetch para registrar nueva sección
-    formRegistro.addEventListener('submit', async (e) => {
+    // 2. Registrar Sección
+    formRegistro?.addEventListener('submit', async (e) => {
         e.preventDefault();
-        
         const formData = new FormData(formRegistro);
-        const data = Object.fromEntries(formData.entries());
+        const payload = Object.fromEntries(formData.entries());
 
         try {
-            const response = await fetch('/admin/secciones/registrar', {
+            const res = await fetch('/api/materias/crear-seccion', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                body: JSON.stringify(payload)
             });
 
-            if (response.ok) {
-                alert('Sección registrada con éxito');
-                window.location.reload(); // Recarga para ver los cambios
-            } else {
-                alert('Error al registrar la sección');
-            }
+            const data = await res.json();
+            manejarRespuesta(data);
         } catch (error) {
-            console.error('Error:', error);
-            alert('Error de conexión con el servidor');
+            alert('Error de conexión');
         }
     });
 });
 
-// Función global para cerrar/abrir modales (usada en los botones del EJS)
+// --- Funciones Globales para la Tabla ---
+
+async function editarSeccion(event, id) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const payload = Object.fromEntries(formData.entries());
+
+    try {
+        const res = await fetch(`/api/secciones/editar/${id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        manejarRespuesta(data);
+    } catch (error) {
+        alert('Error al editar');
+    }
+}
+
+async function eliminarSeccion(id) {
+    if (!confirm('¿Está seguro de eliminar esta sección?')) return;
+
+    try {
+        const res = await fetch(`/api/secciones/eliminar/${id}`, {
+            method: 'DELETE'
+        });
+        const data = await res.json();
+        manejarRespuesta(data);
+    } catch (error) {
+        alert('Error al eliminar');
+    }
+}
+
+function manejarRespuesta(data) {
+    if (data.status === "ok") {
+        alert(data.message);
+        if (data.redirect) window.location.href = data.redirect;
+        else window.location.reload();
+    } else {
+        alert("Error: " + data.message);
+    }
+}
+
 function toggleModal(id, show) {
     const modal = document.getElementById(`modal-${id}`);
-    if (show) {
-        modal.classList.remove('hidden');
-    } else {
-        modal.classList.add('hidden');
+    if (modal) {
+        modal.classList.toggle('hidden', !show);
     }
 }

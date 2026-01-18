@@ -61,8 +61,7 @@
               Debes seleccionar entre 1 y 3 materias.
             </div>
 
-            <form action="/api/estudiante/encuestas/<%= encuesta.id %>/votar" method="POST" 
-                  onsubmit="return validarVotos('<%= encuesta.id %>', this)">
+            <form onsubmit="return validarVotos('<%= encuesta.id %>', this)">
               <% if (encuesta.materias && encuesta.materias.length > 0) { %>
                 <% encuesta.materias.forEach(mat => { %>
                   <div class="flex items-center space-x-2 mb-2">

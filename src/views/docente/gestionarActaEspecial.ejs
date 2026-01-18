@@ -4,7 +4,7 @@
   <!-- Formulario de creación de acta -->
   <div class="bg-gray-50 p-6 rounded shadow mb-8">
     <h3 class="text-lg font-semibold text-blue-700 mb-4">Crear nueva Acta Especial</h3>
-    <form action="/api/docente/actas" method="POST" class="space-y-4">
+    <form class="space-y-4">
       
       <!-- Buscar estudiante por cédula -->
       <div class="md:col-span-2">
@@ -12,8 +12,8 @@
         <div class="flex mb-2 rounded overflow-hidden border">
           <!-- Prefijo -->
           <select id="prefijoCedula" class="border-none px-3 py-2 bg-gray-100 focus:outline-none">
-            <option value="V-">V-</option>
-            <option value="E-">E-</option>
+            <option value="1">V-</option>
+            <option value="0">E-</option>
           </select>
 
           <!-- Input de cédula -->
