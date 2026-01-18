@@ -1,9 +1,10 @@
 <div class="flex items-center justify-center min-h-screen">
   <div class="w-full max-w-[550px] mx-auto bg-white shadow-lg rounded-lg p-6">
     <div class="flex justify-center items-center space-x-3 mb-6">
-      <img src="/img/isotipo.png" alt="Logo EduLink" class="w-10 h-10">
+      <img src="/img/isotipo.png" alt="Logo EduLink" class="w-10 h-10" />
       <h1 class="text-2xl font-bold">
-        <span class="text-blue-900">Edu</span><span class="text-blue-500">Link</span>
+        <span class="text-blue-900">Edu</span
+        ><span class="text-blue-500">Link</span>
       </h1>
     </div>
 
@@ -11,34 +12,74 @@
 
     <form id="formLogin" class="space-y-4">
       <div>
-        <label for="correo" class="block text-sm font-medium text-gray-700">Correo electrónico</label>
-        <input type="email" id="correo" name="correo" required
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-300"/>
+        <label for="correo" class="block text-sm font-medium text-gray-700"
+          >Correo electrónico</label
+        >
+        <input
+          type="email"
+          id="correo"
+          name="correo"
+          required
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-300"
+        />
       </div>
 
       <div>
-        <label for="clave" class="block text-sm font-medium text-gray-700">Contraseña</label>
+        <label for="clave" class="block text-sm font-medium text-gray-700"
+          >Contraseña</label
+        >
         <div class="relative">
-          <input type="password" id="clave" name="clave" required
-            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-300 pr-10"/>
-          
-          <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center">
-            <svg id="eyeIcon" class="h-5 w-5 text-gray-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+          <input
+            type="password"
+            id="clave"
+            name="clave"
+            required
+            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring focus:border-blue-300 pr-10"
+          />
+
+          <button
+            type="button"
+            id="togglePassword"
+            class="absolute inset-y-0 right-0 pr-3 flex items-center"
+          >
+            <svg
+              id="eyeIcon"
+              class="h-5 w-5 text-gray-500 pointer-events-none"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+              />
             </svg>
           </button>
         </div>
       </div>
 
-      <button type="submit" id="btnAcceder"
-        class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300">
+      <button
+        type="submit"
+        id="btnAcceder"
+        class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-300"
+      >
         Acceder
       </button>
     </form>
 
     <p class="mt-4 text-sm text-gray-600 text-center">
-      ¿No tienes cuenta? <a href="/registro-usuario" class="text-blue-500 hover:underline">Regístrate aquí</a>
+      ¿No tienes cuenta?
+      <a href="/registro-usuario" class="text-blue-500 hover:underline"
+        >Regístrate aquí</a
+      >
     </p>
   </div>
 </div>

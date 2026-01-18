@@ -1,9 +1,9 @@
-import nombreToken from "../libs/nombreToken";
-import validarLogin from "../services/login/validarLogin";
-import { respuestaAlFront } from "../utils/respuestaAlFront";
+import nombreToken from "../libs/nombreToken.js";
+import validarLogin from "../services/login/validarLogin.js";
+import { respuestaAlFront } from "../utils/respuestaAlFront.js";
 
 export default class LoginController {
-  static async login(req, res) {
+  static async iniciarSesion(req, res) {
     try {
       // 1. Extrae datos del cuerpo (Express usa req.body)
       const { correo, clave } = req.body;
@@ -18,7 +18,7 @@ export default class LoginController {
           validaciones.status,
           validaciones.message,
           {},
-          validaciones.codigo ? validaciones.codigo : 400
+          validaciones.codigo ? validaciones.codigo : 400,
         );
       }
 
@@ -32,7 +32,7 @@ export default class LoginController {
         {
           redirect: validaciones.redirect,
         },
-        200
+        200,
       );
     } catch (error) {
       console.error(`Error interno al iniciar sesion: `, error);
@@ -42,7 +42,7 @@ export default class LoginController {
         "error",
         "Error interno al iniciar sesion",
         {},
-        500
+        500,
       );
     }
   }
@@ -63,7 +63,7 @@ export default class LoginController {
         "ok",
         "Cerrando sesion",
         { redirect: "/" },
-        200
+        200,
       );
     } catch (error) {
       console.error("Error interno cerrando sesión:", error);
@@ -73,7 +73,7 @@ export default class LoginController {
         "error",
         "Error interno cerrando sesión",
         {},
-        500
+        500,
       );
     }
   }

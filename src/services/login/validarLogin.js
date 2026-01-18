@@ -5,11 +5,11 @@
  y una utilidad para estructurar respuestas internas. @module services/login/validarLogin
 */
 
-import CifrarDescifrarClaves from "../../libs/CifrarDescifrarClaves";
-import { UserModel } from "../../models/UserModel";
-import AuthTokens from "../../libs/AuthTokens";
-import validarCamposLogin from "./validarCamposLogin";
-import respuestasAlBack from "../../utils/respuestasAlBack";
+import CifrarDescifrarClaves from "../../libs/CifrarDescifrarClaves.js";
+import { UserModel } from "../../models/UserModel.js";
+import AuthTokens from "../../libs/AuthTokens.js";
+import validarCamposLogin from "./validarCamposLogin.js";
+import respuestasAlBack from "../../utils/respuestasAlBack.js";
 
 /**
  Valida el proceso de inicio de sesión de un usuario. Comprueba los campos, verifica credenciales,
@@ -32,7 +32,7 @@ export default async function validarLogin(correo, clave) {
 
     // 3. Buscar usuario en la base de datos
     const datosInicioSesion = await UserModel.buscarUsuarioPorCorreo(
-      validandoCampos.correo
+      validandoCampos.correo,
     );
 
     // 4. Verificar si el usuario existe
@@ -50,7 +50,7 @@ export default async function validarLogin(correo, clave) {
     // 6. Comparar la contraseña ingresada con la almacenada
     const claveEncriptada = await CifrarDescifrarClaves.compararClave(
       validandoCampos.clave,
-      datosInicioSesion.clave
+      datosInicioSesion.clave,
     );
 
     // 8. Si la validación falla retornamos una respuesta
@@ -60,25 +60,25 @@ export default async function validarLogin(correo, clave) {
 
     // 9. Determinar la ruta de redirección según el rol del usuario
     const redirecciones = {
-      1: "/dashboard/master",
-      2: "/dashboard/administrador",
-      3: "/dashboard/comun",
+      1: "/dashboard/admin/panel",
+      2: "/dashboard/docente/panel",
+      3: "/dashboard/estudiante/panel",
     };
 
     // 10. Tomamos la direccion por el id_rol o la raiz
-    const redirect = redirecciones[datosInicioSesion.rol] || "/";
+    const redirect = redirecciones[datosInicioSesion.rol_id] || "/";
 
     // 11. Generar token de sesión
     const crearTokenInicioSesion = AuthTokens.tokenInicioSesion(
       validandoCampos.correo,
-      datosInicioSesion.rol
+      datosInicioSesion.rol,
     );
 
     // 12. Si la validación falla retornamos una respuesta
     if (crearTokenInicioSesion.status === "error") {
       return respuestasAlBack(
         crearTokenInicioSesion.status,
-        crearTokenInicioSesion.message
+        crearTokenInicioSesion.message,
       );
     }
 

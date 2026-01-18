@@ -1,8 +1,8 @@
-00document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", () => {
   const formLogin = document.getElementById("formLogin");
   const alertContainer = document.getElementById("alertContainer");
   const btnAcceder = document.getElementById("btnAcceder");
-  
+
   const togglePassword = document.getElementById("togglePassword");
   const passwordInput = document.getElementById("clave");
 
@@ -16,14 +16,14 @@
 
       const isPassword = passwordInput.type === "password";
       passwordInput.type = isPassword ? "text" : "password";
-      
-      const svgIcon = togglePassword.querySelector('svg');
+
+      const svgIcon = togglePassword.querySelector("svg");
 
       if (isPassword) {
         // MOSTRAR CLAVE: Poner Ojo Tachado y color azul
         svgIcon.classList.remove("text-gray-500");
         svgIcon.classList.add("text-blue-600");
-        
+
         // Path del ojo tachado (HeroIcons)
         svgIcon.innerHTML = `
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />
@@ -32,7 +32,7 @@
         // OCULTAR CLAVE: Poner Ojo normal y color gris
         svgIcon.classList.remove("text-blue-600");
         svgIcon.classList.add("text-gray-500");
-        
+
         // Path del ojo normal original
         svgIcon.innerHTML = `
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -57,8 +57,8 @@
         </svg>
         Verificando...
       </span>`;
-    
-    alertContainer.innerHTML = ""; 
+
+    alertContainer.innerHTML = "";
 
     try {
       const response = await fetch("/api/login/iniciar-sesion", {
@@ -72,7 +72,7 @@
       if (response.ok && resultado.status === "ok") {
         mostrarAlerta(resultado.message, "success");
         setTimeout(() => {
-          window.location.href = resultado.data.redirect || "/";
+          window.location.href = resultado.redirect || "/";
         }, 1200);
       } else {
         mostrarAlerta(resultado.message || "Credenciales incorrectas", "error");
@@ -91,10 +91,11 @@
   }
 
   function mostrarAlerta(mensaje, tipo) {
-    const bgColor = tipo === "success" 
-      ? "bg-green-100 text-green-800 border-green-300" 
-      : "bg-red-100 text-red-800 border-red-300";
-    
+    const bgColor =
+      tipo === "success"
+        ? "bg-green-100 text-green-800 border-green-300"
+        : "bg-red-100 text-red-800 border-red-300";
+
     alertContainer.innerHTML = `
       <div class="${bgColor} border px-4 py-3 rounded text-center shadow-sm mb-4" role="alert">
         <span class="font-medium">${mensaje}</span>

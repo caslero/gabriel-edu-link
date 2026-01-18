@@ -1,6 +1,7 @@
 import express from "express";
 import UserController from "../controllers/UserController.js";
 import InscripcionesController from "../controllers/InscripcionesController.js";
+import LoginController from "../controllers/LoginController.js";
 
 const rutas = express.Router();
 
@@ -172,6 +173,12 @@ rutas.get("/docente/gestionar-actas-especiales", (req, res) => {
 });
 
 rutas.post("/api/usuarios/crear-usuario", UserController.crearUsuario);
-rutas.post("/api/inscripciones/crear-inscripcion", InscripcionesController.crearInscripcion);
+
+rutas.post("/api/login/iniciar-sesion", LoginController.iniciarSesion);
+
+rutas.post(
+  "/api/inscripciones/crear-inscripcion",
+  InscripcionesController.crearInscripcion,
+);
 
 export default rutas;
