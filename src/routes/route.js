@@ -41,7 +41,7 @@ rutas.get("/login", (req, res) => {
 
 //--------------Rutas Admin-------------
 // Panel de inicio
-rutas.get("/admin/panel", (req, res) => {
+rutas.get("/dashboard/admin/panel", (req, res) => {
   res.render("admin/panel", {
     title: "Panel de Administración - EduLink",
     user: "Admin",
@@ -55,17 +55,19 @@ rutas.get("/admin/perfil", (req, res) => {
 
 // Gestionar Usuarios
 rutas.get("/admin/gestionar-usuarios", (req, res) => {
-  res.render("admin/gestionar-usuarios", {
+  res.render("admin/gestionUsuario", {
     title: "Gestionar Usuarios - EduLink",
     user: "Admin",
+    usuarios: []
   });
 });
 
 // Gestionar Materias
 rutas.get("/admin/gestionar-materias", (req, res) => {
-  res.render("admin/gestionar-materias", {
+  res.render("admin/gestionMateria", {
     title: "Gestionar Materias - EduLink",
     user: "Admin",
+    semestre: []
   });
 });
 
@@ -79,7 +81,7 @@ rutas.get("/admin/gestionar-inscripciones", (req, res) => {
 
 // Gestionar Adicion y Retiro
 rutas.get("/admin/gestionar-adicion-retiro", (req, res) => {
-  res.render("admin/gestionar-adicion-retiro", {
+  res.render("admin/gestionAdicionRetiro", {
     title: "Gestionar Adición y Retiro - EduLink",
     user: "Admin",
   });
@@ -87,7 +89,7 @@ rutas.get("/admin/gestionar-adicion-retiro", (req, res) => {
 
 // Gestionar Actas Especiales
 rutas.get("/admin/gestionar-actas-especiales", (req, res) => {
-  res.render("admin/gestionar-actas-especiales", {
+  res.render("admin/gestionActaEspecial", {
     title: "Gestionar Actas Especiales - EduLink",
     user: "Admin",
   });
@@ -95,18 +97,50 @@ rutas.get("/admin/gestionar-actas-especiales", (req, res) => {
 
 // Gestionar Encuestas
 rutas.get("/admin/gestionar-encuestas", (req, res) => {
-  res.render("admin/gestionar-encuestas", {
+  res.render("admin/gestionEncuesta", {
     title: "Gestionar Encuestas - EduLink",
     user: "Admin",
   });
 });
 
+//--------------Rutas Docentes------------
+// Panel de inicio
+rutas.get("/dashboard/docente/panel", (req, res) => {
+  res.render("docente/panel", {
+    title: "Panel de Docente - EduLink",
+    user: "Docente",
+  });
+});
+
+// Perfil
+rutas.get("/docente/perfil", (req, res) => {
+  res.render("docente/perfil", { title: "Perfil - EduLink", user: "Docente" });
+});
+
+// Gestionar Actas Especiales
+rutas.get("/docente/gestionar-actas-especiales", (req, res) => {
+  res.render("docente/gestionar-actas-especiales", {
+    title: "Gestionar Actas Especiales - EduLink",
+    user: "Docente",
+  });
+});
+
+rutas.post("/api/usuarios/crear-usuario", UserController.crearUsuario);
+
+rutas.post("/api/login/iniciar-sesion", LoginController.iniciarSesion);
+
+rutas.post(
+  "/api/inscripciones/crear-inscripcion",
+  InscripcionesController.crearInscripcion,
+);
+
 //--------------Rutas Estudiantes------------
 // Panel de inicio
-rutas.get("/estudiante/panel", (req, res) => {
+rutas.get("/dashboard/estudiante/panel", (req, res) => {
   res.render("estudiante/panel", {
     title: "Panel de Estudiante - EduLink",
     user: "Estudiante",
+    semestre: null
   });
 });
 
@@ -149,36 +183,5 @@ rutas.get("/estudiante/encuestas", (req, res) => {
     user: "Estudiante",
   });
 });
-
-//--------------Rutas Docentes------------
-// Panel de inicio
-rutas.get("/docente/panel", (req, res) => {
-  res.render("docente/panel", {
-    title: "Panel de Docente - EduLink",
-    user: "Docente",
-  });
-});
-
-// Perfil
-rutas.get("/docente/perfil", (req, res) => {
-  res.render("docente/perfil", { title: "Perfil - EduLink", user: "Docente" });
-});
-
-// Gestionar Actas Especiales
-rutas.get("/docente/gestionar-actas-especiales", (req, res) => {
-  res.render("docente/gestionar-actas-especiales", {
-    title: "Gestionar Actas Especiales - EduLink",
-    user: "Docente",
-  });
-});
-
-rutas.post("/api/usuarios/crear-usuario", UserController.crearUsuario);
-
-rutas.post("/api/login/iniciar-sesion", LoginController.iniciarSesion);
-
-rutas.post(
-  "/api/inscripciones/crear-inscripcion",
-  InscripcionesController.crearInscripcion,
-);
 
 export default rutas;
