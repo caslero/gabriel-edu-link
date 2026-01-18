@@ -4,9 +4,9 @@
  @module utils/obtenerCorreoToken
 */
 
-import respuestasAlBack from "../utils/respuestasAlBack";
-import AuthTokens from "./AuthTokens";
-import nombreToken from "./nombreToken";
+import respuestasAlBack from "../utils/respuestasAlBack.js";
+import AuthTokens from "./AuthTokens.js";
+import nombreToken from "./nombreToken.js";
 
 /**
  Middleware/función para obtener correo y rol desde el token en cookies.

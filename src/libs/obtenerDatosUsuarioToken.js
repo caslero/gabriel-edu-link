@@ -4,9 +4,9 @@
  * @module controllers/usuarios/obtenerDatosUsuarioToken
  */
 
-import { UserModel } from "../models/UserModel";
-import respuestasAlBack from "../utils/respuestasAlBack";
-import obtenerCorreoToken from "./obtenerCorreoToken";
+import { UserModel } from "../models/UserModel.js";
+import respuestasAlBack from "../utils/respuestasAlBack.js";
+import obtenerCorreoToken from "./obtenerCorreoToken.js";
 
 /**
  * Controlador Express que obtiene los datos del usuario activo utilizando su correo extraído del token.
@@ -27,7 +27,9 @@ export default async function obtenerDatosUsuarioToken(req) {
     }
 
     // 3. Consultar en la base de datos los datos del usuario por correo.
-    const datosUsuario = await UserModel.buscarUsuarioPorCorreo(correo);
+    const datosUsuario = await UserModel.buscarUsuarioPorCorreo(
+      validaciones.correo,
+    );
 
     // 4. Si no se encuentra el usuario, retornar error.
     if (!datosUsuario) {
@@ -41,7 +43,7 @@ export default async function obtenerDatosUsuarioToken(req) {
       usuarioId: datosUsuario.id,
       nombre: datosUsuario.nombre,
       correo: validaciones.correo,
-      rolId: validaciones.rol,
+      rolId: datosUsuario.rol_id,
     });
   } catch (error) {
     console.error("Error interno obtener datos usuario:", error);

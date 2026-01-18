@@ -1,5 +1,6 @@
 import { UserModel } from "../models/UserModel.js";
 import validarCrearUsuario from "../services/usuarios/validarCrearUsuario.js";
+import validarObtenerTodosUsuarios from "../services/usuarios/validarObtenerTodosUsuarios.js";
 import { respuestaAlFront } from "../utils/respuestaAlFront.js";
 
 export default class UserController {
@@ -24,9 +25,9 @@ export default class UserController {
         correo,
         clave,
         confirmarClave,
-        3,
+        rol ? rol : 3,
         texto,
-        pais === "v" ? 1 : 0
+        pais === "v" ? 1 : 0,
       );
 
       if (validaciones.status === "error") {
@@ -35,7 +36,7 @@ export default class UserController {
           validaciones.status,
           validaciones.message,
           {},
-          validaciones.codigo ? validaciones.codigo : 400
+          validaciones.codigo ? validaciones.codigo : 400,
         );
       }
 
@@ -57,7 +58,7 @@ export default class UserController {
           "error",
           "Error al crear usuario",
           {},
-          400
+          400,
         );
       }
 
@@ -68,7 +69,7 @@ export default class UserController {
         {
           redirect: "/login",
         },
-        201
+        201,
       );
     } catch (error) {
       console.error("Error interno crear usuario:", error);
@@ -76,9 +77,57 @@ export default class UserController {
       return respuestaAlFront(
         res,
         "error",
-        "Error interno crear contacto",
+        "Error interno crear usuario",
         {},
-        500
+        500,
+      );
+    }
+  }
+
+  static async todosUsuarios(req, res) {
+    try {
+      const validaciones = await validarObtenerTodosUsuarios(req);
+
+      if (validaciones.status === "error") {
+        return respuestaAlFront(
+          res,
+          validaciones.status,
+          validaciones.message,
+          {},
+          validaciones.codigo ? validaciones.codigo : 400,
+        );
+      }
+
+      const todosUsuarios = await UserModel.obtenerTodosUsuarios();
+
+      if (!todosUsuarios) {
+        return respuestaAlFront(
+          res,
+          "error",
+          "Error al obtener todos los usuarios",
+          {},
+          400,
+        );
+      }
+
+      return respuestaAlFront(
+        res,
+        "ok",
+        "Todos los usuarios obtenidos",
+        {
+          usuarios: todosUsuarios,
+        },
+        200,
+      );
+    } catch (error) {
+      console.log("Error interno todos los usuarios:", error);
+
+      return respuestaAlFront(
+        res,
+        "error",
+        "Error interno todos los usuarios",
+        {},
+        500,
       );
     }
   }

@@ -80,4 +80,22 @@ export class UserModel {
       });
     });
   }
+
+  /**
+   Obtiene todos los usuarios
+    @returns {Promise<Array<Object>>} - Lista de usuarios
+  */
+  static async obtenerTodosUsuarios() {
+    return new Promise((resolve, reject) => {
+      const sql = `SELECT * FROM users`;
+
+      db.all(sql, [], (err, rows) => {
+        if (err) {
+          return reject(err);
+        }
+        // Devuelve todas las filas (array vacío si no hay registros)
+        resolve(rows);
+      });
+    });
+  }
 }

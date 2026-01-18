@@ -2,6 +2,7 @@ import express from "express";
 import UserController from "../controllers/UserController.js";
 import InscripcionesController from "../controllers/InscripcionesController.js";
 import LoginController from "../controllers/LoginController.js";
+import RolController from "../controllers/RolController.js";
 
 const rutas = express.Router();
 
@@ -58,7 +59,7 @@ rutas.get("/admin/gestionar-usuarios", (req, res) => {
   res.render("admin/gestionUsuario", {
     title: "Gestionar Usuarios - EduLink",
     user: "Admin",
-    usuarios: []
+    usuarios: [],
   });
 });
 
@@ -67,7 +68,7 @@ rutas.get("/admin/gestionar-materias", (req, res) => {
   res.render("admin/gestionMateria", {
     title: "Gestionar Materias - EduLink",
     user: "Admin",
-    semestre: []
+    semestre: [],
   });
 });
 
@@ -125,22 +126,13 @@ rutas.get("/docente/gestionar-actas-especiales", (req, res) => {
   });
 });
 
-rutas.post("/api/usuarios/crear-usuario", UserController.crearUsuario);
-
-rutas.post("/api/login/iniciar-sesion", LoginController.iniciarSesion);
-
-rutas.post(
-  "/api/inscripciones/crear-inscripcion",
-  InscripcionesController.crearInscripcion,
-);
-
 //--------------Rutas Estudiantes------------
 // Panel de inicio
 rutas.get("/dashboard/estudiante/panel", (req, res) => {
   res.render("estudiante/panel", {
     title: "Panel de Estudiante - EduLink",
     user: "Estudiante",
-    semestre: null
+    semestre: null,
   });
 });
 
@@ -183,5 +175,18 @@ rutas.get("/estudiante/encuestas", (req, res) => {
     user: "Estudiante",
   });
 });
+
+rutas.post("/api/usuarios/crear-usuario", UserController.crearUsuario);
+rutas.get("/api/usuarios/todos-usuarios", UserController.todosUsuarios);
+
+rutas.post("/api/roles/crear-rol", RolController.crearRol);
+rutas.get("/api/roles/todos-roles", RolController.todosRoles);
+
+rutas.post("/api/login/iniciar-sesion", LoginController.iniciarSesion);
+
+rutas.post(
+  "/api/inscripciones/crear-inscripcion",
+  InscripcionesController.crearInscripcion,
+);
 
 export default rutas;

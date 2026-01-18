@@ -71,7 +71,7 @@ export default async function validarLogin(correo, clave) {
     // 11. Generar token de sesión
     const crearTokenInicioSesion = AuthTokens.tokenInicioSesion(
       validandoCampos.correo,
-      datosInicioSesion.rol,
+      datosInicioSesion.rol_id,
     );
 
     // 12. Si la validación falla retornamos una respuesta
@@ -87,10 +87,6 @@ export default async function validarLogin(correo, clave) {
       token: crearTokenInicioSesion.token,
       cookie: crearTokenInicioSesion.cookieOption,
       redirect: redirect,
-      correo: datosInicioSesion.correo,
-      clave: datosInicioSesion.clave,
-      rol: datosInicioSesion.rol,
-      borrado: datosInicioSesion.borrado,
     });
   } catch (error) {
     // 14. Manejo de errores inesperados
