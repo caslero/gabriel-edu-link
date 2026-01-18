@@ -3,6 +3,7 @@ import UserController from "../controllers/UserController.js";
 import InscripcionesController from "../controllers/InscripcionesController.js";
 import LoginController from "../controllers/LoginController.js";
 import RolController from "../controllers/RolController.js";
+import MateriaController from "../controllers/MateriaController.js";
 
 const rutas = express.Router();
 
@@ -188,5 +189,7 @@ rutas.post(
   "/api/inscripciones/crear-inscripcion",
   InscripcionesController.crearInscripcion,
 );
+
+rutas.post("/api/materias/crear-seccion", MateriaController.crearSeccion);
 
 export default rutas;
