@@ -7,6 +7,7 @@
       Crear nuevo usuario
     </h3>
     <form
+      id="form-crear-usuario"
       class="grid grid-cols-1 md:grid-cols-2 gap-4"
     >
       <div>
@@ -85,17 +86,16 @@
     <table id="tabla-usuarios" class="min-w-full border border-gray-200 rounded-lg shadow-sm">
       <thead class="bg-blue-600 text-white">
         <tr>
-          <th class="px-4 py-2 text-left">ID Usuario</th>
-          <th class="px-4 py-2 text-left">Nombre</th>
-          <th class="px-4 py-2 text-left">Correo</th>
-          <th class="px-4 py-2 text-left">Rol</th>
-          <th class="px-4 py-2 text-left">Foto</th>
+          <th class="px-4 py-2 text-center">ID Usuario</th>
+          <th class="px-4 py-2 text-center">Nombre</th>
+          <th class="px-4 py-2 text-center">Correo</th>
+          <th class="px-4 py-2 text-center">Rol</th>
+          <th class="px-4 py-2 text-center">Foto</th>
           <th class="px-4 py-2 text-center">Acciones</th>
         </tr>
       </thead>
 
       <tbody class="divide-y divide-gray-200">
-        
         <% if (!usuarios || usuarios.length === 0) { %>
           <tr>
             <td colspan="6" class="text-center py-6 text-gray-500">
@@ -103,23 +103,39 @@
             </td>
           </tr>
         <% } else { %>
-          
-           
-            
+          <% usuarios.forEach(usuario => { %>
+            <tr>
+              <td class="px-4 py-2 text-center"><%= usuario.id %></td>
+              <td class="px-4 py-2 text-center"><%= usuario.nombre %></td>
+              <td class="px-4 py-2 text-center"><%= usuario.correo %></td>
+              <td class="px-4 py-2 text-center"><%= usuario.rol %></td>
+              <td class="px-4 py-2 flex justify-center">
+                  <img src="<%= usuario.foto || '/default-avatar.png' %>" class="w-10 h-10 rounded-full">
+              </td>
+              <td class="px-4 py-2 text-center">
+                <button 
+                  onclick="document.getElementById('modal-<%= usuario.id %>').classList.remove('hidden')"
+                  class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition duration-200">
+                  Editar
+                </button>
+              </td>
+            </tr>
+
             <div id="modal-<%= usuario.id %>" 
-                 class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-              <div class="bg-white rounded-lg shadow-lg p-6 w-96">
+                class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+              <div class="bg-white rounded-lg shadow-lg p-6 w-96 text-left">
                 <h3 class="text-lg font-semibold text-blue-700 mb-4">Editar Usuario</h3>
-                <form class="space-y-3">
+                
+                <form action="/usuarios/editar/<%= usuario.id %>" method="POST" class="space-y-3">
                   <div>
                     <label class="block text-sm font-semibold">Nombre</label>
                     <input type="text" name="nombre" value="<%= usuario.nombre %>" 
-                           class="w-full border p-2 rounded" required>
+                          class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500" required>
                   </div>
                   <div>
                     <label class="block text-sm font-semibold">Correo</label>
                     <input type="email" name="correo" value="<%= usuario.correo %>" 
-                           class="w-full border p-2 rounded" required>
+                          class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-500" required>
                   </div>
                   <div>
                     <label class="block text-sm font-semibold">Rol</label>
@@ -129,7 +145,8 @@
                       <option value="Admin" <%= usuario.rol === 'Admin' ? 'selected' : '' %>>Admin</option>
                     </select>
                   </div>
-                  <div class="flex justify-center mt-3 space-x-2">
+                  
+                  <div class="flex justify-end mt-4 space-x-2">
                     <button type="button" 
                             onclick="document.getElementById('modal-<%= usuario.id %>').classList.add('hidden')" 
                             class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition">
@@ -137,111 +154,17 @@
                     </button>
                     <button type="submit" 
                             class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-                      Guardar
+                      Guardar Cambios
                     </button>
                   </div>
                 </form>
               </div>
             </div>
-
+          <% }) %>
         <% } %>
       </tbody>
     </table>
   </div>
 </div>
 
-<script>
-  async function cargarUsuarios() {
-    try {
-      const response = await fetch("/api/usuarios/todos-usuarios", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-
-      const datos = await response.json();
-
-      if (datos.status === "error") throw new Error('Error al obtener usuarios');      
-
-      const tbody = document.querySelector('#tabla-usuarios tbody');
-      tbody.innerHTML = '';
-
-       if (!datos.usuarios || datos.usuarios.length === 0) {
-         tbody.innerHTML = `
-           <tr>
-             <td colspan="6" class="text-center py-6 text-gray-500">
-               No hay usuarios registrados.
-             </td>
-           </tr>`;
-         return;
-       }
-
-       datos.usuarios.map(usuario => {
-         const fila = document.createElement('tr');
-         fila.innerHTML = `
-           <td class="px-4 py-2">${usuario.id}</td>
-           <td class="px-4 py-2">${usuario.nombre}</td>
-           <td class="px-4 py-2">${usuario.correo}</td>
-           <td class="px-4 py-2">${usuario.rol_id}</td>
-           <td class="px-4 py-2">
-             <img src="${usuario.foto || '/img/usuario.png'}" 
-                  alt="Foto usuario" 
-                  class="w-10 h-10 rounded-full border">
-           </td>
-           <td class="px-4 py-2 text-center space-x-2">
-             <form action="/api/admin/usuarios/${usuario.id}/eliminar" method="POST" class="inline">
-               <button type="submit" 
-                       class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
-                       onclick="return confirm('¿Seguro que deseas eliminar este usuario?')">
-                 Eliminar
-               </button>
-             </form>
-           </td>
-         `;
-         tbody.appendChild(fila);
-       });
-    } catch (error) {
-      console.error('Error al refrescar usuarios:', error);
-    }
-  }
-
-  async function cargarRoles() {
-    try {
-      const response = await fetch("/api/roles/todos-roles", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-
-      const datos = await response.json();
-
-      if (datos.status === "error") throw new Error('Error al obtener usuarios');  
-
-      // Suponiendo que datos.roles es un array de objetos con { nombre: "Estudiante" } etc.
-      const contenedor = document.getElementById("todos-roles");
-
-      contenedor.innerHTML = `
-        <label for="rol" class="block font-semibold">Rol</label>
-        <select id="rol" name="rol" class="w-full border p-2 rounded capitalize" required>
-          <option value="">Seleccione</option>
-          ${datos.roles.map(rol => `
-            <option value="${rol.id}">${rol.nombre}</option>
-          `).join('')}
-        </select>
-      `;
-      
-    } catch(error) {
-      console.log("Error al obtener los roles:", error);
-      
-    }
-  }
-
-  // refrescar cada 10 segundos
-  //setInterval(cargarUsuarios, 10000);
-
-  // cargar al inicio
-  cargarUsuarios();
-  cargarRoles();
-</script>
+<script src="/js/gestionUsuario.js"></script>
