@@ -44,7 +44,6 @@ async function cargarUsuarios() {
 // FUNCIÓN PARA MOSTRAR MODAL DE ELIMINAR
 function confirmarEliminacion(id) {
   let modalContainer = document.getElementById('modal-eliminar-container');
-  
   if (!modalContainer) {
     modalContainer = document.createElement('div');
     modalContainer.id = 'modal-eliminar-container';
@@ -53,40 +52,52 @@ function confirmarEliminacion(id) {
 
   modalContainer.innerHTML = `
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[60]">
-      <div class="bg-white rounded-lg shadow-xl p-6 w-80 text-center transform transition-all scale-100">
+      <div class="bg-white rounded-lg shadow-xl p-6 w-80 text-center">
         <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
           <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
         </div>
-        
         <h3 class="text-lg font-bold text-gray-900 mb-2">¿Estás seguro?</h3>
-        <p class="text-sm text-gray-500 mb-6">Esta acción no se puede deshacer. El usuario será eliminado permanentemente.</p>
-        
+        <p class="text-sm text-gray-500 mb-6">El usuario con ID: ${id} será eliminado.</p>
         <div class="flex justify-center space-x-3">
-          <button type="button" 
-                  onclick="document.getElementById('modal-eliminar-container').innerHTML=''" 
-                  class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition font-medium">
+          <button type="button" onclick="document.getElementById('modal-eliminar-container').innerHTML=''" 
+                  class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">
             Cancelar
           </button>
-          
-          <form action="/api/admin/usuarios/${id}/eliminar" method="POST">
-            <button type="submit" 
-                    class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition font-medium">
-              Eliminar
-            </button>
-          </form>
+          <button id="btn-confirmar-eliminar" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 font-medium">
+            Eliminar
+          </button>
         </div>
       </div>
     </div>
   `;
+
+  // Evento para el botón de confirmar
+  document.getElementById('btn-confirmar-eliminar').onclick = async () => {
+    try {
+      const response = await fetch(`/api/usuarios/eliminar-usuario`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idUsuario: id })
+      });
+
+      if (response.ok) {
+        mostrarNotificacion("Usuario eliminado correctamente");
+        document.getElementById('modal-eliminar-container').innerHTML = '';
+        cargarUsuarios();
+      } else {
+        mostrarNotificacion("Error al eliminar", "error");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
 }
 
-// FUNCIÓN PARA MANEJAR EL MODAL
+// FUNCIÓN PARA MANEJAR EL MODAL editar
 function abrirModalEditar(id, nombre, correo, rolId) {
-  // Creamos el modal dinámicamente si no existe, o lo actualizamos
   let modal = document.getElementById('modal-editar-container');
-  
   if (!modal) {
     modal = document.createElement('div');
     modal.id = 'modal-editar-container';
@@ -97,7 +108,8 @@ function abrirModalEditar(id, nombre, correo, rolId) {
     <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div class="bg-white rounded-lg shadow-lg p-6 w-96 text-left">
         <h3 class="text-lg font-semibold text-blue-700 mb-4">Editar Usuario</h3>
-        <form action="/api/usuarios/editar/${id}" method="POST" class="space-y-3">
+        <form id="form-editar-usuario" class="space-y-3">
+          <input type="hidden" name="idUsuario" value="${id}">
           <div>
             <label class="block text-sm font-semibold">Nombre</label>
             <input type="text" name="nombre" value="${nombre}" class="w-full border p-2 rounded" required>
@@ -111,7 +123,7 @@ function abrirModalEditar(id, nombre, correo, rolId) {
             <input type="number" name="rol_id" value="${rolId}" class="w-full border p-2 rounded" required>
           </div>
           <div class="flex justify-end mt-4 space-x-2">
-            <button type="button" onclick="this.closest('#modal-editar-container').innerHTML=''" 
+            <button type="button" onclick="document.getElementById('modal-editar-container').innerHTML=''" 
                     class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">
               Cancelar
             </button>
@@ -123,6 +135,42 @@ function abrirModalEditar(id, nombre, correo, rolId) {
       </div>
     </div>
   `;
+
+  // Listener para el envío del formulario de edición
+  document.getElementById('form-editar-usuario').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const info = Object.fromEntries(formData.entries());
+
+    try {
+      // Estructura de ruta según tu ejemplo
+      const response = await fetch("/api/usuarios/actualizar-usuario", {
+        method: "PUT", // O POST según tu backend
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          params: {
+            id: info.idUsuario,
+            nombre: info.nombre,
+            correo: info.correo,
+            rol_id: info.rol_id
+          }
+        })
+      });
+
+      const resultado = await response.json();
+
+      if (response.ok || resultado.status === "ok") {
+        mostrarNotificacion("Usuario actualizado con éxito");
+        document.getElementById('modal-editar-container').innerHTML = ''; // Cerrar modal
+        cargarUsuarios(); // Recargar tabla
+      } else {
+        mostrarNotificacion(resultado.message || "Error al actualizar", "error");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      mostrarNotificacion("Error de conexión", "error");
+    }
+  });
 }
 
   async function cargarRoles() {
