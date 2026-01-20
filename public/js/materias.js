@@ -168,7 +168,7 @@ function confirmarEliminarSeccion(id) {
 
     document.getElementById('btn-confirm-delete-seccion').onclick = async () => {
         try {
-            const response = await fetch(`/api/materias/actualizar-seccion`, {
+            const response = await fetch(`/api/materias/eliminar-seccion`, {
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id: id, eliminar: true }) 
