@@ -59,28 +59,30 @@ function confirmarEliminacion(id) {
           </svg>
         </div>
         <h3 class="text-lg font-bold text-gray-900 mb-2">¿Estás seguro?</h3>
-        <p class="text-sm text-gray-500 mb-6">El usuario con ID: ${id} será eliminado.</p>
+        <p class="text-sm text-gray-500 mb-6">El usuario con ID: ${id} será marcado para eliminación.</p>
         <div class="flex justify-center space-x-3">
           <button type="button" onclick="document.getElementById('modal-eliminar-container').innerHTML=''" 
                   class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300">
             Cancelar
           </button>
           <button id="btn-confirmar-eliminar" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 font-medium">
-            Eliminar
+            Confirmar
           </button>
         </div>
       </div>
     </div>
   `;
 
-  // Evento para el botón de confirmar
   document.getElementById('btn-confirmar-eliminar').onclick = async () => {
+    console.log("Eliminando usuario ID:", id);
     try {
       const response = await fetch(`/api/usuarios/eliminar-usuario`, {
-        method: "DELETE",
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idUsuario: id })
       });
+
+      console.log("Status eliminar:", response.status);
 
       if (response.ok) {
         mostrarNotificacion("Usuario eliminado correctamente");
@@ -90,7 +92,7 @@ function confirmarEliminacion(id) {
         mostrarNotificacion("Error al eliminar", "error");
       }
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error en eliminación:", error);
     }
   };
 }
@@ -136,49 +138,64 @@ function abrirModalEditar(id, nombre, correo, rolId) {
     </div>
   `;
 
-  // Listener para el envío del formulario de edición
   document.getElementById('form-editar-usuario').addEventListener('submit', async (e) => {
     e.preventDefault();
     const formData = new FormData(e.target);
     const info = Object.fromEntries(formData.entries());
+    
+    console.log("Datos a actualizar:", info);
 
     try {
-      // Estructura de ruta según tu ejemplo
+      const datosAEnviar = {
+        params: {
+          id: info.idUsuario,
+          nombre: info.nombre,
+          correo: info.correo,
+          rol_id: info.rol_id
+        }
+      };
+
       const response = await fetch("/api/usuarios/actualizar-usuario", {
-        method: "PUT", // O POST según tu backend
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          params: {
-            id: info.idUsuario,
-            nombre: info.nombre,
-            correo: info.correo,
-            rol_id: info.rol_id
-          }
-        })
+        body: JSON.stringify(datosAEnviar)
       });
 
+      console.log("Status servidor:", response.status);
+
+      // Verificamos si la respuesta es JSON
+      const contentType = response.headers.get("content-type");
+      if (!response.ok || !contentType || !contentType.includes("application/json")) {
+        const textoError = await response.text(); 
+        console.error("Respuesta no JSON:", textoError);
+        throw new Error(`Error ${response.status}`);
+      }
+
       const resultado = await response.json();
+      console.log("Respuesta JSON:", resultado);
 
       if (response.ok || resultado.status === "ok") {
         mostrarNotificacion("Usuario actualizado con éxito");
-        document.getElementById('modal-editar-container').innerHTML = ''; // Cerrar modal
-        cargarUsuarios(); // Recargar tabla
+        document.getElementById('modal-editar-container').innerHTML = '';
+        cargarUsuarios();
       } else {
         mostrarNotificacion(resultado.message || "Error al actualizar", "error");
-      }
+      } 
     } catch (error) {
-      console.error("Error:", error);
-      mostrarNotificacion("Error de conexión", "error");
+      console.error("Error capturado:", error.message);
+      mostrarNotificacion("Error en la operación", "error");
     }
   });
 }
 
+// FUNCION PARA CARGAR ROLES
   async function cargarRoles() {
     try {
       const response = await fetch("/api/roles/todos-roles", {
         method: "GET",
         headers: {
           "Content-Type": "application/json"
+          
         }
       });
 
