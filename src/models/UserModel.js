@@ -82,6 +82,60 @@ export class UserModel {
   }
 
   /**
+   Busca un usuario por su correo e id
+   @param {string} correo - El correo a buscar
+   @param {number} id - El ID del usuario a buscar
+   @returns {Promise<Object|null>} - El usuario encontrado o null
+  */
+  static async buscarUsuarioActualizar(correo, id) {
+    return new Promise((resolve, reject) => {
+      const sql = `SELECT * FROM users WHERE correo = ? AND id != ? LIMIT 1`;
+
+      db.get(sql, [correo, id], (err, row) => {
+        if (err) {
+          return reject(err);
+        }
+        // Si no hay errores, devolvemos la fila (o undefined si no existe)
+        resolve(row || null);
+      });
+    });
+  }
+
+  /**
+   * Actualiza un usuario existente en la base de datos
+   * @param {Object} datos - Objeto con id, nombre, correo y rol_id
+   * @returns {Promise<Object>} - Los datos actualizados
+   */
+  static async actualizarUsuario(datos) {
+    return new Promise((resolve, reject) => {
+      // 1. Usamos UPDATE en lugar de INSERT
+      // Buscamos por ID para modificar solo ese registro
+      const sql = `
+      UPDATE users 
+      SET nombre = ?, correo = ?, rol_id = ? 
+      WHERE id = ?
+    `;
+
+      // 2. El orden de los parámetros debe coincidir exactamente con los "?" del SQL
+      const params = [datos.nombre, datos.correo, datos.rol_id, datos.id];
+
+      db.run(sql, params, function (err) {
+        if (err) {
+          return reject(err);
+        }
+
+        // 3. Verificamos si realmente se actualizó algo (this.changes indica filas afectadas)
+        if (this.changes === 0) {
+          return reject(new Error("No se encontró ningún usuario con ese ID"));
+        }
+
+        // Devolvemos los datos que acabamos de guardar
+        resolve({ ...datos });
+      });
+    });
+  }
+
+  /**
    Obtiene todos los usuarios
     @returns {Promise<Array<Object>>} - Lista de usuarios
   */

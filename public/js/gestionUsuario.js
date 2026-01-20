@@ -2,15 +2,15 @@ async function cargarUsuarios() {
   try {
     const response = await fetch("/api/usuarios/todos-usuarios", {
       method: "GET",
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     });
 
     const datos = await response.json();
-    const tbody = document.querySelector('#tabla-usuarios tbody');
-    tbody.innerHTML = '';
+    const tbody = document.querySelector("#tabla-usuarios tbody");
+    tbody.innerHTML = "";
 
-    datos.usuarios.forEach(usuario => {
-      const fila = document.createElement('tr');
+    datos.usuarios.forEach((usuario) => {
+      const fila = document.createElement("tr");
       fila.className = "hover:bg-gray-50 transition";
       fila.innerHTML = `
         <td class="px-4 py-2 text-center border-b">${usuario.id}</td>
@@ -19,7 +19,7 @@ async function cargarUsuarios() {
         <td class="px-4 py-2 text-center border-b">${usuario.rol_id}</td>
         <td class="px-4 py-2 border-b">
           <div class="flex justify-center">
-            <img src="${usuario.foto || '/img/usuario.png'}" class="w-10 h-10 rounded-full border shadow-sm">
+            <img src="${usuario.foto || "/img/usuario.png"}" class="w-10 h-10 rounded-full border shadow-sm">
           </div>
         </td>
         <td class="px-4 py-2 text-center border-b space-x-2">
@@ -37,16 +37,16 @@ async function cargarUsuarios() {
       tbody.appendChild(fila);
     });
   } catch (error) {
-    console.error('Error:', error);
+    console.error("Error:", error);
   }
 }
 
 // FUNCIÓN PARA MOSTRAR MODAL DE ELIMINAR
 function confirmarEliminacion(id) {
-  let modalContainer = document.getElementById('modal-eliminar-container');
+  let modalContainer = document.getElementById("modal-eliminar-container");
   if (!modalContainer) {
-    modalContainer = document.createElement('div');
-    modalContainer.id = 'modal-eliminar-container';
+    modalContainer = document.createElement("div");
+    modalContainer.id = "modal-eliminar-container";
     document.body.appendChild(modalContainer);
   }
 
@@ -73,20 +73,20 @@ function confirmarEliminacion(id) {
     </div>
   `;
 
-  document.getElementById('btn-confirmar-eliminar').onclick = async () => {
+  document.getElementById("btn-confirmar-eliminar").onclick = async () => {
     console.log("Eliminando usuario ID:", id);
     try {
       const response = await fetch(`/api/usuarios/eliminar-usuario`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idUsuario: id })
+        body: JSON.stringify({ idUsuario: id }),
       });
 
       console.log("Status eliminar:", response.status);
 
       if (response.ok) {
         mostrarNotificacion("Usuario eliminado correctamente");
-        document.getElementById('modal-eliminar-container').innerHTML = '';
+        document.getElementById("modal-eliminar-container").innerHTML = "";
         cargarUsuarios();
       } else {
         mostrarNotificacion("Error al eliminar", "error");
@@ -99,10 +99,10 @@ function confirmarEliminacion(id) {
 
 // FUNCIÓN PARA MANEJAR EL MODAL editar
 function abrirModalEditar(id, nombre, correo, rolId) {
-  let modal = document.getElementById('modal-editar-container');
+  let modal = document.getElementById("modal-editar-container");
   if (!modal) {
-    modal = document.createElement('div');
-    modal.id = 'modal-editar-container';
+    modal = document.createElement("div");
+    modal.id = "modal-editar-container";
     document.body.appendChild(modal);
   }
 
@@ -138,91 +138,83 @@ function abrirModalEditar(id, nombre, correo, rolId) {
     </div>
   `;
 
-  document.getElementById('form-editar-usuario').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const info = Object.fromEntries(formData.entries());
-    
-    console.log("Datos a actualizar:", info);
+  document
+    .getElementById("form-editar-usuario")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const info = Object.fromEntries(formData.entries());
 
-    try {
-      const datosAEnviar = {
-        params: {
-          id: info.idUsuario,
-          nombre: info.nombre,
-          correo: info.correo,
-          rol_id: info.rol_id
+      try {
+        const response = await fetch("/api/usuarios/actualizar-usuario", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: info.idUsuario,
+            nombre: info.nombre,
+            correo: info.correo,
+            rol_id: info.rol_id,
+          }),
+        });
+
+        const resultado = await response.json();
+        console.log(resultado);
+
+        if (resultado.status === "ok") {
+          mostrarNotificacion("Usuario actualizado con éxito");
+          document.getElementById("modal-editar-container").innerHTML = "";
+          cargarUsuarios();
+        } else {
+          mostrarNotificacion(
+            resultado.message || "Error al actualizar",
+            "error",
+          );
         }
-      };
-
-      const response = await fetch("/api/usuarios/actualizar-usuario", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(datosAEnviar)
-      });
-
-      console.log("Status servidor:", response.status);
-
-      // Verificamos si la respuesta es JSON
-      const contentType = response.headers.get("content-type");
-      if (!response.ok || !contentType || !contentType.includes("application/json")) {
-        const textoError = await response.text(); 
-        console.error("Respuesta no JSON:", textoError);
-        throw new Error(`Error ${response.status}`);
+      } catch (error) {
+        console.error("Error capturado:", error.message);
+        mostrarNotificacion("Error en la operación", "error");
       }
-
-      const resultado = await response.json();
-      console.log("Respuesta JSON:", resultado);
-
-      if (response.ok || resultado.status === "ok") {
-        mostrarNotificacion("Usuario actualizado con éxito");
-        document.getElementById('modal-editar-container').innerHTML = '';
-        cargarUsuarios();
-      } else {
-        mostrarNotificacion(resultado.message || "Error al actualizar", "error");
-      } 
-    } catch (error) {
-      console.error("Error capturado:", error.message);
-      mostrarNotificacion("Error en la operación", "error");
-    }
-  });
+    });
 }
 
 // FUNCION PARA CARGAR ROLES
-  async function cargarRoles() {
-    try {
-      const response = await fetch("/api/roles/todos-roles", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json"
-          
-        }
-      });
+async function cargarRoles() {
+  try {
+    const response = await fetch("/api/roles/todos-roles", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
 
-      const datos = await response.json();
+    const datos = await response.json();
 
-      if (datos.status === "error") throw new Error('Error al obtener usuarios');  
+    if (datos.status === "error") throw new Error("Error al obtener usuarios");
 
-      // Suponiendo que datos.roles es un array de objetos con { nombre: "Estudiante" } etc.
-      const contenedor = document.getElementById("todos-roles");
+    // Suponiendo que datos.roles es un array de objetos con { nombre: "Estudiante" } etc.
+    const contenedor = document.getElementById("todos-roles");
 
-     contenedor.innerHTML = `
+    contenedor.innerHTML = `
         <label for="rol" class="block font-semibold">Rol</label>
         <select id="rol" name="rol" class="w-full border p-2 rounded" required>
           <option value="">Seleccione</option>
-          ${datos.roles.map(rol => `
+          ${datos.roles
+            .map(
+              (rol) => `
             <option value="${rol.id}">${rol.nombre}</option>
-          `).join('')}
+          `,
+            )
+            .join("")}
         </select>
       `;
-      
-    } catch(error) {
-      console.log("Error al obtener los roles:", error);
-      
-    }
+  } catch (error) {
+    console.log("Error al obtener los roles:", error);
   }
+}
 
-    document.getElementById('form-crear-usuario').addEventListener('submit', async (e) => {
+document
+  .getElementById("form-crear-usuario")
+  .addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const formData = new FormData(e.target);
@@ -230,74 +222,74 @@ function abrirModalEditar(id, nombre, correo, rolId) {
 
     // CREAMOS EL OBJETO EXACTO QUE PIDE EL CONTROLLER
     const usuarioParaController = {
-        nombre: data.nombre,
-        correo: data.correo,
-        cedula: data.cedula,
-        clave: data.clave,
-        confirmarClave: data.clave, // El controlador lo pide para validar
-        rol: data.rol,               // En el HTML el select debe tener name="rol"
-        pais: data.pais === "1" ? "v" : "e", // El controlador espera "v" para poner 1
-        texto: ""                    // El controlador pide 'texto' (posiblemente para la imagen)
+      nombre: data.nombre,
+      correo: data.correo,
+      cedula: data.cedula,
+      clave: data.clave,
+      confirmarClave: data.clave, // El controlador lo pide para validar
+      rol: data.rol, // En el HTML el select debe tener name="rol"
+      pais: data.pais === "1" ? "v" : "e", // El controlador espera "v" para poner 1
+      texto: "", // El controlador pide 'texto' (posiblemente para la imagen)
     };
 
     try {
-        const response = await fetch("/api/usuarios/crear-usuario", {
+      const response = await fetch("/api/usuarios/crear-usuario", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(usuarioParaController)
-        });
+        body: JSON.stringify(usuarioParaController),
+      });
 
-        const resultado = await response.json();
+      const resultado = await response.json();
 
-        if (response.ok || resultado.status === "ok") {
-        
+      if (response.ok || resultado.status === "ok") {
         e.target.reset();
         cargarUsuarios(); // Recarga la tabla
-        } else {
+      } else {
         // Si hay error de validación, aquí verás el mensaje
         console.log("Respuesta error:", resultado);
-        }
+      }
     } catch (error) {
-        console.error("Error en la petición:", error);
+      console.error("Error en la petición:", error);
     }
-    });
+  });
 
-    // FUNCIÓN PARA NOTIFICACIONES
-    function mostrarNotificacion(mensaje, tipo = 'exito') {
-        // Eliminar notificación previa si existe
-        const previa = document.getElementById('toast-notificacion');
-        if (previa) previa.remove();
+// FUNCIÓN PARA NOTIFICACIONES
+function mostrarNotificacion(mensaje, tipo = "exito") {
+  // Eliminar notificación previa si existe
+  const previa = document.getElementById("toast-notificacion");
+  if (previa) previa.remove();
 
-        const colorFondo = tipo === 'exito' ? 'bg-green-600' : 'bg-red-600';
-        const icono = tipo === 'exito' 
-            ? '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
-            : '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+  const colorFondo = tipo === "exito" ? "bg-green-600" : "bg-red-600";
+  const icono =
+    tipo === "exito"
+      ? '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+      : '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
 
-        const toast = document.createElement('div');
-        toast.id = 'toast-notificacion';
-        toast.className = `fixed bottom-5 right-5 ${colorFondo} text-white px-6 py-3 rounded-lg shadow-2xl flex items-center space-x-3 transform transition-all duration-500 translate-y-10 opacity-0 z-[100]`;
-        
-        toast.innerHTML = `
+  const toast = document.createElement("div");
+  toast.id = "toast-notificacion";
+  toast.className = `fixed bottom-5 right-5 ${colorFondo} text-white px-6 py-3 rounded-lg shadow-2xl flex items-center space-x-3 transform transition-all duration-500 translate-y-10 opacity-0 z-[100]`;
+
+  toast.innerHTML = `
             <span>${icono}</span>
             <span class="font-medium">${mensaje}</span>
         `;
 
-        document.body.appendChild(toast);
+  document.body.appendChild(toast);
 
-        // Animación de entrada
-        setTimeout(() => {
-            toast.classList.remove('translate-y-10', 'opacity-0');
-        }, 100);
+  // Animación de entrada
+  setTimeout(() => {
+    toast.classList.remove("translate-y-10", "opacity-0");
+  }, 100);
 
-        // Desaparecer automáticamente después de 4 segundos
-        setTimeout(() => {
-            toast.classList.add('translate-y-10', 'opacity-0');
-            setTimeout(() => toast.remove(), 500);
-        }, 4000);
-    }
-  // refrescar cada 10 segundos
-  //setInterval(cargarUsuarios, 10000);
+  // Desaparecer automáticamente después de 4 segundos
+  setTimeout(() => {
+    toast.classList.add("translate-y-10", "opacity-0");
+    setTimeout(() => toast.remove(), 500);
+  }, 4000);
+}
+// refrescar cada 10 segundos
+//setInterval(cargarUsuarios, 10000);
 
-  // cargar al inicio
-  cargarUsuarios();
-  cargarRoles();
+// cargar al inicio
+cargarUsuarios();
+cargarRoles();

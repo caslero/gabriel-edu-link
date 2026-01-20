@@ -179,6 +179,10 @@ rutas.get("/estudiante/encuestas", (req, res) => {
 
 rutas.post("/api/usuarios/crear-usuario", UserController.crearUsuario);
 rutas.get("/api/usuarios/todos-usuarios", UserController.todosUsuarios);
+rutas.patch(
+  "/api/usuarios/actualizar-usuario",
+  UserController.actualizarUsuario,
+);
 
 rutas.post("/api/roles/crear-rol", RolController.crearRol);
 rutas.get("/api/roles/todos-roles", RolController.todosRoles);

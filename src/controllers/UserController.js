@@ -1,4 +1,5 @@
 import { UserModel } from "../models/UserModel.js";
+import validarActualizarUsuario from "../services/usuarios/validarActualizarUsuario.js";
 import validarCrearUsuario from "../services/usuarios/validarCrearUsuario.js";
 import validarObtenerTodosUsuarios from "../services/usuarios/validarObtenerTodosUsuarios.js";
 import { respuestaAlFront } from "../utils/respuestaAlFront.js";
@@ -126,6 +127,59 @@ export default class UserController {
         res,
         "error",
         "Error interno todos los usuarios",
+        {},
+        500,
+      );
+    }
+  }
+
+  static async actualizarUsuario(req, res) {
+    try {
+      const validaciones = await validarActualizarUsuario(req);
+
+      if (validaciones.status === "error") {
+        return respuestaAlFront(
+          res,
+          validaciones.status,
+          validaciones.message,
+          {},
+          validaciones.codigo ? validaciones.codigo : 400,
+        );
+      }
+
+      const usuarioActualizado = await UserModel.actualizarUsuario(
+        validaciones.id,
+        validaciones.nombre,
+        validaciones.correo,
+        validaciones.rol_id,
+      );
+
+      if (!usuarioActualizado) {
+        return respuestaAlFront(
+          res,
+          "error",
+          "Error al actualizar usuario",
+          {},
+          400,
+        );
+      }
+
+      return respuestaAlFront(
+        res,
+        "ok",
+        "Usuario actualizado con exito",
+        {
+          usuarios: usuarioActualizado,
+        },
+        200,
+      );
+    } catch (error) {
+      console.log("Error interno actualizar usuario:", error);
+
+      return respuestaAlFront(
+        res,
+        "error",
+        "Error interno actualizar usuario",
         {},
         500,
       );
