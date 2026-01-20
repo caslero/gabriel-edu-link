@@ -59,7 +59,7 @@ async function eliminarActa(id) {
 
     try {
         const res = await fetch(`/api/actas-especiales/eliminar`, {
-            method: 'DELETE',
+            method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id })
         });
