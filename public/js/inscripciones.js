@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = Object.fromEntries(formData.entries());
 
             try {
-                const res = await fetch('/api/inscripciones/crear-inscripcion', {
+                const res = await fetch('/api/inscripciones/crear-inscripcion', { // estudiante_id, semestre_id, materia_id, seccion_id
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             info.solicitud_id = solicitudId;
 
             try {
-                const res = await fetch('/api/inscripciones/gestionar-solicitud', {
+                const res = await fetch('/api/inscripciones/gestionar-solicitud', { // solicitud_id, estado
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(info)
