@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log("Datos para nueva sección:", payload);
 
         try {
-            const res = await fetch('/api/materias/crear-seccion', {
+            const res = await fetch('/api/materias/crear-seccion', { //semestre, materia_id, seccion_nombre
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -108,7 +108,7 @@ function abrirModalEditarSeccion(id, nombre, materiaId) {
         console.log("Enviando actualización de sección:", info);
 
         try {
-            const response = await fetch(`/api/materias/actualizar-seccion`, {
+            const response = await fetch(`/api/materias/actualizar-seccion`, { // id, nombre
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -168,7 +168,7 @@ function confirmarEliminarSeccion(id) {
 
     document.getElementById('btn-confirm-delete-seccion').onclick = async () => {
         try {
-            const response = await fetch(`/api/materias/eliminar-seccion`, {
+            const response = await fetch(`/api/materias/eliminar-seccion`, { // id, eliminar: true
                 method: "PATCH",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ id: id, eliminar: true }) 

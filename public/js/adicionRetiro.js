@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const payload = Object.fromEntries(new FormData(formNueva));
 
         try {
-            const res = await fetch("/api/adicion-retiro/crear", {
+            const res = await fetch("/api/adicion-retiro/crear", { // estudiante_id, semestre_id, materia_id, seccion_id, tipo
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // --- 3. GESTIÓN DE PENDIENTES (APROBAR/RECHAZAR) ---
 async function gestionarSolicitud(id, nuevoEstado) {
     try {
-        const res = await fetch("/api/adicion-retiro/actualizar-estado", {
+        const res = await fetch("/api/adicion-retiro/actualizar-estado", {// id, estado ('Aprobada', 'Rechazada', 'Procesada').
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id, estado: nuevoEstado })
@@ -104,7 +104,7 @@ function confirmarEliminarSolicitud(id) {
 
 async function ejecutarEliminacion(id) {
     try {
-        const res = await fetch("/api/adicion-retiro/eliminar", {
+        const res = await fetch("/api/adicion-retiro/eliminar", { // id
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id })
