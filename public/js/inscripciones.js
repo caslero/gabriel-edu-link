@@ -1,131 +1,184 @@
-
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Referencias de Selectores ---
-    const selectSemestre = document.getElementById('semestre_id') || document.getElementById('semestre');
+    // --- 1. REFERENCIAS DE SELECTORES (REGISTRO MANUAL) ---
+    const selectSemestre = document.getElementById('semestre_id');
     const selectMateria = document.getElementById('materia_id');
     const selectSeccion = document.getElementById('seccion_id');
-    const formInscripcion = document.querySelector('form');
+    const formManual = document.querySelector('form.grid'); // El formulario de arriba
 
-    // --- Referencias Exclusivas Admin ---
+    // Referencias Búsqueda Estudiante
     const buscarCedula = document.getElementById('buscarCedula');
     const btnBuscarCedula = document.getElementById('btnBuscarCedula');
     const selectEstudiante = document.getElementById('estudiante_id');
 
-    const esModoAdmin = !!buscarCedula;
-
-    // --- 1. LÓGICA DE BÚSQUEDA (SOLO ADMIN) ---
-    if (esModoAdmin && btnBuscarCedula) {
+    // --- 2. LÓGICA DE BÚSQUEDA DE ESTUDIANTE ---
+    if (btnBuscarCedula && buscarCedula) {
         const realizarBusqueda = async () => {
             const prefijo = document.getElementById('prefijoCedula').value;
             const cedula = buscarCedula.value.trim();
-            if (!cedula) return alert("Ingrese una cédula");
+            if (!cedula) return mostrarNotificacion("Ingrese una cédula", "error");
 
             try {
-                // Ruta ajustada a tu controlador de búsqueda
-                const res = await fetch(`/api/inscripciones/buscar-estudiante/${prefijo}${cedula}`);
+                // prefijo '1' es V, '0' es E
+                const letra = prefijo === "1" ? "V" : "E";
+                const res = await fetch(`/api/inscripciones/buscar-estudiante`);
                 const data = await res.json();
 
                 if (data.status === "ok") {
-                    selectEstudiante.innerHTML = `<option value="${data.estudiante.id}">${data.estudiante.nombre} (${data.estudiante.cedula})</option>`;
+                    selectEstudiante.innerHTML = `<option value="${data.estudiante.id}">${data.estudiante.nombre} (${letra}-${cedula})</option>`;
                     selectEstudiante.disabled = false;
                     selectSemestre.disabled = false;
+                    mostrarNotificacion("Estudiante encontrado");
                 } else {
-                    alert(data.message);
+                    mostrarNotificacion(data.message, "error");
                     resetSelect(selectEstudiante, "Realice una búsqueda...");
+                    selectSemestre.disabled = true;
                 }
-            } catch (err) { 
-                console.error("Error en búsqueda:", err);
-                alert("Error al conectar con el servidor");
+            } catch (err) {
+                mostrarNotificacion("Error al conectar con el servidor", "error");
             }
         };
 
         btnBuscarCedula.addEventListener('click', realizarBusqueda);
-        buscarCedula.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                realizarBusqueda();
-            }
-        });
+        buscarCedula.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); realizarBusqueda(); } });
     }
 
-    // --- 2. FILTRADO (CASCADA LOCAL) ---
-
+    // --- 3. FILTRADO EN CASCADA (LOCAL) ---
     if (selectSemestre) {
         selectSemestre.addEventListener('change', () => {
-            const semestre = selectSemestre.value;
             resetSelect(selectMateria, "Selecciona la Materia");
             resetSelect(selectSeccion, "Selecciona la Sección");
-
-            if (!semestre) return;
-
-            filtrarOpcionesLocales(selectMateria, 'data-semestre', semestre);
+            if (!selectSemestre.value) return;
+            
+            // Filtramos las materias que pertenecen al semestre seleccionado
+            filtrarOpcionesLocales(selectMateria, 'data-semestre', selectSemestre.value);
             selectMateria.disabled = false;
         });
     }
 
     if (selectMateria) {
         selectMateria.addEventListener('change', () => {
-            const materiaId = selectMateria.value;
             resetSelect(selectSeccion, "Selecciona la Sección");
+            if (!selectMateria.value) return;
 
-            if (!materiaId) return;
-
-            filtrarOpcionesLocales(selectSeccion, 'data-materia', materiaId);
+            filtrarOpcionesLocales(selectSeccion, 'data-materia', selectMateria.value);
             selectSeccion.disabled = false;
         });
     }
 
-    // --- 3. ENVÍO (FETCH) ---
-    if (formInscripcion) {
-        formInscripcion.addEventListener('submit', async (e) => {
+    // --- 4. ENVÍO REGISTRO MANUAL ---
+    if (formManual) {
+        formManual.addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            const formData = new FormData(formInscripcion);
+            const formData = new FormData(formManual);
             const payload = Object.fromEntries(formData.entries());
 
             try {
-                // USAMOS LA RUTA UNIFICADA QUE DEFINISTE
                 const res = await fetch('/api/inscripciones/crear-inscripcion', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-
                 const data = await res.json();
 
                 if (data.status === "ok") {
-                    alert(data.message);
-                    // Redirección dinámica según lo que responda el controlador
-                    if (data.redirect) window.location.href = data.redirect;
+                    mostrarNotificacion("Inscripción realizada con éxito");
+                    setTimeout(() => window.location.reload(), 1500);
                 } else {
-                    alert("Error: " + data.message);
+                    mostrarNotificacion(data.message, "error");
                 }
             } catch (err) {
-                console.error("Error al enviar:", err);
-                alert("Error de red al procesar la solicitud");
+                mostrarNotificacion("Error de red", "error");
             }
         });
     }
 
-    // --- FUNCIONES AUXILIARES ---
+    // --- 5. GESTIÓN DE SOLICITUDES (APROBAR/RECHAZAR EN MODALES) ---
+    // Buscamos todos los formularios dentro de los modales de solicitudes
+    document.querySelectorAll('div[id^="modal-"] form').forEach(form => {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const modalId = form.closest('div[id^="modal-"]').id;
+            const solicitudId = modalId.replace('modal-', '');
+            
+            const formData = new FormData(form);
+            const info = Object.fromEntries(formData.entries());
+            info.solicitud_id = solicitudId;
 
-    function filtrarOpcionesLocales(select, dataAttr, valor) {
-        Array.from(select.options).forEach(opt => {
-            if (!opt.value) return; 
-            const coincide = opt.getAttribute(dataAttr) === valor;
-            opt.hidden = !coincide;
-            opt.disabled = !coincide;
+            try {
+                const res = await fetch('/api/inscripciones/gestionar-solicitud', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(info)
+                });
+                const data = await res.json();
+
+                if (data.status === "ok") {
+                    mostrarNotificacion(`Solicitud ${info.estado} correctamente`);
+                    toggleModal(modalId, false);
+                    setTimeout(() => window.location.reload(), 1000);
+                } else {
+                    mostrarNotificacion(data.message, "error");
+                }
+            } catch (err) {
+                mostrarNotificacion("Error al procesar la solicitud", "error");
+            }
         });
-    }
-
-    function resetSelect(select, texto) {
-        if (!select) return;
-        select.innerHTML = `<option value="">${texto}</option>`;
-        select.disabled = true;
-    }
-
-    window.toggleModal = (id, show) => {
-        const modal = document.getElementById(id);
-        if (modal) modal.classList.toggle('hidden', !show);
-    };
+    });
 });
+
+// --- FUNCIONES GLOBALES ---
+
+function toggleModal(id, show) {
+    const modal = document.getElementById(id);
+    if (!modal) return;
+    if (show) {
+        modal.classList.remove('hidden');
+    } else {
+        modal.classList.add('hidden');
+    }
+}
+
+function filtrarOpcionesLocales(select, dataAttr, valor) {
+    if (!select) return;
+    Array.from(select.options).forEach(opt => {
+        if (!opt.value) return; 
+        const coincide = opt.getAttribute(dataAttr) === valor;
+        opt.hidden = !coincide;
+        opt.disabled = !coincide;
+    });
+}
+
+function resetSelect(select, texto) {
+    if (!select) return;
+    select.innerHTML = `<option value="">${texto}</option>`;
+    select.disabled = true;
+}
+
+/**
+ * Notificación Toast estilo Tailwind (Compatible con tu CSS de Usuarios)
+ */
+function mostrarNotificacion(mensaje, tipo = 'exito') {
+    const previa = document.getElementById('toast-notificacion');
+    if (previa) previa.remove();
+
+    const colorFondo = tipo === 'exito' ? 'bg-green-600' : 'bg-red-600';
+    const icono = tipo === 'exito' 
+        ? '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+        : '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+
+    const toast = document.createElement('div');
+    toast.id = 'toast-notificacion';
+    toast.className = `fixed bottom-5 right-5 ${colorFondo} text-white px-6 py-3 rounded-lg shadow-2xl flex items-center space-x-3 transform transition-all duration-500 z-[100] translate-y-0 opacity-100`;
+    
+    toast.innerHTML = `
+        <span>${icono}</span>
+        <span class="font-medium">${mensaje}</span>
+    `;
+
+    document.body.appendChild(toast);
+
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-10');
+        setTimeout(() => toast.remove(), 500);
+    }, 3500);
+}
