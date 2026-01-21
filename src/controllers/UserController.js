@@ -1,6 +1,7 @@
 import { UserModel } from "../models/UserModel.js";
 import validarActualizarUsuario from "../services/usuarios/validarActualizarUsuario.js";
 import validarCrearUsuario from "../services/usuarios/validarCrearUsuario.js";
+import validarEliminarUsuario from "../services/usuarios/validarEliminarUsuario.js";
 import validarObtenerTodosUsuarios from "../services/usuarios/validarObtenerTodosUsuarios.js";
 import { respuestaAlFront } from "../utils/respuestaAlFront.js";
 
@@ -147,14 +148,14 @@ export default class UserController {
         );
       }
 
-      const usuarioActualizado = await UserModel.actualizarUsuario(
+      const usuarioEliminado = await UserModel.actualizarUsuario(
         validaciones.id,
         validaciones.nombre,
         validaciones.correo,
         validaciones.rol_id,
       );
 
-      if (!usuarioActualizado) {
+      if (!usuarioEliminado) {
         return respuestaAlFront(
           res,
           "error",
@@ -169,7 +170,7 @@ export default class UserController {
         "ok",
         "Usuario actualizado con exito",
         {
-          usuarios: usuarioActualizado,
+          usuarios: usuarioEliminado,
         },
         200,
       );
@@ -180,6 +181,54 @@ export default class UserController {
         res,
         "error",
         "Error interno actualizar usuario",
+        {},
+        500,
+      );
+    }
+  }
+
+  static async eliminarUsuario(req, res) {
+    try {
+      const validaciones = await validarEliminarUsuario(req);
+
+      if (validaciones.status === "error") {
+        return respuestaAlFront(
+          res,
+          validaciones.status,
+          validaciones.message,
+          {},
+          validaciones.codigo ? validaciones.codigo : 400,
+        );
+      }
+
+      const usuarioEliminado = await UserModel.eliminarUsuario(validaciones.id);
+
+      if (!usuarioEliminado) {
+        return respuestaAlFront(
+          res,
+          "error",
+          "Error al eliminar usuario",
+          {},
+          400,
+        );
+      }
+
+      return respuestaAlFront(
+        res,
+        "ok",
+        "Usuario eliminado con exito",
+        {
+          usuarios: usuarioEliminado,
+        },
+        200,
+      );
+    } catch (error) {
+      console.log("Error interno eliminar usuario:", error);
+
+      return respuestaAlFront(
+        res,
+        "error",
+        "Error interno eliminar usuario",
         {},
         500,
       );

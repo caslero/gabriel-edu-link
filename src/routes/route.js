@@ -184,14 +184,20 @@ rutas.patch(
   UserController.actualizarUsuario,
 );
 
+rutas.patch("/api/usuarios/eliminar-usuario", UserController.eliminarUsuario);
+
 rutas.post("/api/roles/crear-rol", RolController.crearRol);
 rutas.get("/api/roles/todos-roles", RolController.todosRoles);
 
 rutas.post("/api/login/iniciar-sesion", LoginController.iniciarSesion);
 
-rutas.post("/api/inscripciones/crear-inscripcion",InscripcionesController.crearInscripcion,); // estudiante_id, semestre_id, materia_id, seccion_id
-//rutas.post("/api/inscripciones/gestionar-solicitud", InscripcionesController.actualizarEstadoSolicitud); // solicitud_id, estado
+rutas.post(
+  "/api/inscripciones/crear-inscripcion",
+  InscripcionesController.crearInscripcion,
+); // estudiante_id, semestre_id, materia_id, seccion_id
 
+
+//rutas.post("/api/inscripciones/gestionar-solicitud", InscripcionesController.actualizarEstadoSolicitud); // solicitud_id, estado
 
 //API MATERIAS
 //rutas.post("/api/materias/crear-seccion", MateriaController.crearSeccion); //semestre, materia_id, seccion_nombre
@@ -211,7 +217,5 @@ rutas.post("/api/inscripciones/crear-inscripcion",InscripcionesController.crearI
 //rutas.post("/api/encuestas/crear-encuesta", EncuestasController.crearEncuestas); // titulo, descripcion, semestre, fecha_inicio, fecha_fin, materias id (para el array q muestra las materias a seleccionar)
 //rutas.patch("/api/encuestas/actualizar-encuestas", EncuestasController.actualizarEncuestas); // id, titulo, descripcion, semestre, fecha_inicio, fecha_fin, estado, materias id (para el array q muestra las materias a seleccionar)
 //rutas.patch("/api/encuestas/eliminar-encuesta", EncuestasController.eliminarEncuestas); //id
-
-
 
 export default rutas;

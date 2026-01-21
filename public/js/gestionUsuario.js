@@ -14,7 +14,7 @@ async function cargarUsuarios() {
       fila.className = "hover:bg-gray-50 transition";
       fila.innerHTML = `
         <td class="px-4 py-2 text-center border-b">${usuario.id}</td>
-        <td class="px-4 py-2 text-center border-b font-medium">${usuario.nombre}</td>
+        <td class="px-4 py-2 text-center border-b font-medium ${usuario.borrado ?'text-[red]' : ''}">${usuario.nombre}</td>
         <td class="px-4 py-2 text-center border-b">${usuario.correo}</td>
         <td class="px-4 py-2 text-center border-b">${usuario.rol_id}</td>
         <td class="px-4 py-2 border-b">
@@ -74,7 +74,6 @@ function confirmarEliminacion(id) {
   `;
 
   document.getElementById("btn-confirmar-eliminar").onclick = async () => {
-    console.log("Eliminando usuario ID:", id);
     try {
       const response = await fetch(`/api/usuarios/eliminar-usuario`, {
         method: "PATCH",
@@ -82,17 +81,14 @@ function confirmarEliminacion(id) {
         body: JSON.stringify({ idUsuario: id }),
       });
 
-      console.log("Status eliminar:", response.status);
+      const resultado = await response.json();
 
-      if (response.ok) {
-        mostrarNotificacion("Usuario eliminado correctamente");
-        document.getElementById("modal-eliminar-container").innerHTML = "";
-        cargarUsuarios();
-      } else {
-        mostrarNotificacion("Error al eliminar", "error");
-      }
+      mostrarNotificacion(resultado.message);
+      document.getElementById("modal-eliminar-container").innerHTML = "";
+      cargarUsuarios();
     } catch (error) {
       console.error("Error en eliminación:", error);
+      mostrarNotificacion(error.message, error.status);
     }
   };
 }
@@ -293,3 +289,26 @@ function mostrarNotificacion(mensaje, tipo = "exito") {
 // cargar al inicio
 cargarUsuarios();
 cargarRoles();
+
+/** 
+  document.getElementById("btn-confirmar-eliminar").onclick = async () => {
+    console.log("Eliminando usuario ID:", id);
+    try {
+      const response = await fetch(`/api/usuarios/eliminar-usuario`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idUsuario: id }),
+      });
+
+      if (response.ok) {
+        mostrarNotificacion("Usuario eliminado correctamente");
+        document.getElementById("modal-eliminar-container").innerHTML = "";
+        cargarUsuarios();
+      } else {
+        mostrarNotificacion("Error al eliminar", "error");
+      }
+    } catch (error) {
+      console.error("Error en eliminación:", error);
+    }
+  };
+*/

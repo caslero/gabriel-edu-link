@@ -82,6 +82,25 @@ export class UserModel {
   }
 
   /**
+   Busca un usuario por su id
+   @param {string} id - El id a buscar
+   @returns {Promise<Object|null>} - El usuario encontrado o null
+  */
+  static async buscarUsuarioPorId(id) {
+    return new Promise((resolve, reject) => {
+      const sql = `SELECT * FROM users WHERE id = ? LIMIT 1`;
+
+      db.get(sql, [id], (err, row) => {
+        if (err) {
+          return reject(err);
+        }
+        // Si no hay errores, devolvemos la fila (o undefined si no existe)
+        resolve(row || null);
+      });
+    });
+  }
+
+  /**
    Busca un usuario por su correo e id
    @param {string} correo - El correo a buscar
    @param {number} id - El ID del usuario a buscar
@@ -102,35 +121,103 @@ export class UserModel {
   }
 
   /**
-   * Actualiza un usuario existente en la base de datos
-   * @param {Object} datos - Objeto con id, nombre, correo y rol_id
-   * @returns {Promise<Object>} - Los datos actualizados
-   */
-  static async actualizarUsuario(datos) {
+   Actualiza un usuario existente en la base de datos
+   @param {Object} datos - Objeto con id, nombre, correo y rol_id
+   @returns {Promise<Object>} - Los datos actualizados del usuario
+  */
+  static async actualizarUsuario(id, nombre, correo, rol_id) {
     return new Promise((resolve, reject) => {
-      // 1. Usamos UPDATE en lugar de INSERT
-      // Buscamos por ID para modificar solo ese registro
-      const sql = `
-      UPDATE users 
-      SET nombre = ?, correo = ?, rol_id = ? 
-      WHERE id = ?
-    `;
+      // 1. Actualizar el usuario
+      const updateSql = `
+        UPDATE users 
+        SET nombre = ?, correo = ?, rol_id = ? 
+        WHERE id = ?
+      `;
 
-      // 2. El orden de los parámetros debe coincidir exactamente con los "?" del SQL
-      const params = [datos.nombre, datos.correo, datos.rol_id, datos.id];
+      const updateParams = [nombre, correo, rol_id, id];
 
-      db.run(sql, params, function (err) {
+      db.run(updateSql, updateParams, function (err) {
         if (err) {
           return reject(err);
         }
 
-        // 3. Verificamos si realmente se actualizó algo (this.changes indica filas afectadas)
+        // 2. Verificar si se actualizó algo
         if (this.changes === 0) {
           return reject(new Error("No se encontró ningún usuario con ese ID"));
         }
 
-        // Devolvemos los datos que acabamos de guardar
-        resolve({ ...datos });
+        // 3. Consultar solo los datos del usuario (sin JOIN innecesario)
+        const selectSql = `
+          SELECT id, nombre, correo, rol_id, borrado 
+          FROM users 
+          WHERE id = ?
+        `;
+
+        db.get(selectSql, [id], (err, usuario) => {
+          if (err) {
+            return reject(err);
+          }
+
+          if (!usuario) {
+            return reject(
+              new Error("No se pudo recuperar el usuario actualizado"),
+            );
+          }
+
+          // Devolvemos los datos actualizados del usuario
+          resolve(usuario);
+        });
+      });
+    });
+  }
+
+  /**
+   Eliminar un usuario de manera lógica (soft delete) en la base de datos
+   @param {number} id - ID del usuario a eliminar
+   @returns {Promise<Object>} - El usuario con el campo 'borrado' actualizado
+  */
+  static async eliminarUsuario(id) {
+    return new Promise((resolve, reject) => {
+      // 1. Actualizar el usuario
+      const updateSql = `
+        UPDATE users 
+        SET borrado = 1 
+        WHERE id = ?
+      `;
+
+      const updateParams = [id];
+
+      db.run(updateSql, updateParams, function (err) {
+        if (err) {
+          return reject(err);
+        }
+
+        // 2. Verificar si se actualizó algo
+        if (this.changes === 0) {
+          return reject(new Error("No se encontró ningún usuario con ese ID"));
+        }
+
+        // 3. Consultar solo los datos del usuario (sin JOIN innecesario)
+        const selectSql = `
+          SELECT id, nombre, correo, rol_id, borrado 
+          FROM users 
+          WHERE id = ?
+        `;
+
+        db.get(selectSql, [id], (err, usuario) => {
+          if (err) {
+            return reject(err);
+          }
+
+          if (!usuario) {
+            return reject(
+              new Error("No se pudo recuperar el usuario eliminado"),
+            );
+          }
+
+          // Devolvemos los datos actualizados del usuario
+          resolve(usuario);
+        });
       });
     });
   }
