@@ -33,8 +33,8 @@ document.addEventListener('DOMContentLoaded', () => {
             dataObj.materias = formData.getAll('materias[]');
 
             try {
-                const res = await fetch('/api/encuestas/crear', { // titulo, descripcion, semestre, fecha_inicio, fecha_fin, materias id (para el array q muestra las materias a seleccionar)
-            method: 'PATCH',
+                const res = await fetch('/api/encuestas/crear-encuesta', { // titulo, descripcion, semestre, fecha_inicio, fecha_fin, materias id (para el array q muestra las materias a seleccionar)
+            method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dataObj)
                 });
@@ -62,7 +62,7 @@ async function actualizarEncuesta(e, id) {
     dataObj.materias = formData.getAll('materias[]');
 
     try {
-        const res = await fetch('/api/encuestas/actualizar', { // id, titulo, descripcion, semestre, fecha_inicio, fecha_fin, estado, materias id (para el array q muestra las materias a seleccionar)
+        const res = await fetch('/api/encuestas/actualizar-encuestas', { // id, titulo, descripcion, semestre, fecha_inicio, fecha_fin, estado, materias id (para el array q muestra las materias a seleccionar)
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dataObj)
@@ -85,7 +85,7 @@ async function eliminarEncuesta(id) {
     if (!confirm("¿Seguro que deseas eliminar esta encuesta y sus votos asociados?")) return;
 
     try {
-        const res = await fetch('/api/encuestas/eliminar', { // id
+        const res = await fetch('/api/encuestas/eliminar-encuesta', { // id
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id })

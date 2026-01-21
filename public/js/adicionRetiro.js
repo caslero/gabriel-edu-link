@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const payload = Object.fromEntries(new FormData(formNueva));
 
         try {
-            const res = await fetch("/api/adicion-retiro/crear", { // estudiante_id, semestre_id, materia_id, seccion_id, tipo
+            const res = await fetch("/api/adicion-retiro/crear-adicion-retiro", { // estudiante_id, semestre_id, materia_id, seccion_id, tipo
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)
