@@ -189,11 +189,29 @@ rutas.get("/api/roles/todos-roles", RolController.todosRoles);
 
 rutas.post("/api/login/iniciar-sesion", LoginController.iniciarSesion);
 
-rutas.post(
-  "/api/inscripciones/crear-inscripcion",
-  InscripcionesController.crearInscripcion,
-);
+rutas.post("/api/inscripciones/crear-inscripcion",InscripcionesController.crearInscripcion,); // estudiante_id, semestre_id, materia_id, seccion_id
+//rutas.post("/api/inscripciones/gestionar-solicitud", InscripcionesController.actualizarEstadoSolicitud); // solicitud_id, estado
 
-//rutas.post("/api/materias/crear-seccion", MateriaController.crearSeccion);
+
+//API MATERIAS
+//rutas.post("/api/materias/crear-seccion", MateriaController.crearSeccion); //semestre, materia_id, seccion_nombre
+//rutas.patch("/api/materias/actualizar-seccion", MateriaController.actualizarSeccion); // id, nombre
+//rutas.patch("/api/materias/eliminar-seccion", MateriaController.eliminarSeccion); //id
+
+//API ADICION Y RETIRO
+//rutas.post("/api/adicion-retiro/crear-adicion-retiro", AdicionRetiroController.crearAdicionRetiro);  // estudiante_id, semestre_id, materia_id, seccion_id, tipo
+//rutas.patch("/api/adicion-retiro/actualizar-estado", AdicionRetiroController.actualizarAdicioRetiro); // id, estado ('Aprobada', 'Rechazada', 'Procesada').
+
+//API ACTAS ESPECIALES
+//rutas.post("/api/actas-especiales/crear-actas-especiales", ActasEspecialesController.crearActasEspeciales);  // estudiante_id, materia_id, nota, motivo
+//rutas.patch("/api/actas-especiales/gestionar-actas-especiales", ActasEspecialesController.gestionarActasEspeciales); // id, accion ('Aprobar' o 'Rechazar')
+//rutas.patch("/api/actas-especiales/eliminar-actas-especiales", ActasEspecialesController.eliminarActasEspeciales); // id
+
+//API ENCUESTAS
+//rutas.post("/api/encuestas/crear-encuesta", EncuestasController.crearEncuestas); // titulo, descripcion, semestre, fecha_inicio, fecha_fin, materias id (para el array q muestra las materias a seleccionar)
+//rutas.patch("/api/encuestas/actualizar-encuestas", EncuestasController.actualizarEncuestas); // id, titulo, descripcion, semestre, fecha_inicio, fecha_fin, estado, materias id (para el array q muestra las materias a seleccionar)
+//rutas.patch("/api/encuestas/eliminar-encuesta", EncuestasController.eliminarEncuestas); //id
+
+
 
 export default rutas;

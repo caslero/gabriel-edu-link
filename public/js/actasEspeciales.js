@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = Object.fromEntries(formData.entries());
 
             try {
-                const res = await fetch('/api/actas-especiales/crear', { // estudiante_id, materia_id, nota, motivo
+                const res = await fetch('/api/actas-especiales/crear-acta-especial', { // estudiante_id, materia_id, nota, motivo
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -35,7 +35,7 @@ async function gestionarActa(id, accion) {
     if (!confirmacion) return;
 
     try {
-        const res = await fetch(`/api/actas-especiales/gestionar`, { // id, accion ('Aprobar' o 'Rechazar'.)
+        const res = await fetch(`/api/actas-especiales/gestionar-actas-especiales`, { // id, accion ('Aprobar' o 'Rechazar'.)
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id, accion }) // accion: 'Aprobar' o 'Rechazar'
@@ -58,7 +58,7 @@ async function eliminarActa(id) {
     if (!confirm('¿Deseas eliminar permanentemente esta acta?')) return;
 
     try {
-        const res = await fetch(`/api/actas-especiales/eliminar`, { // id
+        const res = await fetch(`/api/actas-especiales/eliminar-actas-especiales`, { // id
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id })
