@@ -77,43 +77,49 @@ export const initUsersTable = () => {
   });
 };
 
-// Inicializar tabla materias
+// Inicializar tabla materias 
 export const initMateriasTable = () => {
   const sql = `
     CREATE TABLE IF NOT EXISTS materias (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       nombre TEXT NOT NULL,
-      semestre INTEGER NOT NULL, -- Usado para el filtro en cascada
+      semestre INTEGER NOT NULL,
+      usuario_id INTEGER NOT NULL,            -- Usuario que creó la materia
       borrado BOOLEAN NOT NULL DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (usuario_id) REFERENCES users(id)
     );
   `;
   db.run(sql, (err) => {
     if (err) {
       console.error("Error al crear tabla materias:", err.message);
     } else {
-      console.log("Tabla materias creada o ya existe.");
+      console.log("Tabla materias con usuario_id creada.");
     }
   });
 };
 
-// Inicializar tabla secciones con relación a materias
+// Inicializar tabla secciones
 export const initSeccionesTable = () => {
   const sql = `
     CREATE TABLE IF NOT EXISTS secciones (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       materia_id INTEGER NOT NULL,
-      seccion_nombre TEXT NOT NULL, -- Campo 'seccion_nombre' del formulario
+      seccion_nombre TEXT NOT NULL,
+      usuario_id INTEGER NOT NULL,            -- Usuario que creó la sección
       borrado BOOLEAN NOT NULL DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (materia_id) REFERENCES materias(id) ON DELETE CASCADE
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (materia_id) REFERENCES materias(id) ON DELETE CASCADE,
+      FOREIGN KEY (usuario_id) REFERENCES users(id)
     );
   `;
   db.run(sql, (err) => {
     if (err) {
       console.error("Error al crear tabla secciones:", err.message);
     } else {
-      console.log("Tabla secciones creada o ya existe.");
+      console.log("Tabla secciones con usuario_id creada.");
     }
   });
 };
