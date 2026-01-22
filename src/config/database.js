@@ -77,9 +77,52 @@ export const initUsersTable = () => {
   });
 };
 
+// Inicializar tabla materias
+export const initMateriasTable = () => {
+  const sql = `
+    CREATE TABLE IF NOT EXISTS materias (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      nombre TEXT NOT NULL,
+      semestre INTEGER NOT NULL, -- Usado para el filtro en cascada
+      borrado BOOLEAN NOT NULL DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+  db.run(sql, (err) => {
+    if (err) {
+      console.error("Error al crear tabla materias:", err.message);
+    } else {
+      console.log("Tabla materias creada o ya existe.");
+    }
+  });
+};
+
+// Inicializar tabla secciones con relación a materias
+export const initSeccionesTable = () => {
+  const sql = `
+    CREATE TABLE IF NOT EXISTS secciones (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      materia_id INTEGER NOT NULL,
+      seccion_nombre TEXT NOT NULL, -- Campo 'seccion_nombre' del formulario
+      borrado BOOLEAN NOT NULL DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (materia_id) REFERENCES materias(id) ON DELETE CASCADE
+    );
+  `;
+  db.run(sql, (err) => {
+    if (err) {
+      console.error("Error al crear tabla secciones:", err.message);
+    } else {
+      console.log("Tabla secciones creada o ya existe.");
+    }
+  });
+};
+
 export const initDatabase = () => {
   initRolesTable();
   initUsersTable();
+  initMateriasTable();
+  initSeccionesTable();
 };
 
 /**
