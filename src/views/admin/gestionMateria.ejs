@@ -48,37 +48,31 @@
           <th class="px-4 py-3 text-center">Semestre</th>
           <th class="px-4 py-3 text-center">Materia</th>
           <th class="px-4 py-3 text-center">Sección</th>
-          <th class="px-4 py-3 text-center">Acciones</th>
+          <th class="px-4 py-3 text-center">Creado por</th> <th class="px-4 py-3 text-center">Acciones</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-200">
+      <tbody class="divide-y divide-gray-200 text-center">
         <% if (!secciones || secciones.length === 0) { %>
           <tr>
-            <td colspan="5" class="text-center py-6 text-gray-500 italic">No hay secciones registradas actualmente.</td>
+            <td colspan="6" class="py-6 text-gray-500 italic">No hay secciones registradas actualmente.</td>
           </tr>
         <% } else { %>
           <% secciones.forEach(sec => { %>
             <tr class="hover:bg-gray-50 transition-colors">
-              <td class="px-4 py-2 text-center text-gray-600">#<%= sec.id %></td>
-              <td class="px-4 py-2 text-center font-medium"><%= sec.semestre %>°</td>
-              <td class="px-4 py-2 text-center"><%= sec.materia %></td>
-              <td class="px-4 py-2 text-center">
+              <td class="px-4 py-2 text-gray-600">#<%= sec.id %></td>
+              <td class="px-4 py-2 font-medium"><%= sec.semestre %>°</td>
+              <td class="px-4 py-2"><%= sec.materia_nombre %></td>
+              <td class="px-4 py-2">
                 <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-bold">
-                  <%= sec.seccion %>
+                  <%= sec.seccion_nombre %>
                 </span>
               </td>
-              <td class="px-4 py-2 text-center space-x-2">
-                <button type="button" 
-                  onclick="abrirModalEditarSeccion('<%= sec.id %>', '<%= sec.seccion %>', '<%= sec.materia_id %>')" 
-                  class="text-yellow-600 hover:text-yellow-800 p-1">
-                   <span class="font-semibold">Editar</span>
-                </button>
-                
-                <button type="button" 
-                  onclick="confirmarEliminarSeccion('<%= sec.id %>')" 
-                  class="text-red-600 hover:text-red-800 p-1">
-                   <span class="font-semibold">Eliminar</span>
-                </button>
+              <td class="px-4 py-2 text-sm">
+                <span class="text-gray-600"><%= sec.usuario_nombre %></span>
+              </td>
+              <td class="px-4 py-2 space-x-2">
+                <button onclick="abrirModalEditarSeccion('<%= sec.id %>', '<%= sec.seccion_nombre %>', '<%= sec.materia_id %>')" class="text-yellow-600 hover:underline font-semibold">Editar</button>
+                <button onclick="confirmarEliminarSeccion('<%= sec.id %>')" class="text-red-600 hover:underline font-semibold">Eliminar</button>
               </td>
             </tr>
           <% }) %>
