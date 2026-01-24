@@ -208,3 +208,47 @@ function mostrarNotificacion(mensaje, tipo = 'exito') {
         setTimeout(() => toast.remove(), 500);
     }, 3500);
 }
+
+// FUNCION PARA CARGAR MATERIAS DESDE LA API
+async function cargarMateriasDinámicas() {
+    try {
+        const response = await fetch("/api/materias/todas-materias", {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+        });
+
+        const datos = await response.json();
+
+        if (datos.status === "error") throw new Error(datos.message || "Error al obtener materias");
+
+        const materiaSelect = document.getElementById("materia_id");
+        const semestreSelect = document.getElementById("semestre"); // Necesario para disparar el filtro
+        
+        if (!materiaSelect) return;
+
+        // 1. Limpiamos pero mantenemos la opción por defecto
+        materiaSelect.innerHTML = '<option value="">Seleccione una materia</option>';
+
+        // 2. Llenamos el select con el atributo 'data-semestre'
+        datos.materias.forEach(materia => {
+            const option = document.createElement('option');
+            option.value = materia.id;
+            option.textContent = materia.nombre;
+            option.setAttribute('data-semestre', materia.semestre);
+            option.hidden = true; 
+            option.disabled = true; 
+            
+            materiaSelect.appendChild(option);
+        });
+
+        // 3. IMPORTANTE: Si ya hay un semestre seleccionado al cargar las materias,
+        if (semestreSelect && semestreSelect.value) {
+            semestreSelect.dispatchEvent(new Event('change'));
+        }
+
+        console.log("Materias cargadas y vinculadas por semestre");
+
+    } catch (error) {
+        console.error("Error al obtener las materias:", error);
+    }
+}

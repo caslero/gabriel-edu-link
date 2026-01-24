@@ -107,6 +107,7 @@ export const initSeccionesTable = () => {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       materia_id INTEGER NOT NULL,
       seccion_nombre TEXT NOT NULL,
+      cupos INTEGER NOT NULL DEFAULT 0, 
       usuario_id INTEGER NOT NULL,            -- Usuario que creó la sección
       borrado BOOLEAN NOT NULL DEFAULT 0,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
