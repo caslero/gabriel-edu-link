@@ -6,7 +6,9 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "seed": "node src/seed/seedRolesUsuario.js",
+    "seed": "node src/seed/seedRolesUsuario.js && node src/seed/seedMaterias.js",
+    "seed:rolesUsers": "node src/seed/seedRolesUsuario.js",
+    "seed:materias": "node src/seed/seedMaterias.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

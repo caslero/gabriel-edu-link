@@ -77,7 +77,7 @@ export const initUsersTable = () => {
   });
 };
 
-// Inicializar tabla materias 
+// Inicializar tabla materias
 export const initMateriasTable = () => {
   const sql = `
     CREATE TABLE IF NOT EXISTS materias (
@@ -113,6 +113,7 @@ export const initSeccionesTable = () => {
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (materia_id) REFERENCES materias(id) ON DELETE CASCADE,
       FOREIGN KEY (usuario_id) REFERENCES users(id)
+      UNIQUE(materia_id, seccion_nombre)
     );
   `;
   db.run(sql, (err) => {
