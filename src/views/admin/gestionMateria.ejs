@@ -2,47 +2,45 @@
   <h2 class="text-2xl font-bold text-blue-700 mb-6">Gestión de Materias y Secciones</h2>
 
   <div class="bg-gray-50 p-6 rounded shadow mb-8 border-l-4 border-blue-600">
-    <h3 class="text-lg font-semibold text-blue-700 mb-4">Registrar nueva sección</h3>
-    <form id="formRegistroSeccion" class="grid grid-cols-1 md:grid-cols-4 gap-4">
-      <div>
-        <label for="semestre" class="block font-semibold text-gray-700">Semestre</label>
-       <select id="semestre" name="semestre" class="w-full border p-2 rounded ...">
-    <option value="">Seleccione</option>
-    <% semestres.forEach(sem => { %>
-        <option value="<%= sem.semestre %>"><%= sem.semestre %>° Semestre</option>
-    <% }) %>
-</select>
+  <h3 class="text-lg font-semibold text-blue-700 mb-4">Registrar nueva sección</h3>
+  <form id="formRegistroSeccion" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+    
+    <!-- Semestres -->
+    <div>
+      <div id="todos-semestres">
+        <!-- Aquí se cargará el select de semestres -->
       </div>
-
-      <div>
-        <label for="materia_id" class="block font-semibold text-gray-700">Materia</label>
-      <select id="materia_id" name="materia_id" class="w-full border p-2 rounded ..." disabled>
-    <option value="">Seleccione materia</option>
-    <% materias.forEach(mat => { %>
-        <option value="<%= mat.id %>" data-semestre="<%= mat.semestre %>" hidden disabled>
-            <%= mat.nombre %>
-        </option>
-    <% }) %>
-</select>
+    </div>
+    
+    <!-- Materias -->
+    <div>
+      <div id="materias-semestre">
+        <!-- Aquí se cargará el select de materias dinámicamente -->
       </div>
-
-      <div>
-        <label for="seccion_nombre" class="block font-semibold text-gray-700">Sección</label>
-        <input type="text" id="seccion_nombre" name="seccion_nombre" placeholder="Ej: Sección 3" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none" disabled required>
-      </div>
-
-      <div>
-        <label for="cupos" class="block font-semibold text-gray-700">Cupos</label>
-        <input type="number" id="cupos" name="cupos" min="1" placeholder="Ej: 30" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none" disabled required>
-      </div>
-
-      <div class="md:col-span-4">
-        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors w-full font-bold shadow-md">
-          Registrar Sección
-        </button>
-      </div>
-    </form>
-  </div>
+    </div>
+    
+    <!-- Sección -->
+    <div>
+      <label for="seccion_nombre" class="block font-semibold text-gray-700">Sección</label>
+      <input type="text" id="seccion_nombre" name="seccion_nombre" placeholder="Ej: Sección 3" 
+             class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none" disabled required>
+    </div>
+    
+    <!-- Cupos -->
+    <div>
+      <label for="cupos" class="block font-semibold text-gray-700">Cupos</label>
+      <input type="number" id="cupos" name="cupos" min="1" placeholder="Ej: 30" 
+             class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none" disabled required>
+    </div>
+    
+    <!-- Botón -->
+    <div class="md:col-span-4">
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors w-full font-bold shadow-md">
+        Registrar Sección
+      </button>
+    </div>
+  </form>
+</div>
 
   <h3 class="text-lg font-semibold text-blue-700 mb-4">Secciones registradas</h3>
   <div class="overflow-x-auto mb-10">

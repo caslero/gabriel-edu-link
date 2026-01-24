@@ -7,8 +7,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   // --- 1. FUNCIÓN DE FILTRADO ---
   const aplicarFiltroMaterias = () => {
     // Obtenemos el valor actual del select de semestre
-    const semestreElegido = semestreSelect.value ? semestreSelect.value.toString().trim() : "";
-    
+    const semestreElegido = semestreSelect.value
+      ? semestreSelect.value.toString().trim()
+      : "";
+
     console.log("Ejecutando filtro para semestre:", semestreElegido);
 
     // Si no hay semestre, deshabilitamos el select de materias
@@ -25,62 +27,72 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!opt.value) return; // Saltar el "Seleccione..."
 
       // Leemos el atributo que pusimos en el EJS o en la carga dinámica
-      const semestreMateria = opt.getAttribute("data-semestre") ? opt.getAttribute("data-semestre").toString().trim() : "";
-      
+      const semestreMateria = opt.getAttribute("data-semestre")
+        ? opt.getAttribute("data-semestre").toString().trim()
+        : "";
+
       // COMPARACIÓN ESTRICTA
-      const coincide = (semestreMateria === semestreElegido);
+      const coincide = semestreMateria === semestreElegido;
 
       opt.hidden = !coincide;
       opt.disabled = !coincide;
-      
+
       if (coincide) materiasVisibles++;
     });
 
     materiaSelect.disabled = false;
-    console.log(`Filtro aplicado. Materias encontradas para el semestre ${semestreElegido}: ${materiasVisibles}`);
+    console.log(
+      `Filtro aplicado. Materias encontradas para el semestre ${semestreElegido}: ${materiasVisibles}`,
+    );
   };
 
   // --- 2. CARGA DINÁMICA ---
-  async function cargarMateriasDinámicas() {
-    try {
-      const response = await fetch("/api/materias/todas-materias");
-      const datos = await response.json();
+  // async function cargarMateriasDinamicas() {
+  //   try {
+  //     const response = await fetch("/api/materias/todas-materias");
+  //     const datos = await response.json();
 
-      if (datos.status === "ok" && datos.materias) {
-        // Guardamos el valor que el usuario pudo haber seleccionado mientras cargaba la API
-        const valorTemporal = materiaSelect.value;
+  //     if (datos.status === "ok" && datos.materias) {
+  //       // Guardamos el valor que el usuario pudo haber seleccionado mientras cargaba la API
+  //       const valorTemporal = materiaSelect.value;
 
-        materiaSelect.innerHTML = '<option value="">Seleccione una materia</option>';
+  //       materiaSelect.innerHTML = '<option value="">Seleccione una materia</option>';
 
-        datos.materias.forEach((materia) => {
-          const option = document.createElement("option");
-          option.value = materia.id;
-          option.textContent = materia.nombre;
-          // Inyectamos el semestre que viene de la base de datos
-          option.setAttribute("data-semestre", materia.semestre);
-          option.hidden = true;
-          option.disabled = true;
-          materiaSelect.appendChild(option);
-        });
+  //       datos.materias.forEach((materia) => {
+  //         const option = document.createElement("option");
+  //         option.value = materia.id;
+  //         option.textContent = materia.nombre;
+  //         // Inyectamos el semestre que viene de la base de datos
+  //         option.setAttribute("data-semestre", materia.semestre);
+  //         option.hidden = true;
+  //         option.disabled = true;
+  //         materiaSelect.appendChild(option);
+  //       });
 
-        if (valorTemporal) materiaSelect.value = valorTemporal;
-        console.log("Materias inyectadas desde API correctamente.");
-      }
-    } catch (error) {
-      console.warn("Error en fetch, se mantendrán las materias cargadas por EJS.");
-    } finally {
-      // SIEMPRE aplicar el filtro al terminar la carga
-      aplicarFiltroMaterias();
-    }
-  }
+  //       if (valorTemporal) materiaSelect.value = valorTemporal;
+  //       console.log("Materias inyectadas desde API correctamente.");
+  //     }
+  //   } catch (error) {
+  //     console.warn("Error en fetch, se mantendrán las materias cargadas por EJS.");
+  //   } finally {
+  //     // SIEMPRE aplicar el filtro al terminar la carga
+  //     aplicarFiltroMaterias();
+  //   }
+  // }
 
   // --- 3. EVENTOS ---
   semestreSelect?.addEventListener("change", () => {
     // Al cambiar semestre, reseteamos todo lo de abajo
     materiaSelect.value = "";
-    if (seccionInput) { seccionInput.value = ""; seccionInput.disabled = true; }
-    if (cuposInput) { cuposInput.value = ""; cuposInput.disabled = true; }
-    
+    if (seccionInput) {
+      seccionInput.value = "";
+      seccionInput.disabled = true;
+    }
+    if (cuposInput) {
+      cuposInput.value = "";
+      cuposInput.disabled = true;
+    }
+
     aplicarFiltroMaterias();
   });
 
@@ -89,11 +101,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (seccionInput) seccionInput.disabled = !seleccionada;
     if (cuposInput) cuposInput.disabled = !seleccionada;
   });
-
-  // Ejecución inicial
-  await cargarMateriasDinámicas();
 });
-
 
 // --- MODAL DINÁMICO PARA EDITAR SECCIÓN (Incluye Cupos) ---
 
@@ -132,33 +140,38 @@ function abrirModalEditarSeccion(id, nombre, materiaId, cupos) {
         </div>
     </div>`;
 
-  document.getElementById("form-editar-seccion").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const info = Object.fromEntries(formData.entries());
+  document
+    .getElementById("form-editar-seccion")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const info = Object.fromEntries(formData.entries());
 
-    try {
-      const response = await fetch(`/api/materias/actualizar-seccion`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: info.idSeccion,
-          nombre: info.nombre,
-          cupos: info.cupos
-        }),
-      });
+      try {
+        const response = await fetch(`/api/materias/actualizar-seccion`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: info.idSeccion,
+            nombre: info.nombre,
+            cupos: info.cupos,
+          }),
+        });
 
-      const resultado = await response.json();
-      if (response.ok || resultado.status === "ok") {
-        mostrarNotificacion("Sección actualizada con éxito");
-        window.location.reload();
-      } else {
-        mostrarNotificacion(resultado.message || "Error al actualizar", "error");
+        const resultado = await response.json();
+        if (response.ok || resultado.status === "ok") {
+          mostrarNotificacion("Sección actualizada con éxito");
+          window.location.reload();
+        } else {
+          mostrarNotificacion(
+            resultado.message || "Error al actualizar",
+            "error",
+          );
+        }
+      } catch (error) {
+        mostrarNotificacion("Error de servidor", "error");
       }
-    } catch (error) {
-      mostrarNotificacion("Error de servidor", "error");
-    }
-  });
+    });
 }
 
 // --- FUNCIONES DE APOYO (Eliminar, Notificar, Cargar) ---
@@ -201,35 +214,6 @@ function confirmarEliminarSeccion(id) {
   };
 }
 
-async function cargarMateriasDinámicas() {
-  try {
-    const response = await fetch("/api/materias/todas-materias");
-    const datos = await response.json();
-    const materiaSelect = document.getElementById("materia_id");
-    const semestreSelect = document.getElementById("semestre");
-
-    if (!materiaSelect || datos.status === "error") return;
-
-    materiaSelect.innerHTML = '<option value="">Seleccione una materia</option>';
-
-    datos.materias.forEach((materia) => {
-      const option = document.createElement("option");
-      option.value = materia.id;
-      option.textContent = materia.nombre;
-      option.setAttribute("data-semestre", materia.semestre);
-      option.hidden = true;
-      option.disabled = true;
-      materiaSelect.appendChild(option);
-    });
-
-    if (semestreSelect?.value) {
-      semestreSelect.dispatchEvent(new Event("change"));
-    }
-  } catch (error) {
-    console.error("Error al cargar materias:", error);
-  }
-}
-
 function mostrarNotificacion(mensaje, tipo = "exito") {
   const color = tipo === "exito" ? "bg-green-600" : "bg-red-600";
   const toast = document.createElement("div");
@@ -238,3 +222,268 @@ function mostrarNotificacion(mensaje, tipo = "exito") {
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
 }
+
+async function cargarMateriasDinamicas() {
+  try {
+    const response = await fetch("/api/materias/todas-materias", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const datos = await response.json();
+
+    if (datos.status === "error")
+      throw new Error("Error al obtener las materias");
+
+    const contenedorSemestres = document.getElementById("todos-semestres");
+    const contenedorMaterias = document.getElementById("materias-semestre");
+
+    // 1. Eliminar duplicados de materias
+    const materiasUnicas = datos.materias.filter(
+      (materia, index, self) =>
+        index === self.findIndex((m) => m.id === materia.id),
+    );
+
+    // Guardar los datos de materias únicas
+    window.materiasData = materiasUnicas;
+
+    // 2. Extraer semestres únicos
+    const semestresUnicos = [
+      ...new Set(materiasUnicas.map((materia) => materia.semestre)),
+    ].sort((a, b) => a - b);
+
+    const maxSemestre = Math.max(...semestresUnicos);
+
+    // 3. Crear opciones del 1 al semestre máximo
+    const opcionesSemestres = [];
+    for (let i = 1; i <= maxSemestre; i++) {
+      opcionesSemestres.push(`<option value="${i}">${i}</option>`);
+    }
+
+    // Crear el select de semestres
+    contenedorSemestres.innerHTML = `
+      <label for="semestres" class="block font-semibold text-gray-700">Semestre</label>
+      <select id="semestres" name="semestres" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
+        <option value="">Seleccione</option>
+        ${opcionesSemestres.join("")}
+      </select>
+    `;
+
+    // Inicialmente mostrar mensaje en contenedor de materias
+    contenedorMaterias.innerHTML = `
+      <label for="materia" class="block font-semibold text-gray-700">Materia</label>
+      <select id="materia" name="materia" class="w-full border p-2 rounded" disabled required>
+        <option value="">Seleccione</option>
+      </select>
+    `;
+
+    // Agregar event listener al select de semestres
+    document
+      .getElementById("semestres")
+      .addEventListener("change", function () {
+        cargarMateriasPorSemestre(this.value, contenedorMaterias);
+      });
+  } catch (error) {
+    console.error("Error al cargar materias:", error);
+    mostrarNotificacion("Error al cargar las materias", "error");
+  }
+}
+
+// Función para cargar materias por semestre
+function cargarMateriasPorSemestre(semestre, contenedorMaterias) {
+  if (!semestre) {
+    contenedorMaterias.innerHTML = "";
+    return;
+  }
+
+  // Filtrar materias por semestre
+  const materiasDelSemestre = window.materiasData.filter(
+    (materia) => materia.semestre == semestre,
+  );
+
+  // Eliminar duplicados por nombre
+  const materiasSinDuplicados = materiasDelSemestre.filter(
+    (materia, index, self) =>
+      index === self.findIndex((m) => m.nombre === materia.nombre),
+  );
+
+  if (materiasSinDuplicados.length === 0) {
+    contenedorMaterias.innerHTML = `
+          <label for="materia" class="block font-semibold text-gray-700">Materia</label>
+          <select id="materia" name="materia" class="w-full border p-2 rounded" disabled required>
+            <option value="">No hay materias para este semestre</option>
+          </select>
+        `;
+    return;
+  }
+
+  // Crear opciones de materias
+  const opcionesMaterias = materiasSinDuplicados
+    .map(
+      (materia) => `<option value="${materia.id}">${materia.nombre}</option>`,
+    )
+    .join("");
+
+  contenedorMaterias.innerHTML = `
+        <label for="materia" class="block font-semibold text-gray-700">Materia</label>
+        <select id="materia" name="materia" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
+          <option value="">Seleccione</option>
+          ${opcionesMaterias}
+        </select>
+      `;
+
+  // Habilitar inputs cuando se selecciona una materia
+  const selectMateria = document.getElementById("materia");
+  const seccionNombreInput = document.getElementById("seccion_nombre");
+  const cuposInput = document.getElementById("cupos");
+
+  selectMateria.addEventListener("change", function () {
+    if (this.value) {
+      seccionNombreInput.disabled = false;
+      cuposInput.disabled = false;
+    } else {
+      seccionNombreInput.disabled = true;
+      cuposInput.disabled = true;
+    }
+  });
+}
+
+// Llamar a la función cuando se cargue la página
+document.addEventListener("DOMContentLoaded", cargarMateriasDinamicas);
+
+/** 
+async function cargarMateriasDinamicas() {
+  try {
+    const response = await fetch("/api/materias/todas-materias", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const datos = await response.json();
+
+    if (datos.status === "error")
+      throw new Error("Error al obtener las materias");
+
+    const contenedor = document.getElementById("todos-semestres");
+    const contenedorMaterias = document.getElementById("materias-semestre");
+
+    // 1. Eliminar duplicados de materias (por id o por nombre)
+    const materiasUnicas = datos.materias.filter(
+      (materia, index, self) =>
+        index === self.findIndex((m) => m.id === materia.id),
+    );
+
+    // Guardar los datos de materias únicas
+    window.materiasData = materiasUnicas;
+
+    // 2. Extraer semestres únicos de las materias únicas
+    const semestresUnicos = [
+      ...new Set(materiasUnicas.map((materia) => materia.semestre)),
+    ].sort((a, b) => a - b);
+
+    const maxSemestre = Math.max(...semestresUnicos);
+
+    // 3. Crear opciones del 1 al semestre máximo
+    const opcionesSemestres = [];
+    for (let i = 1; i <= maxSemestre; i++) {
+      opcionesSemestres.push(`<option value="${i}">${i}</option>`);
+    }
+
+    // Función para cargar materias únicas por semestre
+    function cargarMateriasPorSemestre(semestre) {
+      const contenedorMaterias = document.getElementById("materias-semestre");
+
+      if (!semestre) {
+        contenedorMaterias.innerHTML = "";
+        return;
+      }
+
+      // Filtrar materias únicas por semestre
+      const materiasDelSemestre = window.materiasData.filter(
+        (materia) => materia.semestre == semestre,
+      );
+
+      // Eliminar duplicados por nombre dentro del mismo semestre (por si acaso)
+      const materiasSinDuplicados = materiasDelSemestre.filter(
+        (materia, index, self) =>
+          index === self.findIndex((m) => m.nombre === materia.nombre),
+      );
+
+      if (materiasSinDuplicados.length === 0) {
+        contenedorMaterias.innerHTML = `
+      <div class="p-3 bg-gray-100 rounded">
+        <p class="text-gray-600">No hay materias registradas para el semestre ${semestre}</p>
+      </div>
+    `;
+        return;
+      }
+
+      // Crear opciones con materias sin duplicados
+      const opcionesMaterias = materiasSinDuplicados
+        .map(
+          (materia) =>
+            `<option value="${materia.id}">${materia.nombre}</option>`,
+        )
+        .join("");
+
+      contenedorMaterias.innerHTML = `
+    <label for="materia" class="block font-semibold mb-2">Seleccionar Materia</label>
+    <select id="materia" name="materia" class="w-full border border-gray-300 p-3 rounded-lg" required>
+      <option value="">Seleccione</option>
+      ${opcionesMaterias}
+    </select>
+  `;
+    }
+
+    contenedor.innerHTML = `
+  <div class="space-y-6">
+    <div>
+      <label for="semestres" class="block font-semibold mb-2">Seleccionar Semestre</label>
+      <select id="semestres" name="semestres" class="w-full border border-gray-300 p-3 rounded-lg" required>
+        <option value="">Seleccione</option>
+        ${opcionesSemestres.join("")}
+      </select>
+    </div>
+    
+    
+  </div>
+`;
+
+    // Agregar el event listener
+    document
+      .getElementById("semestres")
+      .addEventListener("change", function () {
+        cargarMateriasPorSemestre(this.value);
+      });
+  } catch (error) {
+    console.error("Error al cargar materias:", error);
+  }
+}
+*/
+
+/** 
+    const datos = await response.json();
+
+    if (datos.status === "error")
+      throw new Error("Error al obtener las materias");
+
+    const contenedor = document.getElementById("todos-semestres");
+
+    // 1. Extraer y ordenar semestres únicos
+    const semestresUnicos = [
+      ...new Set(datos.materias.map((materia) => materia.semestre)),
+    ].sort((a, b) => a - b);
+
+    contenedor.innerHTML = `
+    <label for="rol" class="block font-semibold">Semestre</label>
+    <select id="semestres" name="semestres" class="w-full border p-2 rounded" required>
+      <option value="">Seleccione</option>
+      ${semestresUnicos
+        .map((semestre) => `<option value="${semestre}">${semestre}</option>`)
+        .join("")}
+    </select>
+    `;*/
