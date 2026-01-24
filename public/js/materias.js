@@ -1,81 +1,81 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const semestreSelect = document.getElementById('semestre');
-    const materiaSelect = document.getElementById('materia_id');
-    const seccionInput = document.getElementById('seccion_nombre');
-    const formRegistro = document.getElementById('formRegistroSeccion');
+document.addEventListener("DOMContentLoaded", () => {
+  const semestreSelect = document.getElementById("semestre");
+  const materiaSelect = document.getElementById("materia_id");
+  const seccionInput = document.getElementById("seccion_nombre");
+  const formRegistro = document.getElementById("formRegistroSeccion");
 
-    // 1. Lógica de filtros en cascada (Local)
-    semestreSelect?.addEventListener('change', () => {
-        const semestre = semestreSelect.value;
-        materiaSelect.value = '';
-        if (seccionInput) {
-            seccionInput.value = '';
-            seccionInput.disabled = true;
-        }
+  // 1. Lógica de filtros en cascada (Local)
+  semestreSelect?.addEventListener("change", () => {
+    const semestre = semestreSelect.value;
+    materiaSelect.value = "";
+    if (seccionInput) {
+      seccionInput.value = "";
+      seccionInput.disabled = true;
+    }
 
-        if (semestre) {
-            Array.from(materiaSelect.options).forEach(opt => {
-                if (!opt.value) return; 
-                const coincide = opt.getAttribute('data-semestre') === semestre;
-                opt.hidden = !coincide;
-                opt.disabled = !coincide;
-            });
-            materiaSelect.disabled = false;
-        } else {
-            materiaSelect.disabled = true;
-        }
-    });
+    if (semestre) {
+      Array.from(materiaSelect.options).forEach((opt) => {
+        if (!opt.value) return;
+        const coincide = opt.getAttribute("data-semestre") === semestre;
+        opt.hidden = !coincide;
+        opt.disabled = !coincide;
+      });
+      materiaSelect.disabled = false;
+    } else {
+      materiaSelect.disabled = true;
+    }
+  });
 
-    materiaSelect?.addEventListener('change', () => {
-        if (seccionInput) seccionInput.disabled = !materiaSelect.value;
-    });
+  materiaSelect?.addEventListener("change", () => {
+    if (seccionInput) seccionInput.disabled = !materiaSelect.value;
+  });
 
-    // 2. Registrar Sección
-    formRegistro?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(formRegistro);
-        const payload = Object.fromEntries(formData.entries());
+  // 2. Registrar Sección
+  formRegistro?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(formRegistro);
+    const payload = Object.fromEntries(formData.entries());
 
-        /* NOTA: El usuario_id se recomienda obtenerlo en el Backend 
+    /* NOTA: El usuario_id se recomienda obtenerlo en el Backend 
            vía req.session para mayor seguridad.
         */
-        console.log("Enviando datos de sección:", payload);
+    console.log("Enviando datos de sección:", payload);
 
-        try {
-            const res = await fetch('/api/materias/crear-seccion', { 
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
+    try {
+      const res = await fetch("/api/materias/crear-seccion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
 
-            const data = await res.json();
-            if (res.ok || data.status === "ok") {
-                mostrarNotificacion(data.message || "Sección registrada correctamente");
-                formRegistro.reset();
-                
-                // Recarga para ver al nuevo usuario creador en la tabla
-                setTimeout(() => window.location.reload(), 1000);
-            } else {
-                mostrarNotificacion(data.message || "Error al crear", "error");
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            mostrarNotificacion("Error de conexión con el servidor", "error");
-        }
-    });
+      const data = await res.json();
+      if (res.ok || data.status === "ok") {
+        mostrarNotificacion(data.message || "Sección registrada correctamente");
+        formRegistro.reset();
+
+        // Recarga para ver al nuevo usuario creador en la tabla
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        mostrarNotificacion(data.message || "Error al crear", "error");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      mostrarNotificacion("Error de conexión con el servidor", "error");
+    }
+  });
 });
 
 // --- MODAL DINÁMICO PARA EDITAR SECCIÓN ---
 
 function abrirModalEditarSeccion(id, nombre, materiaId) {
-    let modal = document.getElementById('modal-editar-seccion-container');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'modal-editar-seccion-container';
-        document.body.appendChild(modal);
-    }
+  let modal = document.getElementById("modal-editar-seccion-container");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "modal-editar-seccion-container";
+    document.body.appendChild(modal);
+  }
 
-    modal.innerHTML = `
+  modal.innerHTML = `
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div class="bg-white rounded-lg shadow-lg p-6 w-96 text-left">
                 <h3 class="text-lg font-semibold text-blue-700 mb-4">Actualizar Información</h3>
@@ -104,49 +104,54 @@ function abrirModalEditarSeccion(id, nombre, materiaId) {
         </div>
     `;
 
-    document.getElementById('form-editar-seccion').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const info = Object.fromEntries(formData.entries());
+  document
+    .getElementById("form-editar-seccion")
+    .addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const formData = new FormData(e.target);
+      const info = Object.fromEntries(formData.entries());
 
-        try {
-            const response = await fetch(`/api/materias/actualizar-seccion`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    id: info.idSeccion,
-                    nombre: info.nombre
-                    // El backend se encarga de actualizar el updated_at y verificar el usuario
-                })
-            });
+      try {
+        const response = await fetch(`/api/materias/actualizar-seccion`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: info.idSeccion,
+            nombre: info.nombre,
+            // El backend se encarga de actualizar el updated_at y verificar el usuario
+          }),
+        });
 
-            const resultado = await response.json();
+        const resultado = await response.json();
 
-            if (response.ok || resultado.status === "ok") {
-                mostrarNotificacion("Sección actualizada con éxito");
-                modal.innerHTML = '';
-                window.location.reload(); 
-            } else {
-                mostrarNotificacion(resultado.message || "Error al actualizar", "error");
-            }
-        } catch (error) {
-            console.error("Error:", error);
-            mostrarNotificacion("Error de servidor", "error");
+        if (response.ok || resultado.status === "ok") {
+          mostrarNotificacion("Sección actualizada con éxito");
+          modal.innerHTML = "";
+          window.location.reload();
+        } else {
+          mostrarNotificacion(
+            resultado.message || "Error al actualizar",
+            "error",
+          );
         }
+      } catch (error) {
+        console.error("Error:", error);
+        mostrarNotificacion("Error de servidor", "error");
+      }
     });
 }
 
 // --- MODAL DINÁMICO PARA ELIMINAR SECCIÓN ---
 
 function confirmarEliminarSeccion(id) {
-    let modal = document.getElementById('modal-eliminar-seccion-container');
-    if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'modal-eliminar-seccion-container';
-        document.body.appendChild(modal);
-    }
+  let modal = document.getElementById("modal-eliminar-seccion-container");
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "modal-eliminar-seccion-container";
+    document.body.appendChild(modal);
+  }
 
-    modal.innerHTML = `
+  modal.innerHTML = `
         <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[60]">
             <div class="bg-white rounded-lg shadow-xl p-6 w-80 text-center">
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
@@ -169,86 +174,92 @@ function confirmarEliminarSeccion(id) {
         </div>
     `;
 
-    document.getElementById('btn-confirm-delete-seccion').onclick = async () => {
-        try {
-            const response = await fetch(`/api/materias/eliminar-seccion`, {
-                method: "PATCH",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ id: id, eliminar: true }) 
-            });
+  document.getElementById("btn-confirm-delete-seccion").onclick = async () => {
+    try {
+      const response = await fetch(`/api/materias/eliminar-seccion`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: id, eliminar: true }),
+      });
 
-            if (response.ok) {
-                mostrarNotificacion("Registro eliminado correctamente");
-                modal.innerHTML = '';
-                window.location.reload();
-            } else {
-                mostrarNotificacion("No tienes permisos para eliminar este registro", "error");
-            }
-        } catch (error) {
-            mostrarNotificacion("Error de conexión", "error");
-        }
-    };
+      if (response.ok) {
+        mostrarNotificacion("Registro eliminado correctamente");
+        modal.innerHTML = "";
+        window.location.reload();
+      } else {
+        mostrarNotificacion(
+          "No tienes permisos para eliminar este registro",
+          "error",
+        );
+      }
+    } catch (error) {
+      mostrarNotificacion("Error de conexión", "error");
+    }
+  };
 }
 
 // --- FUNCIÓN DE NOTIFICACIÓN ---
-function mostrarNotificacion(mensaje, tipo = 'exito') {
-    const previa = document.getElementById('toast-notificacion');
-    if (previa) previa.remove();
+function mostrarNotificacion(mensaje, tipo = "exito") {
+  const previa = document.getElementById("toast-notificacion");
+  if (previa) previa.remove();
 
-    const colorFondo = tipo === 'exito' ? 'bg-green-600' : 'bg-red-600';
-    const toast = document.createElement('div');
-    toast.id = 'toast-notificacion';
-    toast.className = `fixed bottom-5 right-5 ${colorFondo} text-white px-6 py-3 rounded-lg shadow-2xl flex items-center space-x-3 transform transition-all duration-500 z-[100] animate-bounce-short`;
-    
-    toast.innerHTML = `<span class="font-medium">${mensaje}</span>`;
-    document.body.appendChild(toast);
+  const colorFondo = tipo === "exito" ? "bg-green-600" : "bg-red-600";
+  const toast = document.createElement("div");
+  toast.id = "toast-notificacion";
+  toast.className = `fixed bottom-5 right-5 ${colorFondo} text-white px-6 py-3 rounded-lg shadow-2xl flex items-center space-x-3 transform transition-all duration-500 z-[100] animate-bounce-short`;
 
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        setTimeout(() => toast.remove(), 500);
-    }, 3500);
+  toast.innerHTML = `<span class="font-medium">${mensaje}</span>`;
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = "0";
+    setTimeout(() => toast.remove(), 500);
+  }, 3500);
 }
 
 // FUNCION PARA CARGAR MATERIAS DESDE LA API
 async function cargarMateriasDinámicas() {
-    try {
-        const response = await fetch("/api/materias/todas-materias", {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-        });
+  try {
+    const response = await fetch("/api/materias/todas-materias", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
 
-        const datos = await response.json();
+    const datos = await response.json();
 
-        if (datos.status === "error") throw new Error(datos.message || "Error al obtener materias");
+    if (datos.status === "error")
+      throw new Error(datos.message || "Error al obtener materias");
 
-        const materiaSelect = document.getElementById("materia_id");
-        const semestreSelect = document.getElementById("semestre"); // Necesario para disparar el filtro
-        
-        if (!materiaSelect) return;
+    const materiaSelect = document.getElementById("materia_id");
+    const semestreSelect = document.getElementById("semestre"); // Necesario para disparar el filtro
 
-        // 1. Limpiamos pero mantenemos la opción por defecto
-        materiaSelect.innerHTML = '<option value="">Seleccione una materia</option>';
+    if (!materiaSelect) return;
 
-        // 2. Llenamos el select con el atributo 'data-semestre'
-        datos.materias.forEach(materia => {
-            const option = document.createElement('option');
-            option.value = materia.id;
-            option.textContent = materia.nombre;
-            option.setAttribute('data-semestre', materia.semestre);
-            option.hidden = true; 
-            option.disabled = true; 
-            
-            materiaSelect.appendChild(option);
-        });
+    // 1. Limpiamos pero mantenemos la opción por defecto
+    materiaSelect.innerHTML =
+      '<option value="">Seleccione una materia</option>';
 
-        // 3. IMPORTANTE: Si ya hay un semestre seleccionado al cargar las materias,
-        if (semestreSelect && semestreSelect.value) {
-            semestreSelect.dispatchEvent(new Event('change'));
-        }
+    // 2. Llenamos el select con el atributo 'data-semestre'
+    datos.materias.map((materia) => {
+      const option = document.createElement("option");
+      option.value = materia.id;
+      option.textContent = materia.nombre;
+      option.setAttribute("data-semestre", materia.semestre);
+      option.hidden = true;
+      option.disabled = true;
 
-        console.log("Materias cargadas y vinculadas por semestre");
+      materiaSelect.appendChild(option);
+    });
 
-    } catch (error) {
-        console.error("Error al obtener las materias:", error);
+    // 3. IMPORTANTE: Si ya hay un semestre seleccionado al cargar las materias,
+    if (semestreSelect && semestreSelect.value) {
+      semestreSelect.dispatchEvent(new Event("change"));
     }
+
+    console.log("Materias cargadas y vinculadas por semestre");
+  } catch (error) {
+    console.error("Error al obtener las materias:", error);
+  }
 }
+
+cargarMateriasDinámicas();

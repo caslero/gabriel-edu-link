@@ -193,6 +193,8 @@ rutas.get("/api/roles/todos-roles", RolController.todosRoles);
 
 rutas.post("/api/login/iniciar-sesion", LoginController.iniciarSesion);
 
+rutas.get("/api/materias/todas-materias", MateriaController.todasMaterias);
+
 //API INSCRIPCIONES
 rutas.post("/api/inscripciones/crear-inscripcion", InscripcionesController.crearInscripcion,); // estudiante_id, semestre_id, materia_id, seccion_id
 //rutas.post("/api/inscripciones/gestionar-solicitud", InscripcionesController.actualizarEstadoSolicitud); // solicitud_id, estado

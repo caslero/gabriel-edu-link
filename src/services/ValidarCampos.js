@@ -74,7 +74,7 @@ export default class ValidarCampos {
       if (!emailRegex.test(correo)) {
         return respuestasAlBack(
           "error",
-          "Error, formato de correo invalido..."
+          "Error, formato de correo invalido...",
         );
       }
 
@@ -112,7 +112,7 @@ export default class ValidarCampos {
       if (!textRegex.test(nombre)) {
         return respuestasAlBack(
           "error",
-          "Error, formato de nombre invalido..."
+          "Error, formato de nombre invalido...",
         );
       }
 
@@ -166,7 +166,7 @@ export default class ValidarCampos {
       // Retorna una respuesta del error inesperado
       return respuestasAlBack(
         "error",
-        `Error, interno al (validar id ${detalles})`
+        `Error, interno al (validar id ${detalles})`,
       );
     }
   }
@@ -190,7 +190,7 @@ export default class ValidarCampos {
       if (!claveDos) {
         return respuestasAlBack(
           "error",
-          "Error campo confirmar clave vacio..."
+          "Error campo confirmar clave vacio...",
         );
       }
 
@@ -244,7 +244,7 @@ export default class ValidarCampos {
       if (isNaN(fechaConvertida.getTime())) {
         return respuestasAlBack(
           "error",
-          "Error no se puede interpretar la fecha..."
+          "Error no se puede interpretar la fecha...",
         );
       }
 
@@ -256,7 +256,7 @@ export default class ValidarCampos {
       if (fechaConvertida > ahora) {
         return respuestasAlBack(
           "error",
-          "Error fecha no puede pasar el dia actual..."
+          "Error fecha no puede pasar el dia actual...",
         );
       }
 
@@ -275,6 +275,135 @@ export default class ValidarCampos {
 
       // Retorna una respuesta del error inesperado
       return respuestasAlBack("error", "Error, interno campo fecha...");
+    }
+  }
+
+  /**
+   Valida que un campo de semestre sea un número entero entre 1 y 12 (inclusive).
+   Verifica que no esté vacío, que sea un número válido y que esté dentro del rango de semestres.
+   @function validarSemestre
+   @param {string|number} semestre - Semestre ingresado por el usuario.
+   @returns {Object} Objeto con estado, mensaje y semestre validado.
+  */
+  static validarCampoSemestre(semestre, detalles) {
+    try {
+      // 1. Verifica si el campo está vacío
+      if (!semestre && semestre !== 0) {
+        return respuestasAlBack(
+          "error",
+          `Campo ${detalles ? detalles : "semestre"} vacío`,
+        );
+      }
+
+      // 2. Convierte el valor a número
+      const semestreNumero = Number(semestre);
+
+      // 3. Verifica si es un número válido
+      if (isNaN(semestreNumero)) {
+        return respuestasAlBack(
+          "error",
+          `Error ${detalles ? detalles : "semestre"} inválido`,
+        );
+      }
+
+      // 4. Verifica si es un número entero
+      if (!Number.isInteger(semestreNumero)) {
+        return respuestasAlBack(
+          "error",
+          `Error el ${detalles ? detalles : "semestre"} debe ser un número entero`,
+        );
+      }
+
+      // 5. Verifica si está dentro del rango 1-12
+      if (semestreNumero < 1 || semestreNumero > 12) {
+        return respuestasAlBack(
+          "error",
+          `Error el ${detalles ? detalles : "semestre"} debe estar entre 1 y 12`,
+        );
+      }
+
+      // 6. Retorna respuesta exitosa con el semestre validado
+      return respuestasAlBack(
+        "ok",
+        `Campo ${detalles ? detalles : "semestre"} válido`,
+        {
+          semestre: semestreNumero,
+        },
+      );
+    } catch (error) {
+      // 7. Manejo de errores inesperados
+      console.log(
+        `Error interno al validar ${detalles ? detalles : "semestre"}: ` +
+          error,
+      );
+      return respuestasAlBack(
+        "error",
+        `Error interno al validar ${detalles ? detalles : "semestre"}`,
+      );
+    }
+  }
+
+  /**
+   Valida que un campo de cupos sea un número entero entre 1 y 50 (inclusive).
+   Verifica que no esté vacío, que sea un número válido y que esté dentro del rango de cupos.
+   @function validarCupo
+   @param {string|number} cupo - Cupo ingresado por el usuario.
+   @returns {Object} Objeto con estado, mensaje y cupo validado.
+  */
+  static validarCampoCupo(cupo, detalles) {
+    try {
+      // 1. Verifica si el campo está vacío
+      if (!cupo && cupo !== 0) {
+        return respuestasAlBack(
+          "error",
+          `Campo ${detalles ? detalles : "cupo"} vacío`,
+        );
+      }
+
+      // 2. Convierte el valor a número
+      const cupoNumero = Number(cupo);
+
+      // 3. Verifica si es un número válido
+      if (isNaN(cupoNumero)) {
+        return respuestasAlBack(
+          "error",
+          `Error ${detalles ? detalles : "cupo"} inválido`,
+        );
+      }
+
+      // 4. Verifica si es un número entero
+      if (!Number.isInteger(cupoNumero)) {
+        return respuestasAlBack(
+          "error",
+          `Error el ${detalles ? detalles : "cupo"} debe ser un número entero`,
+        );
+      }
+
+      // 5. Verifica si está dentro del rango 1-12
+      if (cupoNumero < 1 || cupoNumero > 12) {
+        return respuestasAlBack(
+          "error",
+          `Error el ${detalles ? detalles : "cupo"} debe estar entre 1 y 50`,
+        );
+      }
+
+      // 6. Retorna respuesta exitosa con el cupo validado
+      return respuestasAlBack(
+        "ok",
+        `Campo ${detalles ? detalles : "cupo"} válido`,
+        {
+          cupo: cupoNumero,
+        },
+      );
+    } catch (error) {
+      // 7. Manejo de errores inesperados
+      console.log(
+        `Error interno al validar ${detalles ? detalles : "cupo"}: ` + error,
+      );
+      return respuestasAlBack(
+        "error",
+        `Error interno al validar ${detalles ? detalles : "cupo"}`,
+      );
     }
   }
 }
