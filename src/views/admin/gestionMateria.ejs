@@ -55,36 +55,38 @@
           <th class="px-4 py-3 text-center">Acciones</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-200 text-center">
-        <% if (!secciones || secciones.length === 0) { %>
-          <tr>
-            <td colspan="7" class="py-6 text-gray-500 italic">No hay secciones registradas actualmente.</td>
-          </tr>
-        <% } else { %>
-          <% secciones.forEach(sec => { %>
-            <tr class="hover:bg-gray-50 transition-colors">
-              <td class="px-4 py-2 text-gray-600">#<%= sec.id %></td>
-              <td class="px-4 py-2 font-medium"><%= sec.semestre %>°</td>
-              <td class="px-4 py-2 text-sm"><%= sec.materia_nombre %></td>
-              <td class="px-4 py-2">
-                <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-bold">
-                  <%= sec.seccion_nombre %>
-                </span>
-              </td>
-              <td class="px-4 py-2">
-                <span class="text-green-700 font-semibold"><%= sec.cupos || 0 %></span>
-              </td>
-              <td class="px-4 py-2 text-xs">
-                <span class="text-gray-600 font-medium"><%= sec.usuario_nombre %></span>
-              </td>
-              <td class="px-4 py-2 space-x-2">
-                <button onclick="abrirModalEditarSeccion('<%= sec.id %>', '<%= sec.seccion_nombre %>', '<%= sec.materia_id %>', '<%= sec.cupos %>')" class="text-yellow-600 hover:text-yellow-700 font-bold text-sm uppercase">Editar</button>
-                <button onclick="confirmarEliminarSeccion('<%= sec.id %>')" class="text-red-600 hover:text-red-700 font-bold text-sm uppercase">Eliminar</button>
-              </td>
+      <tbody id="tabla-secciones-body" class="divide-y divide-gray-200 text-center">
+          <% if (!secciones || secciones.length === 0) { %>
+            <tr>
+              <td colspan="7" class="py-6 text-gray-500 italic">No hay secciones registradas actualmente.</td>
             </tr>
-          <% }) %>
-        <% } %>
-      </tbody>
+          <% } else { %>
+            <% secciones.forEach(sec => { %>
+              <tr class="hover:bg-gray-50 transition-colors border-b">
+                <td class="px-4 py-2 text-gray-600">#<%= sec.id %></td>
+                <td class="px-4 py-2 font-medium"><%= sec.semestre %>°</td>
+                <td class="px-4 py-2 text-sm"><%= sec.materia_nombre %></td>
+                <td class="px-4 py-2">
+                  <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-bold">
+                    <%= sec.seccion_nombre %>
+                  </span>
+                </td>
+                <td class="px-4 py-2">
+                  <span class="text-green-700 font-semibold"><%= sec.cupos || 0 %></span>
+                </td>
+                <td class="px-4 py-2 text-xs">
+                  <span class="text-gray-600 font-medium"><%= sec.usuario_nombre %></span>
+                </td>
+                <td class="px-4 py-2 space-x-2">
+                  <button onclick="abrirModalEditarSeccion('<%= sec.id %>', '<%= sec.seccion_nombre %>', '<%= sec.materia_id %>', '<%= sec.cupos %>')" 
+                          class="text-yellow-600 hover:text-yellow-700 font-bold text-sm uppercase">Editar</button>
+                  <button onclick="confirmarEliminarSeccion('<%= sec.id %>')" 
+                          class="text-red-600 hover:text-red-700 font-bold text-sm uppercase">Eliminar</button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
     </table>
   </div>
 </div>

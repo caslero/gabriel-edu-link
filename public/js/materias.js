@@ -487,3 +487,69 @@ async function cargarMateriasDinamicas() {
         .join("")}
     </select>
     `;*/
+
+// LISTAR SECCIONES REGISTRADAS
+async function listarSecciones() {
+  try {
+    const response = await fetch("/api/materias/todas-secciones", {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+
+    const datos = await response.json();
+    
+    // Seleccionamos el cuerpo de la tabla
+    const tbody = document.querySelector("table tbody");
+    if (!tbody) return;
+
+    // Limpiamos el contenido previo
+    tbody.innerHTML = "";
+
+    // Validamos si hay datos
+    if (!datos.secciones || datos.secciones.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="py-6 text-gray-500 italic text-center">No hay secciones registradas actualmente.</td>
+        </tr>`;
+      return;
+    }
+
+    // Recorremos las secciones y creamos las filas
+    datos.secciones.forEach((sec) => {
+      const fila = document.createElement("tr");
+      fila.className = "hover:bg-gray-50 transition-colors border-b";
+
+      fila.innerHTML = `
+        <td class="px-4 py-2 text-gray-600 text-center">#${sec.id}</td>
+        <td class="px-4 py-2 font-medium text-center">${sec.semestre}°</td>
+        <td class="px-4 py-2 text-sm text-center">${sec.materia_nombre}</td>
+        <td class="px-4 py-2 text-center">
+          <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-bold">
+            ${sec.seccion_nombre}
+          </span>
+        </td>
+        <td class="px-4 py-2 text-center">
+          <span class="text-green-700 font-semibold">${sec.cupos || 0}</span>
+        </td>
+        <td class="px-4 py-2 text-xs text-center">
+          <span class="text-gray-600 font-medium">${sec.usuario_nombre || 'N/A'}</span>
+        </td>
+        <td class="px-4 py-2 space-x-2 text-center">
+          <button onclick="abrirModalEditarSeccion('${sec.id}', '${sec.seccion_nombre}', '${sec.materia_id}', '${sec.cupos}')" 
+                  class="text-yellow-600 hover:text-yellow-700 font-bold text-sm uppercase">
+            Editar
+          </button>
+          <button onclick="confirmarEliminarSeccion('${sec.id}')" 
+                  class="text-red-600 hover:text-red-700 font-bold text-sm uppercase">
+            Eliminar
+          </button>
+        </td>
+      `;
+      tbody.appendChild(fila);
+    });
+  } catch (error) {
+    console.error("Error al listar secciones:", error);
+    mostrarNotificacion("Error al cargar la tabla de secciones", "error");
+  }
+}
+document.addEventListener("DOMContentLoaded", listarSecciones)
