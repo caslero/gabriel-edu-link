@@ -491,56 +491,42 @@ async function cargarMateriasDinamicas() {
 // LISTAR SECCIONES REGISTRADAS
 async function listarSecciones() {
   try {
-    const response = await fetch("/api/materias/todas-secciones", {
+    // --- PETICIÓN AL SERVIDOR ---
+    // No envía body (es un GET). Solo solicita los datos.
+    const response = await fetch("/api/secciones/todas-secciones", {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });
 
-    const datos = await response.json();
-    
-    // Seleccionamos el cuerpo de la tabla
+   
+    const datos = await response.json(); 
+  
     const tbody = document.querySelector("table tbody");
     if (!tbody) return;
-
-    // Limpiamos el contenido previo
     tbody.innerHTML = "";
 
-    // Validamos si hay datos
     if (!datos.secciones || datos.secciones.length === 0) {
-      tbody.innerHTML = `
-        <tr>
-          <td colspan="7" class="py-6 text-gray-500 italic text-center">No hay secciones registradas actualmente.</td>
-        </tr>`;
+      tbody.innerHTML = `<tr><td colspan="7">No hay secciones registradas.</td></tr>`;
       return;
     }
 
-    // Recorremos las secciones y creamos las filas
     datos.secciones.forEach((sec) => {
       const fila = document.createElement("tr");
       fila.className = "hover:bg-gray-50 transition-colors border-b";
 
+      // Uso de los datos recibidos:
       fila.innerHTML = `
-        <td class="px-4 py-2 text-gray-600 text-center">#${sec.id}</td>
-        <td class="px-4 py-2 font-medium text-center">${sec.semestre}°</td>
-        <td class="px-4 py-2 text-sm text-center">${sec.materia_nombre}</td>
-        <td class="px-4 py-2 text-center">
-          <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-bold">
-            ${sec.seccion_nombre}
-          </span>
-        </td>
-        <td class="px-4 py-2 text-center">
-          <span class="text-green-700 font-semibold">${sec.cupos || 0}</span>
-        </td>
-        <td class="px-4 py-2 text-xs text-center">
-          <span class="text-gray-600 font-medium">${sec.usuario_nombre || 'N/A'}</span>
-        </td>
-        <td class="px-4 py-2 space-x-2 text-center">
-          <button onclick="abrirModalEditarSeccion('${sec.id}', '${sec.seccion_nombre}', '${sec.materia_id}', '${sec.cupos}')" 
-                  class="text-yellow-600 hover:text-yellow-700 font-bold text-sm uppercase">
+        <td class="text-center">#${sec.id}</td>
+        <td class="text-center">${sec.semestre}°</td>
+        <td class="text-center">${sec.materia_nombre}</td>
+        <td class="text-center">${sec.seccion_nombre}</td>
+        <td class="text-center">${sec.cupos || 0}</td>
+        <td class="text-center">${sec.usuario_nombre || 'N/A'}</td>
+        <td class="text-center">
+          <button onclick="abrirModalEditarSeccion('${sec.id}', '${sec.seccion_nombre}', '${sec.materia_id}', '${sec.cupos}')">
             Editar
           </button>
-          <button onclick="confirmarEliminarSeccion('${sec.id}')" 
-                  class="text-red-600 hover:text-red-700 font-bold text-sm uppercase">
+          <button onclick="confirmarEliminarSeccion('${sec.id}')">
             Eliminar
           </button>
         </td>
@@ -548,69 +534,59 @@ async function listarSecciones() {
       tbody.appendChild(fila);
     });
   } catch (error) {
-    console.error("Error al listar secciones:", error);
-    mostrarNotificacion("Error al cargar la tabla de secciones", "error");
+    console.error("Error al listar:", error);
   }
 }
 document.addEventListener("DOMContentLoaded", listarSecciones)
 
 // FUNCION PARA CREAR SECCIONES
 async function registrarNuevaSeccion(e) {
-    e.preventDefault(); // Evitar que la página se recargue
+    e.preventDefault(); 
 
-    // 1. Obtener referencias a los elementos
     const form = e.target;
     const selectMateria = document.getElementById("materia");
     const inputSeccion = document.getElementById("seccion_nombre");
     const inputCupos = document.getElementById("cupos");
 
-    // 2. Construir el objeto con los datos
     const payload = {
-        materia_id: selectMateria.value,
+        materia_id: selectMateria.value,        
         seccion_nombre: inputSeccion.value.trim(),
-        cupos: parseInt(inputCupos.value)
+        cupos: parseInt(inputCupos.value)       
     };
 
-    // 3. Validación rápida antes de enviar
     if (!payload.materia_id || !payload.seccion_nombre || isNaN(payload.cupos)) {
         mostrarNotificacion("Por favor, completa todos los campos correctamente", "error");
         return;
     }
 
     try {
-        // 4. Petición al servidor
         const response = await fetch("/api/secciones/crear-seccion", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
 
+        // --- DATOS RECIBIDOS DEL SERVIDOR (RESPONSE) ---
+        // Se espera un objeto con: { status: "ok", message: "...", id: ... }
         const resultado = await response.json();
 
         if (response.ok || resultado.status === "ok") {
             mostrarNotificacion("Sección registrada con éxito");
-            
-            // 5. Resetear el formulario y deshabilitar inputs
             form.reset();
             inputSeccion.disabled = true;
             inputCupos.disabled = true;
 
-            // 6. Refrescar la tabla de secciones (si tienes la función listarSecciones)
             if (typeof listarSecciones === 'function') {
                 await listarSecciones();
             } else {
-                // Si no tienes la función de listado dinámico, recarga la página
                 setTimeout(() => window.location.reload(), 1500);
             }
         } else {
-            // ERROR del servidor (ej: validación fallida)
-            mostrarNotificacion(resultado.message || "Error al registrar la sección", "error");
+            mostrarNotificacion(resultado.message || "Error al registrar", "error");
         }
     } catch (error) {
         console.error("Error en la petición:", error);
-        mostrarNotificacion("Error de conexión con el servidor", "error");
+        mostrarNotificacion("Error de conexión", "error");
     }
 }
 
