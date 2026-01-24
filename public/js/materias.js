@@ -103,8 +103,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
-// --- MODAL DINÁMICO PARA EDITAR SECCIÓN (Incluye Cupos) ---
 
+// --- MODAL DINÁMICO PARA EDITAR SECCIÓN (Incluye Cupos) ---
 function abrirModalEditarSeccion(id, nombre, materiaId, cupos) {
   let modal = document.getElementById("modal-editar-seccion-container");
   if (!modal) {
@@ -175,7 +175,6 @@ function abrirModalEditarSeccion(id, nombre, materiaId, cupos) {
 }
 
 // --- FUNCIONES DE APOYO (Eliminar, Notificar, Cargar) ---
-
 function confirmarEliminarSeccion(id) {
   let modal = document.getElementById("modal-eliminar-seccion-container");
   if (!modal) {
@@ -223,6 +222,7 @@ function mostrarNotificacion(mensaje, tipo = "exito") {
   setTimeout(() => toast.remove(), 3000);
 }
 
+//  funcion para traer todas las materias
 async function cargarMateriasDinamicas() {
   try {
     const response = await fetch("/api/materias/todas-materias", {
@@ -553,3 +553,70 @@ async function listarSecciones() {
   }
 }
 document.addEventListener("DOMContentLoaded", listarSecciones)
+
+// FUNCION PARA CREAR SECCIONES
+async function registrarNuevaSeccion(e) {
+    e.preventDefault(); // Evitar que la página se recargue
+
+    // 1. Obtener referencias a los elementos
+    const form = e.target;
+    const selectMateria = document.getElementById("materia");
+    const inputSeccion = document.getElementById("seccion_nombre");
+    const inputCupos = document.getElementById("cupos");
+
+    // 2. Construir el objeto con los datos
+    const payload = {
+        materia_id: selectMateria.value,
+        seccion_nombre: inputSeccion.value.trim(),
+        cupos: parseInt(inputCupos.value)
+    };
+
+    // 3. Validación rápida antes de enviar
+    if (!payload.materia_id || !payload.seccion_nombre || isNaN(payload.cupos)) {
+        mostrarNotificacion("Por favor, completa todos los campos correctamente", "error");
+        return;
+    }
+
+    try {
+        // 4. Petición al servidor
+        const response = await fetch("/api/materias/crear-seccion", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const resultado = await response.json();
+
+        if (response.ok || resultado.status === "ok") {
+            mostrarNotificacion("Sección registrada con éxito");
+            
+            // 5. Resetear el formulario y deshabilitar inputs
+            form.reset();
+            inputSeccion.disabled = true;
+            inputCupos.disabled = true;
+
+            // 6. Refrescar la tabla de secciones (si tienes la función listarSecciones)
+            if (typeof listarSecciones === 'function') {
+                await listarSecciones();
+            } else {
+                // Si no tienes la función de listado dinámico, recarga la página
+                setTimeout(() => window.location.reload(), 1500);
+            }
+        } else {
+            // ERROR del servidor (ej: validación fallida)
+            mostrarNotificacion(resultado.message || "Error al registrar la sección", "error");
+        }
+    } catch (error) {
+        console.error("Error en la petición:", error);
+        mostrarNotificacion("Error de conexión con el servidor", "error");
+    }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const formRegistro = document.getElementById("formRegistroSeccion");
+    if (formRegistro) {
+        formRegistro.addEventListener("submit", registrarNuevaSeccion);
+    }
+});
