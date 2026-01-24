@@ -69,7 +69,9 @@ rutas.get("/admin/gestionar-materias", (req, res) => {
   res.render("admin/gestionMateria", {
     title: "Gestionar Materias - EduLink",
     user: "Admin",
-    semestre: [],
+    semestres: [],
+    materias: [],
+    secciones: []
   });
 });
 

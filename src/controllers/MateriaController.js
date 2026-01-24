@@ -18,7 +18,12 @@ export default class MateriaController {
         materias, semestres, secciones 
       });
     } catch (error) {
-      res.render('admin/gestionar-materias', { title: 'Error', user: req.session.user, materias: [], semestres: [], secciones: [] });
+      console.error("Error al cargar página:", error);
+      res.render('admin/gestionar-materias', { 
+        title: 'Error', 
+        user: req.session.user, 
+        materias: [], semestres: [], secciones: [] 
+      });
     }
   }
 
@@ -26,22 +31,42 @@ export default class MateriaController {
   static async apiCrearSeccion(req, res) {
     try {
       const { materia_id, seccion_nombre } = req.body;
-      if (!materia_id || !seccion_nombre) return respuestaAlFront(res, "error", "Datos incompletos", {}, 400);
+      // IMPORTANTE: Obtenemos el ID del usuario logueado de la sesión
+      const usuario_id = req.session.user?.id;
 
-      await MateriaModel.crearSeccion(seccion_nombre, materia_id);
-      return respuestaAlFront(res, "ok", "Sección creada", { redirect: "/admin/gestionar-materias" });
+      if (!materia_id || !seccion_nombre) {
+        return respuestaAlFront(res, "error", "Datos incompletos", {}, 400);
+      }
+
+      if (!usuario_id) {
+        return respuestaAlFront(res, "error", "Sesión no válida o expirada", {}, 401);
+      }
+
+      // Pasamos los 3 parámetros necesarios según tu nueva tabla
+      await MateriaModel.crearSeccion(seccion_nombre, materia_id, usuario_id);
+      
+      return respuestaAlFront(res, "ok", "Sección registrada correctamente");
     } catch (error) {
-      return respuestaAlFront(res, "error", "Error al crear", {}, 500);
+      console.error("Error en apiCrearSeccion:", error);
+      return respuestaAlFront(res, "error", "Error interno al crear sección", {}, 500);
     }
   }
 
-  // API: Eliminar Materia
-  static async apiEliminarMateria(req, res) {
+  // API: Eliminar Sección (Adaptado a PATCH según tu JS)
+  static async apiEliminarSeccion(req, res) {
     try {
-      await MateriaModel.eliminarMateria(req.params.id);
-      return respuestaAlFront(res, "ok", "Materia eliminada", { redirect: "/admin/gestionar-materias" });
+      const { id } = req.body;
+      const usuario_id = req.session.user?.id;
+
+      if (!id) return respuestaAlFront(res, "error", "ID no proporcionado", {}, 400);
+
+      // Opcional: El modelo puede verificar si el usuario tiene permiso (si es el creador)
+      await MateriaModel.eliminarSeccion(id, usuario_id);
+      
+      return respuestaAlFront(res, "ok", "Sección eliminada");
     } catch (error) {
-      return respuestaAlFront(res, "error", "No se pudo eliminar", {}, 500);
+      console.error("Error en apiEliminarSeccion:", error);
+      return respuestaAlFront(res, "error", "No se pudo eliminar el registro", {}, 500);
     }
   }
 }
