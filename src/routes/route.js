@@ -203,7 +203,7 @@ rutas.post("/api/inscripciones/crear-inscripcion", InscripcionesController.crear
 //rutas.post("/api/materias/crear-seccion", MateriaController.crearSeccion); //semestre, materia_id, seccion_nombre
 //rutas.patch("/api/materias/actualizar-seccion", MateriaController.actualizarSeccion); // id, nombre
 //rutas.patch("/api/materias/eliminar-seccion", MateriaController.eliminarSeccion); //id
-//rutas.get("/api/materias/todas-materias", MateriaController.todasMaterias);
+rutas.get("/api/materias/todas-materias", MateriaController.todasMaterias);
 
 //API ADICION Y RETIRO
 //rutas.post("/api/adicion-retiro/crear-adicion-retiro", AdicionRetiroController.crearAdicionRetiro);  // estudiante_id, semestre_id, materia_id, seccion_id, tipo

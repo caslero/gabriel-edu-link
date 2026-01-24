@@ -1,73 +1,103 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const semestreSelect = document.getElementById("semestre");
   const materiaSelect = document.getElementById("materia_id");
   const seccionInput = document.getElementById("seccion_nombre");
-  const formRegistro = document.getElementById("formRegistroSeccion");
+  const cuposInput = document.getElementById("cupos");
 
-  // 1. Lógica de filtros en cascada (Local)
-  semestreSelect?.addEventListener("change", () => {
-    const semestre = semestreSelect.value;
-    materiaSelect.value = "";
-    if (seccionInput) {
-      seccionInput.value = "";
-      seccionInput.disabled = true;
-    }
+  // --- 1. FUNCIÓN DE FILTRADO ---
+  const aplicarFiltroMaterias = () => {
+    // Obtenemos el valor actual del select de semestre
+    const semestreElegido = semestreSelect.value ? semestreSelect.value.toString().trim() : "";
+    
+    console.log("Ejecutando filtro para semestre:", semestreElegido);
 
-    if (semestre) {
-      Array.from(materiaSelect.options).forEach((opt) => {
-        if (!opt.value) return;
-        const coincide = opt.getAttribute("data-semestre") === semestre;
-        opt.hidden = !coincide;
-        opt.disabled = !coincide;
-      });
-      materiaSelect.disabled = false;
-    } else {
+    // Si no hay semestre, deshabilitamos el select de materias
+    if (!semestreElegido) {
       materiaSelect.disabled = true;
+      materiaSelect.value = "";
+      return;
     }
+
+    const opciones = materiaSelect.querySelectorAll("option");
+    let materiasVisibles = 0;
+
+    opciones.forEach((opt) => {
+      if (!opt.value) return; // Saltar el "Seleccione..."
+
+      // Leemos el atributo que pusimos en el EJS o en la carga dinámica
+      const semestreMateria = opt.getAttribute("data-semestre") ? opt.getAttribute("data-semestre").toString().trim() : "";
+      
+      // COMPARACIÓN ESTRICTA
+      const coincide = (semestreMateria === semestreElegido);
+
+      opt.hidden = !coincide;
+      opt.disabled = !coincide;
+      
+      if (coincide) materiasVisibles++;
+    });
+
+    materiaSelect.disabled = false;
+    console.log(`Filtro aplicado. Materias encontradas para el semestre ${semestreElegido}: ${materiasVisibles}`);
+  };
+
+  // --- 2. CARGA DINÁMICA ---
+  async function cargarMateriasDinámicas() {
+    try {
+      const response = await fetch("/api/materias/todas-materias");
+      const datos = await response.json();
+
+      if (datos.status === "ok" && datos.materias) {
+        // Guardamos el valor que el usuario pudo haber seleccionado mientras cargaba la API
+        const valorTemporal = materiaSelect.value;
+
+        materiaSelect.innerHTML = '<option value="">Seleccione una materia</option>';
+
+        datos.materias.forEach((materia) => {
+          const option = document.createElement("option");
+          option.value = materia.id;
+          option.textContent = materia.nombre;
+          // Inyectamos el semestre que viene de la base de datos
+          option.setAttribute("data-semestre", materia.semestre);
+          option.hidden = true;
+          option.disabled = true;
+          materiaSelect.appendChild(option);
+        });
+
+        if (valorTemporal) materiaSelect.value = valorTemporal;
+        console.log("Materias inyectadas desde API correctamente.");
+      }
+    } catch (error) {
+      console.warn("Error en fetch, se mantendrán las materias cargadas por EJS.");
+    } finally {
+      // SIEMPRE aplicar el filtro al terminar la carga
+      aplicarFiltroMaterias();
+    }
+  }
+
+  // --- 3. EVENTOS ---
+  semestreSelect?.addEventListener("change", () => {
+    // Al cambiar semestre, reseteamos todo lo de abajo
+    materiaSelect.value = "";
+    if (seccionInput) { seccionInput.value = ""; seccionInput.disabled = true; }
+    if (cuposInput) { cuposInput.value = ""; cuposInput.disabled = true; }
+    
+    aplicarFiltroMaterias();
   });
 
   materiaSelect?.addEventListener("change", () => {
-    if (seccionInput) seccionInput.disabled = !materiaSelect.value;
+    const seleccionada = !!materiaSelect.value;
+    if (seccionInput) seccionInput.disabled = !seleccionada;
+    if (cuposInput) cuposInput.disabled = !seleccionada;
   });
 
-  // 2. Registrar Sección
-  formRegistro?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const formData = new FormData(formRegistro);
-    const payload = Object.fromEntries(formData.entries());
-
-    /* NOTA: El usuario_id se recomienda obtenerlo en el Backend 
-           vía req.session para mayor seguridad.
-        */
-    console.log("Enviando datos de sección:", payload);
-
-    try {
-      const res = await fetch("/api/materias/crear-seccion", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-      if (res.ok || data.status === "ok") {
-        mostrarNotificacion(data.message || "Sección registrada correctamente");
-        formRegistro.reset();
-
-        // Recarga para ver al nuevo usuario creador en la tabla
-        setTimeout(() => window.location.reload(), 1000);
-      } else {
-        mostrarNotificacion(data.message || "Error al crear", "error");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      mostrarNotificacion("Error de conexión con el servidor", "error");
-    }
-  });
+  // Ejecución inicial
+  await cargarMateriasDinámicas();
 });
 
-// --- MODAL DINÁMICO PARA EDITAR SECCIÓN ---
 
-function abrirModalEditarSeccion(id, nombre, materiaId) {
+// --- MODAL DINÁMICO PARA EDITAR SECCIÓN (Incluye Cupos) ---
+
+function abrirModalEditarSeccion(id, nombre, materiaId, cupos) {
   let modal = document.getElementById("modal-editar-seccion-container");
   if (!modal) {
     modal = document.createElement("div");
@@ -76,72 +106,62 @@ function abrirModalEditarSeccion(id, nombre, materiaId) {
   }
 
   modal.innerHTML = `
-        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div class="bg-white rounded-lg shadow-lg p-6 w-96 text-left">
-                <h3 class="text-lg font-semibold text-blue-700 mb-4">Actualizar Información</h3>
-                <form id="form-editar-seccion" class="space-y-3">
-                    <input type="hidden" name="idSeccion" value="${id}">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-600">Nombre de la Sección</label>
-                        <input type="text" name="nombre" value="${nombre}" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-400">ID Materia Relacionada</label>
-                        <input type="number" name="materia_id" value="${materiaId}" class="w-full border p-2 rounded bg-gray-100 cursor-not-allowed" readonly>
-                    </div>
-                    <p class="text-xs text-gray-500 italic">* La edición quedará registrada a nombre de tu usuario.</p>
-                    <div class="flex justify-end mt-4 space-x-2">
-                        <button type="button" onclick="document.getElementById('modal-editar-seccion-container').innerHTML=''" 
-                                class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors">
-                            Cancelar
-                        </button>
-                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 shadow-md transition-colors">
-                            Guardar Cambios
-                        </button>
-                    </div>
-                </form>
-            </div>
+    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+        <div class="bg-white rounded-lg shadow-lg p-6 w-96 text-left">
+            <h3 class="text-lg font-semibold text-blue-700 mb-4">Actualizar Sección</h3>
+            <form id="form-editar-seccion" class="space-y-3">
+                <input type="hidden" name="idSeccion" value="${id}">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600">Nombre de la Sección</label>
+                    <input type="text" name="nombre" value="${nombre}" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600">Cupos</label>
+                    <input type="number" name="cupos" value="${cupos || 0}" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
+                </div>
+                <div class="flex justify-end mt-4 space-x-2">
+                    <button type="button" onclick="document.getElementById('modal-editar-seccion-container').innerHTML=''" 
+                            class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 shadow-md transition-colors">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
         </div>
-    `;
+    </div>`;
 
-  document
-    .getElementById("form-editar-seccion")
-    .addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const formData = new FormData(e.target);
-      const info = Object.fromEntries(formData.entries());
+  document.getElementById("form-editar-seccion").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const info = Object.fromEntries(formData.entries());
 
-      try {
-        const response = await fetch(`/api/materias/actualizar-seccion`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: info.idSeccion,
-            nombre: info.nombre,
-            // El backend se encarga de actualizar el updated_at y verificar el usuario
-          }),
-        });
+    try {
+      const response = await fetch(`/api/materias/actualizar-seccion`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: info.idSeccion,
+          nombre: info.nombre,
+          cupos: info.cupos
+        }),
+      });
 
-        const resultado = await response.json();
-
-        if (response.ok || resultado.status === "ok") {
-          mostrarNotificacion("Sección actualizada con éxito");
-          modal.innerHTML = "";
-          window.location.reload();
-        } else {
-          mostrarNotificacion(
-            resultado.message || "Error al actualizar",
-            "error",
-          );
-        }
-      } catch (error) {
-        console.error("Error:", error);
-        mostrarNotificacion("Error de servidor", "error");
+      const resultado = await response.json();
+      if (response.ok || resultado.status === "ok") {
+        mostrarNotificacion("Sección actualizada con éxito");
+        window.location.reload();
+      } else {
+        mostrarNotificacion(resultado.message || "Error al actualizar", "error");
       }
-    });
+    } catch (error) {
+      mostrarNotificacion("Error de servidor", "error");
+    }
+  });
 }
 
-// --- MODAL DINÁMICO PARA ELIMINAR SECCIÓN ---
+// --- FUNCIONES DE APOYO (Eliminar, Notificar, Cargar) ---
 
 function confirmarEliminarSeccion(id) {
   let modal = document.getElementById("modal-eliminar-seccion-container");
@@ -152,27 +172,16 @@ function confirmarEliminarSeccion(id) {
   }
 
   modal.innerHTML = `
-        <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[60]">
-            <div class="bg-white rounded-lg shadow-xl p-6 w-80 text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                    <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                </div>
-                <h3 class="text-lg font-bold text-gray-900 mb-2">¿Eliminar Sección?</h3>
-                <p class="text-sm text-gray-500 mb-6">Esta acción marcará la sección ID ${id} como borrada del sistema.</p>
-                <div class="flex justify-center space-x-3">
-                    <button type="button" onclick="document.getElementById('modal-eliminar-seccion-container').innerHTML=''" 
-                            class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors">
-                        Cancelar
-                    </button>
-                    <button id="btn-confirm-delete-seccion" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 shadow-sm transition-colors">
-                        Confirmar
-                    </button>
-                </div>
+    <div class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[60]">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-80 text-center">
+            <h3 class="text-lg font-bold text-gray-900 mb-2">¿Eliminar Sección?</h3>
+            <p class="text-sm text-gray-500 mb-6">ID de sección: ${id}</p>
+            <div class="flex justify-center space-x-3">
+                <button type="button" onclick="document.getElementById('modal-eliminar-seccion-container').innerHTML=''" class="bg-gray-200 px-4 py-2 rounded-md">Cancelar</button>
+                <button id="btn-confirm-delete-seccion" class="bg-red-600 text-white px-4 py-2 rounded-md">Confirmar</button>
             </div>
         </div>
-    `;
+    </div>`;
 
   document.getElementById("btn-confirm-delete-seccion").onclick = async () => {
     try {
@@ -181,16 +190,10 @@ function confirmarEliminarSeccion(id) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: id, eliminar: true }),
       });
-
       if (response.ok) {
-        mostrarNotificacion("Registro eliminado correctamente");
-        modal.innerHTML = "";
         window.location.reload();
       } else {
-        mostrarNotificacion(
-          "No tienes permisos para eliminar este registro",
-          "error",
-        );
+        mostrarNotificacion("Error al eliminar", "error");
       }
     } catch (error) {
       mostrarNotificacion("Error de conexión", "error");
@@ -198,68 +201,40 @@ function confirmarEliminarSeccion(id) {
   };
 }
 
-// --- FUNCIÓN DE NOTIFICACIÓN ---
-function mostrarNotificacion(mensaje, tipo = "exito") {
-  const previa = document.getElementById("toast-notificacion");
-  if (previa) previa.remove();
-
-  const colorFondo = tipo === "exito" ? "bg-green-600" : "bg-red-600";
-  const toast = document.createElement("div");
-  toast.id = "toast-notificacion";
-  toast.className = `fixed bottom-5 right-5 ${colorFondo} text-white px-6 py-3 rounded-lg shadow-2xl flex items-center space-x-3 transform transition-all duration-500 z-[100] animate-bounce-short`;
-
-  toast.innerHTML = `<span class="font-medium">${mensaje}</span>`;
-  document.body.appendChild(toast);
-
-  setTimeout(() => {
-    toast.style.opacity = "0";
-    setTimeout(() => toast.remove(), 500);
-  }, 3500);
-}
-
-// FUNCION PARA CARGAR MATERIAS DESDE LA API
 async function cargarMateriasDinámicas() {
   try {
-    const response = await fetch("/api/materias/todas-materias", {
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-
+    const response = await fetch("/api/materias/todas-materias");
     const datos = await response.json();
-
-    if (datos.status === "error")
-      throw new Error(datos.message || "Error al obtener materias");
-
     const materiaSelect = document.getElementById("materia_id");
-    const semestreSelect = document.getElementById("semestre"); // Necesario para disparar el filtro
+    const semestreSelect = document.getElementById("semestre");
 
-    if (!materiaSelect) return;
+    if (!materiaSelect || datos.status === "error") return;
 
-    // 1. Limpiamos pero mantenemos la opción por defecto
-    materiaSelect.innerHTML =
-      '<option value="">Seleccione una materia</option>';
+    materiaSelect.innerHTML = '<option value="">Seleccione una materia</option>';
 
-    // 2. Llenamos el select con el atributo 'data-semestre'
-    datos.materias.map((materia) => {
+    datos.materias.forEach((materia) => {
       const option = document.createElement("option");
       option.value = materia.id;
       option.textContent = materia.nombre;
       option.setAttribute("data-semestre", materia.semestre);
       option.hidden = true;
       option.disabled = true;
-
       materiaSelect.appendChild(option);
     });
 
-    // 3. IMPORTANTE: Si ya hay un semestre seleccionado al cargar las materias,
-    if (semestreSelect && semestreSelect.value) {
+    if (semestreSelect?.value) {
       semestreSelect.dispatchEvent(new Event("change"));
     }
-
-    console.log("Materias cargadas y vinculadas por semestre");
   } catch (error) {
-    console.error("Error al obtener las materias:", error);
+    console.error("Error al cargar materias:", error);
   }
 }
 
-cargarMateriasDinámicas();
+function mostrarNotificacion(mensaje, tipo = "exito") {
+  const color = tipo === "exito" ? "bg-green-600" : "bg-red-600";
+  const toast = document.createElement("div");
+  toast.className = `fixed bottom-5 right-5 ${color} text-white px-6 py-3 rounded-lg shadow-2xl z-[100]`;
+  toast.innerHTML = `<span class="font-medium">${mensaje}</span>`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
