@@ -579,7 +579,7 @@ async function registrarNuevaSeccion(e) {
 
     try {
         // 4. Petición al servidor
-        const response = await fetch("/api/materias/crear-seccion", {
+        const response = await fetch("/api/secciones/crear-seccion", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
