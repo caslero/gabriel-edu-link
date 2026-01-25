@@ -104,7 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // --- MODAL DINÁMICO PARA EDITAR SECCIÓN
-function abrirModalEditarSeccion(id, nombre, cupos) {
+function abrirModalEditarSeccion(id, nombre, cupos, materia_id) { // Agregado materia_id como parámetro
   let modal = document.getElementById("modal-editar-seccion-container");
   if (!modal) {
     modal = document.createElement("div");
@@ -118,7 +118,7 @@ function abrirModalEditarSeccion(id, nombre, cupos) {
             <h3 class="text-lg font-semibold text-blue-700 mb-4">Actualizar Sección</h3>
             <form id="form-editar-seccion" class="space-y-3">
                 <input type="hidden" name="idSeccion" value="${id}">
-                <div>
+                <input type="hidden" name="materia_id" value="${materia_id}"> <div>
                     <label class="block text-sm font-semibold text-gray-600">Nombre de la Sección</label>
                     <input type="text" name="nombre" value="${nombre}" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
                 </div>
@@ -152,6 +152,7 @@ function abrirModalEditarSeccion(id, nombre, cupos) {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             id: info.idSeccion,
+            materia_id: info.materia_id,
             nombre: info.nombre,
             cupos: info.cupos,
           }),
