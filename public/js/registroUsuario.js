@@ -25,17 +25,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const pais = get("pais");
   const terms = get("termsCheck");
 
-  const roleValue = "Estudiante";
+  // --- CAMBIOS DE ROL ---
+  const roleId = 3;             // ID que espera el backend
+  const roleLabel = "Estudiante"; // Texto para el usuario
 
   // --- VER/OCULTAR CONTRASEÑA ---
   const eyeOpenPath = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />`;
   const eyeSlashedPath = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" />`;
 
-  // Seleccionamos todos los botones que tengan la clase toggle-password
   document.querySelectorAll(".toggle-password").forEach((button) => {
     button.addEventListener("click", (e) => {
-      e.preventDefault(); // Evitar que el botón haga submit o mueva el form
-
+      e.preventDefault();
       const targetId = button.getAttribute("data-target");
       const input = get(targetId);
       const svg = button.querySelector("svg");
@@ -59,7 +59,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const summaryName = get("summaryName");
   const summaryRol = get("summaryRol");
 
-  // Alertas dinámicas
   function mostrarAlerta(mensaje, tipo = "error") {
     const colores = {
       error: "bg-red-100 text-red-800 border-red-300",
@@ -68,12 +67,8 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     alertContainer.innerHTML = `
-      <div class="border ${
-        colores[tipo]
-      } px-4 py-3 rounded relative mb-4 transition-all" role="alert">
-        <strong class="font-semibold">${
-          tipo === "success" ? "¡Éxito!" : "Atención"
-        }:</strong>
+      <div class="border ${colores[tipo]} px-4 py-3 rounded relative mb-4 transition-all" role="alert">
+        <strong class="font-semibold">${tipo === "success" ? "¡Éxito!" : "Atención"}:</strong>
         <span class="block sm:inline">${mensaje}</span>
       </div>
     `;
@@ -96,7 +91,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Paso 1 -> Paso 2
   if (step1Next) {
     step1Next.addEventListener("click", () => {
       if (!email.value || !password.value || !confirmPassword.value) {
@@ -107,7 +101,6 @@ document.addEventListener("DOMContentLoaded", () => {
         mostrarAlerta("Las contraseñas no coinciden.");
         return;
       }
-
       alertContainer.innerHTML = "";
       step1.classList.add("hidden");
       step2.classList.remove("hidden");
@@ -115,7 +108,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Paso 2 -> Paso 3
   if (step2Next) {
     step2Next.addEventListener("click", () => {
       if (!name.value || !cedulaInput.value) {
@@ -123,9 +115,10 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      // --- MOSTRAR NOMBRE DEL ROL AL USUARIO ---
       summaryEmail.textContent = email.value;
       summaryName.textContent = name.value;
-      summaryRol.textContent = roleValue;
+      summaryRol.textContent = roleLabel; 
 
       alertContainer.innerHTML = "";
       step2.classList.add("hidden");
@@ -134,21 +127,17 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Botones atrás
-  if (step2Prev)
-    step2Prev.onclick = () => {
-      step2.classList.add("hidden");
-      step1.classList.remove("hidden");
-      activarPaso(1);
-    };
-  if (step3Prev)
-    step3Prev.onclick = () => {
-      step3.classList.add("hidden");
-      step2.classList.remove("hidden");
-      activarPaso(2);
-    };
+  if (step2Prev) step2Prev.onclick = () => {
+    step2.classList.add("hidden");
+    step1.classList.remove("hidden");
+    activarPaso(1);
+  };
+  if (step3Prev) step3Prev.onclick = () => {
+    step3.classList.add("hidden");
+    step2.classList.remove("hidden");
+    activarPaso(2);
+  };
 
-  // --- ENVÍO FINAL CON FETCH ---
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -157,6 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // --- ENVIAR ID DEL ROL AL SERVIDOR ---
     const datos = {
       cedula: `${pais.value}${cedulaInput.value}`,
       pais: pais.value,
@@ -164,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
       correo: email.value,
       clave: password.value,
       confirmarClave: confirmPassword.value,
-      rol: roleValue,
+      rol: roleId, 
       texto: "",
     };
 
@@ -186,10 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
           window.location.href = resultado.redirect || "/login";
         }, 2000);
       } else {
-        mostrarAlerta(
-          resultado.message || "No se pudo procesar el registro.",
-          "error"
-        );
+        mostrarAlerta(resultado.message || "No se pudo procesar el registro.", "error");
       }
     } catch (error) {
       console.error("Error en la petición fetch:", error);

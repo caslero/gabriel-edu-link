@@ -12,6 +12,13 @@ rutas.get("/", (req, res) => {
   res.render("index", { title: "Inicio - EduLink", user: null });
 });
 
+rutas.get('/ayuda', (req, res) => {
+    res.render('ayuda', { 
+        title: 'Centro de Ayuda - EduLink', // <--- Asegúrate de que esta línea exista
+        user: req.user || null 
+    });
+});
+
 //----------Rutas de Partials------
 // layout
 rutas.get("/partials/layout", (req, res) => {
@@ -27,6 +34,7 @@ rutas.get("/partials/header", (req, res) => {
 rutas.get("/partials/footer", (req, res) => {
   res.render("partials/footer");
 });
+
 
 //----------Rutas de Autenticación------
 // Registro de Usuario

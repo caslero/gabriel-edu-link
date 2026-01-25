@@ -152,7 +152,7 @@
           <th class="px-4 py-2">Fecha Registro</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-200">
+      <tbody id="tabla-confirmadas-body" class="divide-y divide-gray-200">
         <% if (!inscripciones || inscripciones.length === 0) { %>
           <tr><td colspan="5" class="text-center py-6 text-gray-400 italic">No hay registros de inscripciones activas.</td></tr>
         <% } else { %>

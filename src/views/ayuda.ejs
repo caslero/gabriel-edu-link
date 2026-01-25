@@ -1,0 +1,288 @@
+<div class="max-w-7xl mx-auto mt-10 mb-20 bg-white rounded-lg shadow-xl overflow-hidden">
+  <div class="bg-blue-700 p-8 text-white text-center">
+    <h1 class="text-3xl font-bold">Centro de Ayuda EduLink</h1>
+    <p class="mt-2 text-blue-100">Manual de Usuario Integral para la Gestión Académica</p>
+  </div>
+
+  <div class="flex flex-col md:flex-row">
+    <aside class="w-full md:w-64 bg-gray-50 border-r border-gray-200 p-6">
+      <nav class="space-y-2">
+        <button onclick="showTab('general')" class="tab-btn w-full text-left px-4 py-2 rounded font-semibold bg-blue-100 text-blue-700">General</button>
+        <button onclick="showTab('admin')" class="tab-btn w-full text-left px-4 py-2 rounded font-semibold text-gray-600 hover:bg-gray-100">Administrador</button>
+        <button onclick="showTab('estudiante')" class="tab-btn w-full text-left px-4 py-2 rounded font-semibold text-gray-600 hover:bg-gray-100">Estudiante</button>
+        <button onclick="showTab('docente')" class="tab-btn w-full text-left px-4 py-2 rounded font-semibold text-gray-600 hover:bg-gray-100">Docente</button>
+        <button onclick="showTab('faq')" class="tab-btn w-full text-left px-4 py-2 rounded font-semibold text-gray-600 hover:bg-gray-100">Preguntas Frecuentes</button>
+      </nav>
+    </aside>
+
+    <main class="flex-1 p-8">
+      
+      <div id="general" class="tab-content space-y-6">
+        <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">Bienvenido a EduLink</h2>
+        <p class="text-gray-600">EduLink es un ecosistema digital diseñado para interconectar a los tres pilares de la institución. Aquí explicamos los conceptos clave y el flujo de información entre roles.</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 border rounded-lg bg-yellow-50">
+            <h4 class="font-bold text-yellow-800">Glosario de Estados</h4>
+            <ul class="text-sm space-y-2 mt-2">
+              <li><span class="font-bold">Pendiente:</span> La solicitud ha sido enviada y espera revisión del siguiente actor.</li>
+              <li><span class="font-bold">AprobadaDocente:</span> El profesor ha dado el aval académico, falta la validación del Admin.</li>
+              <li><span class="font-bold">Aprobada:</span> El proceso ha finalizado y el cambio ya es efectivo en el sistema.</li>
+              <li><span class="font-bold">Rechazada:</span> La solicitud fue denegada. Revise los comentarios para conocer el motivo.</li>
+            </ul>
+          </div>
+          <div class="p-4 border rounded-lg bg-blue-50">
+            <h4 class="font-bold text-blue-800">Seguridad y Perfil</h4>
+            <p class="text-sm mt-2">Su cuenta es personal e intransferible. Puede actualizar su foto haciendo clic en el avatar de su perfil y cambiar su contraseña mediante la verificación de la clave actual.</p>
+          </div>
+        </div>
+        
+      </div>
+
+      <div id="admin" class="tab-content hidden space-y-6">
+        <h2 class="text-2xl font-bold text-blue-700 border-b-2 border-blue-100 pb-2">Guía del Administrador</h2>
+        
+        <div class="grid grid-cols-1 gap-6 text-gray-700">
+          <section class="bg-white border-l-4 border-blue-600 p-4 shadow-sm rounded-r-lg">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+              <i class="bi bi-people-fill mr-2"></i> 1. Usuarios y Seguridad
+            </h3>
+            <p class="mt-2">Usted es el responsable de mantener la integridad del acceso. Puede registrar nuevos <strong>Administradores, Docentes y Estudiantes</strong>.</p>
+            <ul class="list-disc ml-5 text-sm mt-2 space-y-1">
+              <li><strong>Perfiles:</strong> Los roles determinan qué puede ver cada persona. El sistema protege datos sensibles según el <code>rol_id</code>.</li>
+              <li><strong>Reset de Claves:</strong> En caso de pérdida de acceso, solo usted puede resetear contraseñas desde el panel de gestión de usuarios.</li>
+            </ul>
+          </section>
+
+          <section class="bg-white border-l-4 border-blue-600 p-4 shadow-sm rounded-r-lg">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+              <i class="bi bi-book-half mr-2"></i> 2. Gestión de Oferta (Materias y Secciones)
+            </h3>
+            <p class="mt-2">Configure el catálogo académico de cada semestre. El sistema permite:</p>
+            <ul class="list-disc ml-5 text-sm mt-2 space-y-1">
+              <li><strong>Creación masiva:</strong> Definir materias por nivel (semestre).</li>
+              <li><strong>Control de Cupos:</strong> Al crear una sección, defina un límite. Una vez lleno, el sistema ocultará automáticamente esa sección a los estudiantes.</li>
+              <li><strong>Restricciones:</strong> No se pueden eliminar materias que tengan alumnos inscritos o actas asociadas.</li>
+            </ul>
+            
+          </section>
+
+          <section class="bg-white border-l-4 border-blue-600 p-4 shadow-sm rounded-r-lg">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+              <i class="bi bi-bar-chart-line mr-2"></i> 3. Control de Encuestas
+            </h3>
+            <p class="mt-2">Antes de cada proceso de inscripción, utilice este módulo para proyectar la demanda académica.</p>
+            <div class="grid grid-cols-3 gap-2 mt-2 text-center text-xs font-bold">
+              <div class="p-2 bg-yellow-100 text-yellow-800 rounded">PENDIENTE<br>(Edición)</div>
+              <div class="p-2 bg-green-100 text-green-800 rounded">ACTIVA<br>(Recibe votos)</div>
+              <div class="p-2 bg-gray-100 text-gray-800 rounded">FINALIZADA<br>(Lectura)</div>
+            </div>
+          </section>
+
+          <section class="bg-white border-l-4 border-blue-600 p-4 shadow-sm rounded-r-lg">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+              <i class="bi bi-pencil-square mr-2"></i> 4. Validación de Solicitudes
+            </h3>
+            <p class="mt-2">Este es el corazón operativo del sistema. Usted debe auditar cada petición de los estudiantes:</p>
+            <ul class="list-disc ml-5 text-sm mt-2 space-y-1">
+              <li><strong>Inscripción:</strong> Verifique que el alumno no tenga conflictos de horario.</li>
+              <li><strong>Adición/Retiro:</strong> Revise los motivos expuestos por el alumno. Si rechaza un retiro, el alumno permanecerá legalmente en la lista de clase.</li>
+              <li><strong>Comentarios:</strong> Es obligatorio justificar por qué se rechaza un trámite para evitar reclamos en taquilla.</li>
+            </ul>
+            
+          </section>
+
+          <section class="bg-white border-l-4 border-blue-600 p-4 shadow-sm rounded-r-lg">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+              <i class="bi bi-file-earmark-check mr-2"></i> 5. Flujo de Actas Especiales
+            </h3>
+            <p class="mt-2">Usted es la autoridad final en trámites extraordinarios. El flujo es el siguiente:</p>
+            <ol class="list-decimal ml-5 text-sm mt-2 space-y-1 italic">
+              <li>El estudiante o docente inicia el acta.</li>
+              <li>El docente responsable otorga el aval académico (Estado: <code>AprobadaDocente</code>).</li>
+              <li><strong>Usted valida y cierra el acta:</strong> Solo tras su aprobación el sistema modificará la nota o el estatus del alumno de forma permanente.</li>
+            </ol>
+          </section>
+        </div>
+      </div>
+        
+    
+
+      <div id="estudiante" class="tab-content hidden space-y-6">
+        <h2 class="text-2xl font-bold text-blue-700 border-b-2 border-blue-100 pb-2">Guía del Estudiante</h2>
+        
+        <div class="grid grid-cols-1 gap-6 text-gray-700">
+          <section class="bg-white border-l-4 border-green-500 p-4 shadow-sm rounded-r-lg">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+              <i class="bi bi-pencil-fill mr-2"></i> 1. Proceso de Inscripción
+            </h3>
+            <p class="mt-2">Es el primer paso para formalizar su semestre. El sistema utiliza <strong>filtros dependientes</strong>:</p>
+            <ul class="list-disc ml-5 text-sm mt-2 space-y-1">
+              <li><strong>Paso 1:</strong> Seleccione el Semestre (esto carga las materias correspondientes).</li>
+              <li><strong>Paso 2:</strong> Elija la Materia (esto despliega las secciones con cupo disponible).</li>
+              <li><strong>Paso 3:</strong> Seleccione la Sección y envíe.</li>
+            </ul>
+            <p class="text-xs text-gray-500 mt-2 italic">*Si una sección no aparece, es posible que los cupos se hayan agotado.*</p>
+            
+          </section>
+
+          <section class="bg-white border-l-4 border-orange-500 p-4 shadow-sm rounded-r-lg">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+              <i class="bi bi-plus-circle-dotted mr-2"></i> 2. Ajustes (Adición y Retiro)
+            </h3>
+            <p class="mt-2">Permite modificar su carga académica después de la inscripción inicial:</p>
+            <ul class="list-disc ml-5 text-sm mt-2 space-y-1">
+              <li><strong>Adición:</strong> Funciona igual que la inscripción para sumar materias nuevas.</li>
+              <li><strong>Retiro:</strong> Debe seleccionar la materia y <strong>justificar obligatoriamente</strong> el motivo.</li>
+            </ul>
+            <div class="mt-3 p-3 bg-red-50 rounded border border-red-100 text-xs text-red-700">
+              <strong>Nota:</strong> Todas las solicitudes de ajuste quedan en estado "Pendiente" hasta que el Administrador las valide.
+            </div>
+          </section>
+
+          <section class="bg-white border-l-4 border-purple-500 p-4 shadow-sm rounded-r-lg">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+              <i class="bi bi-clipboard-data mr-2"></i> 3. Encuestas de Oferta
+            </h3>
+            <p class="mt-2">Su opinión ayuda a la institución a planificar qué materias abrir. Puede votar por un <strong>mínimo de 1 y un máximo de 3 materias</strong>. Una vez enviado el voto, no podrá modificarlo.</p>
+          </section>
+
+          <section class="bg-white border-l-4 border-blue-500 p-4 shadow-sm rounded-r-lg">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+              <i class="bi bi-file-earmark-medical mr-2"></i> 4. Solicitud de Actas Especiales
+            </h3>
+            <p class="mt-2">Utilice este módulo para casos excepcionales como:</p>
+            <ul class="list-disc ml-5 text-sm mt-2 space-y-1">
+              <li>Corrección de calificaciones erróneas.</li>
+              <li>Inscripciones extemporáneas justificadas.</li>
+              <li>Validación de tutorías o proyectos.</li>
+            </ul>
+            <p class="text-sm mt-2">Debe indicar la <strong>Materia</strong> y el <strong>Docente Responsable</strong> para que el sistema le asigne la solicitud a la bandeja de dicho profesor.</p>
+          </section>
+
+          <section class="bg-white border-l-4 border-gray-600 p-4 shadow-sm rounded-r-lg">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+              <i class="bi bi-person-badge mr-2"></i> 5. Gestión de Perfil
+            </h3>
+            <p class="mt-2">Mantenga su información actualizada para asegurar la comunicación con la institución:</p>
+            <ul class="list-disc ml-5 text-sm mt-2 space-y-1">
+              <li><strong>Foto:</strong> Haga clic en su imagen para subir una nueva (formato JPG/PNG).</li>
+              <li><strong>Seguridad:</strong> Cambie su clave periódicamente. El sistema le pedirá su contraseña actual por seguridad antes de aceptar una nueva.</li>
+            </ul>
+          </section>
+        </div>
+      </div>
+
+     <div id="docente" class="tab-content hidden space-y-6">
+        <h2 class="text-2xl font-bold text-blue-700 border-b-2 border-blue-100 pb-2">Guía del Docente</h2>
+        
+        <div class="grid grid-cols-1 gap-6 text-gray-700">
+          <section class="bg-white border-l-4 border-indigo-600 p-4 shadow-sm rounded-r-lg">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+              <i class="bi bi-file-earmark-plus-fill mr-2"></i> 1. Emisión de Actas Especiales
+            </h3>
+            <p class="mt-2">Usted puede formalizar trámites extraordinarios para sus alumnos. El proceso cuenta con una herramienta de búsqueda inteligente:</p>
+            <ul class="list-disc ml-5 text-sm mt-2 space-y-2">
+              <li><strong>Búsqueda por Cédula:</strong> Ingrese el número de identidad (usando los prefijos V- o E-) para localizar al alumno. Esto evita errores de transcripción o confusiones entre estudiantes con nombres similares.</li>
+              <li><strong>Tipo de Acta:</strong> Seleccione entre <span class="italic font-semibold">Solicitud</span> (petición interna) o <span class="italic font-semibold">Acta Directa</span> (reporte inmediato de una novedad académica).</li>
+              <li><strong>Justificación:</strong> Es fundamental describir detalladamente el motivo del acta (ej: "Corrección de nota del 2do parcial por error en sumatoria") para la auditoría del Administrador.</li>
+            </ul>
+          </section>
+
+          <section class="bg-white border-l-4 border-cyan-600 p-4 shadow-sm rounded-r-lg">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+              <i class="bi bi-check2-all mr-2"></i> 2. Bandeja de Entrada y Decisiones
+            </h3>
+            <p class="mt-2">En la parte inferior de su módulo, encontrará la tabla de "Solicitudes dirigidas al docente". Aquí debe procesar los trámites iniciados por sus estudiantes:</p>
+            <div class="flex flex-col sm:flex-row gap-4 mt-3">
+              <div class="flex-1 p-3 bg-green-50 rounded border border-green-200">
+                <span class="font-bold text-green-700">Aprobar:</span> El estado cambia a <code>AprobadaDocente</code>. Indica que el profesor avala el cambio solicitado.
+              </div>
+              <div class="flex-1 p-3 bg-red-50 rounded border border-red-200">
+                <span class="font-bold text-red-700">Rechazar:</span> Finaliza el trámite si la solicitud no tiene fundamento académico o legal.
+              </div>
+            </div>
+            
+          </section>
+
+          <section class="bg-white border-l-4 border-gray-400 p-4 shadow-sm rounded-r-lg">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+              <i class="bi bi-diagram-3-fill mr-2"></i> 3. Entendiendo el Flujo de Datos
+            </h3>
+            <p class="mt-2 text-sm">Es importante recordar que la labor del docente es de <strong>validación académica</strong>. Una vez que usted aprueba:</p>
+            <ol class="list-decimal ml-5 text-sm mt-2 space-y-1 italic">
+              <li>La solicitud viaja automáticamente al panel del <strong>Administrador (Control de Estudios)</strong>.</li>
+              <li>El Administrador realiza el cambio técnico en el expediente del alumno.</li>
+              <li>Solo entonces, el trámite aparecerá como <span class="font-bold text-green-600 uppercase">Aprobado</span> definitivo.</li>
+            </ol>
+            
+          </section>
+
+          <section class="bg-white border-l-4 border-blue-400 p-4 shadow-sm rounded-r-lg">
+            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+              <i class="bi bi-shield-lock-fill mr-2"></i> 4. Seguridad y Firma
+            </h3>
+            <p class="mt-2">Su usuario es su firma digital. Mantenga su contraseña segura y actualice su información de perfil para que los alumnos puedan identificarlo correctamente al momento de dirigirle una solicitud de acta.</p>
+          </section>
+        </div>
+      </div>
+
+      <div id="faq" class="tab-content hidden space-y-6">
+        <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">Preguntas Frecuentes (FAQ)</h2>
+        <div class="space-y-4">
+          <details class="group border-b pb-4 cursor-pointer">
+            <summary class="font-bold text-lg text-blue-600 list-none flex justify-between">
+              ¿Qué hago si una materia no aparece en mi semestre?
+              <span class="group-open:rotate-180 transition text-gray-400">▼</span>
+            </summary>
+            <p class="mt-2 text-gray-600">Verifique con Control de Estudios si la oferta académica ya ha sido publicada. También asegúrese de no haber aprobado esa materia previamente.</p>
+          </details>
+
+          <details class="group border-b pb-4 cursor-pointer">
+            <summary class="font-bold text-lg text-blue-600 list-none flex justify-between">
+              ¿Cómo sé si mi retiro fue aceptado?
+              <span class="group-open:rotate-180 transition text-gray-400">▼</span>
+            </summary>
+            <p class="mt-2 text-gray-600">Revise la tabla de "Solicitudes Realizadas" en su panel. Si el estado es "Aprobada", ya no figurará en la lista de clases.</p>
+          </details>
+
+          <details class="group border-b pb-4 cursor-pointer">
+            <summary class="font-bold text-lg text-blue-600 list-none flex justify-between">
+              ¿Puedo editar un acta ya enviada?
+              <span class="group-open:rotate-180 transition text-gray-400">▼</span>
+            </summary>
+            <p class="mt-2 text-gray-600">No. Una vez enviada, el acta entra en flujo de revisión. Si cometió un error, deberá solicitar al docente que la rechace para crear una nueva.</p>
+          </details>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  function showTab(tabId) {
+    // Ocultar todos los contenidos
+    document.querySelectorAll('.tab-content').forEach(content => {
+      content.classList.add('hidden');
+    });
+    
+    // Mostrar el seleccionado
+    document.getElementById(tabId).classList.remove('hidden');
+
+    // Estilos de los botones
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.classList.remove('bg-blue-100', 'text-blue-700');
+      btn.classList.add('text-gray-600');
+    });
+    
+    // Manejar el evento de clic correctamente para el estilo activo
+    const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(btn => 
+      btn.getAttribute('onclick') === `showTab('${tabId}')`
+    );
+    if(activeBtn) {
+      activeBtn.classList.add('bg-blue-100', 'text-blue-700');
+      activeBtn.classList.remove('text-gray-600');
+    }
+  }
+</script>
