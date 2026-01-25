@@ -279,7 +279,7 @@ export default class ValidarCampos {
   }
 
   /**
-   Valida que un campo de semestre sea un número entero entre 1 y 12 (inclusive).
+   Valida que un campo de semestre sea un número entero entre 1 y 10 (inclusive).
    Verifica que no esté vacío, que sea un número válido y que esté dentro del rango de semestres.
    @function validarSemestre
    @param {string|number} semestre - Semestre ingresado por el usuario.
@@ -314,11 +314,11 @@ export default class ValidarCampos {
         );
       }
 
-      // 5. Verifica si está dentro del rango 1-12
-      if (semestreNumero < 1 || semestreNumero > 12) {
+      // 5. Verifica si está dentro del rango 1-10
+      if (semestreNumero < 1 || semestreNumero > 10) {
         return respuestasAlBack(
           "error",
-          `Error el ${detalles ? detalles : "semestre"} debe estar entre 1 y 12`,
+          `Error el ${detalles ? detalles : "semestre"} debe estar entre 1 y 10`,
         );
       }
 
@@ -379,8 +379,8 @@ export default class ValidarCampos {
         );
       }
 
-      // 5. Verifica si está dentro del rango 1-12
-      if (cupoNumero < 1 || cupoNumero > 12) {
+      // 5. Verifica si está dentro del rango 1-50
+      if (cupoNumero < 1 || cupoNumero > 50) {
         return respuestasAlBack(
           "error",
           `Error el ${detalles ? detalles : "cupo"} debe estar entre 1 y 50`,

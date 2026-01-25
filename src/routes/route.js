@@ -4,6 +4,7 @@ import InscripcionesController from "../controllers/InscripcionesController.js";
 import LoginController from "../controllers/LoginController.js";
 import RolController from "../controllers/RolController.js";
 import MateriaController from "../controllers/MateriaController.js";
+import SeccionController from "../controllers/SeccionController.js";
 
 const rutas = express.Router();
 
@@ -71,7 +72,7 @@ rutas.get("/admin/gestionar-materias", (req, res) => {
     user: "Admin",
     semestres: [],
     materias: [],
-    secciones: []
+    secciones: [],
   });
 });
 
@@ -195,8 +196,14 @@ rutas.post("/api/login/iniciar-sesion", LoginController.iniciarSesion);
 
 rutas.get("/api/materias/todas-materias", MateriaController.todasMaterias);
 
+rutas.get("/api/secciones/todas-secciones", SeccionController.todasSecciones);
+rutas.post("/api/secciones/crear-seccion", SeccionController.crearSeccion);
+
 //API INSCRIPCIONES
-rutas.post("/api/inscripciones/crear-inscripcion", InscripcionesController.crearInscripcion,); // estudiante_id, semestre_id, materia_id, seccion_id
+rutas.post(
+  "/api/inscripciones/crear-inscripcion",
+  InscripcionesController.crearInscripcion,
+); // estudiante_id, semestre_id, materia_id, seccion_id
 //rutas.post("/api/inscripciones/gestionar-solicitud", InscripcionesController.actualizarEstadoSolicitud); // solicitud_id, estado
 
 //API MATERIAS

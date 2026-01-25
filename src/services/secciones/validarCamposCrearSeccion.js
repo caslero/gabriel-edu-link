@@ -13,18 +13,21 @@ export default async function validarCamposCrearSeccion(
       materia_id,
       "materia",
     );
-    const validarNombre = ValidarCampos.validarCampoNombre(seccion_nombre);
+    const validarNombreSeccion = ValidarCampos.validarCampoSemestre(
+      seccion_nombre,
+      "seccion",
+    );
     const validarCupos = ValidarCampos.validarCampoCupo(cupos);
 
     // 2. Retorna el primer error encontrado
     if (validarIdMateria.status === "error") return validarIdMateria;
-    if (validarNombre.status === "error") return validarNombre;
+    if (validarNombreSeccion.status === "error") return validarNombreSeccion;
     if (validarCupos.status === "error") return validarCupos;
 
     // 3. Retorna respuesta exitosa con todos los datos validados
     return respuestasAlBack("ok", "Campos validados seccion", {
       materiaId: validarIdMateria.id,
-      nombre: validarNombre.nombre,
+      nombre: validarNombreSeccion.semestre,
       cupos: validarCupos.cupo,
     });
   } catch (error) {

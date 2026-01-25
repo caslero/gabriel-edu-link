@@ -1,7 +1,7 @@
 import obtenerDatosUsuarioToken from "../../libs/obtenerDatosUsuarioToken.js";
 import respuestasAlBack from "../../utils/respuestasAlBack.js";
 
-export default async function validarObtenerTodasMaterias(req) {
+export default async function validarObtenerTodasSecciones(req) {
   try {
     const validaciones = await obtenerDatosUsuarioToken(req);
 
@@ -22,15 +22,15 @@ export default async function validarObtenerTodasMaterias(req) {
 
     return respuestasAlBack(
       "ok",
-      "Validacion correcta obtener todas las materias",
+      "Validacion correcta obtener todas las secciones",
       {},
     );
   } catch (error) {
-    console.error("Error interno validar obtener todas las materias:", error);
+    console.error("Error interno validar obtener todas las secciones:", error);
 
     return respuestasAlBack(
       "error",
-      "Error interno validar obtener todas las materias...",
+      "Error interno validar obtener todas las secciones...",
     );
   }
 }

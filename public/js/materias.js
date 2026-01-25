@@ -103,7 +103,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
-
 // --- MODAL DINÁMICO PARA EDITAR SECCIÓN (Incluye Cupos) ---
 function abrirModalEditarSeccion(id, nombre, materiaId, cupos) {
   let modal = document.getElementById("modal-editar-seccion-container");
@@ -498,9 +497,8 @@ async function listarSecciones() {
       headers: { "Content-Type": "application/json" },
     });
 
-   
-    const datos = await response.json(); 
-  
+    const datos = await response.json();
+
     const tbody = document.querySelector("table tbody");
     if (!tbody) return;
     tbody.innerHTML = "";
@@ -521,7 +519,7 @@ async function listarSecciones() {
         <td class="text-center">${sec.materia_nombre}</td>
         <td class="text-center">${sec.seccion_nombre}</td>
         <td class="text-center">${sec.cupos || 0}</td>
-        <td class="text-center">${sec.usuario_nombre || 'N/A'}</td>
+        <td class="text-center">${sec.usuario_nombre || "N/A"}</td>
         <td class="text-center">
           <button onclick="abrirModalEditarSeccion('${sec.id}', '${sec.seccion_nombre}', '${sec.materia_id}', '${sec.cupos}')">
             Editar
@@ -537,62 +535,66 @@ async function listarSecciones() {
     console.error("Error al listar:", error);
   }
 }
-document.addEventListener("DOMContentLoaded", listarSecciones)
+
+document.addEventListener("DOMContentLoaded", listarSecciones);
 
 // FUNCION PARA CREAR SECCIONES
 async function registrarNuevaSeccion(e) {
-    e.preventDefault(); 
+  e.preventDefault();
 
-    const form = e.target;
-    const selectMateria = document.getElementById("materia");
-    const inputSeccion = document.getElementById("seccion_nombre");
-    const inputCupos = document.getElementById("cupos");
+  const form = e.target;
+  const selectMateria = document.getElementById("materia");
+  const inputSeccion = document.getElementById("seccion_nombre");
+  const inputCupos = document.getElementById("cupos");
 
-    const payload = {
-        materia_id: selectMateria.value,        
-        seccion_nombre: inputSeccion.value.trim(),
-        cupos: parseInt(inputCupos.value)       
-    };
+  const payload = {
+    materia_id: selectMateria.value,
+    seccion_nombre: inputSeccion.value.trim(),
+    cupos: parseInt(inputCupos.value),
+  };
 
-    if (!payload.materia_id || !payload.seccion_nombre || isNaN(payload.cupos)) {
-        mostrarNotificacion("Por favor, completa todos los campos correctamente", "error");
-        return;
+  if (!payload.materia_id || !payload.seccion_nombre || isNaN(payload.cupos)) {
+    mostrarNotificacion(
+      "Por favor, completa todos los campos correctamente",
+      "error",
+    );
+    return;
+  }
+
+  try {
+    const response = await fetch("/api/secciones/crear-seccion", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    // --- DATOS RECIBIDOS DEL SERVIDOR (RESPONSE) ---
+    // Se espera un objeto con: { status: "ok", message: "...", id: ... }
+    const resultado = await response.json();
+
+    if (response.ok || resultado.status === "ok") {
+      mostrarNotificacion("Sección registrada con éxito");
+      form.reset();
+      inputSeccion.disabled = true;
+      inputCupos.disabled = true;
+
+      if (typeof listarSecciones === "function") {
+        await listarSecciones();
+      } else {
+        setTimeout(() => window.location.reload(), 1500);
+      }
+    } else {
+      mostrarNotificacion(resultado.message || "Error al registrar", "error");
     }
-
-    try {
-        const response = await fetch("/api/secciones/crear-seccion", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-        });
-
-        // --- DATOS RECIBIDOS DEL SERVIDOR (RESPONSE) ---
-        // Se espera un objeto con: { status: "ok", message: "...", id: ... }
-        const resultado = await response.json();
-
-        if (response.ok || resultado.status === "ok") {
-            mostrarNotificacion("Sección registrada con éxito");
-            form.reset();
-            inputSeccion.disabled = true;
-            inputCupos.disabled = true;
-
-            if (typeof listarSecciones === 'function') {
-                await listarSecciones();
-            } else {
-                setTimeout(() => window.location.reload(), 1500);
-            }
-        } else {
-            mostrarNotificacion(resultado.message || "Error al registrar", "error");
-        }
-    } catch (error) {
-        console.error("Error en la petición:", error);
-        mostrarNotificacion("Error de conexión", "error");
-    }
+  } catch (error) {
+    console.error("Error en la petición:", error);
+    mostrarNotificacion("Error de conexión", "error");
+  }
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-    const formRegistro = document.getElementById("formRegistroSeccion");
-    if (formRegistro) {
-        formRegistro.addEventListener("submit", registrarNuevaSeccion);
-    }
+  const formRegistro = document.getElementById("formRegistroSeccion");
+  if (formRegistro) {
+    formRegistro.addEventListener("submit", registrarNuevaSeccion);
+  }
 });
