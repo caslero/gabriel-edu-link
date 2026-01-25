@@ -146,10 +146,14 @@ rutas.get("/docente/perfil", (req, res) => {
 });
 
 // Gestionar Actas Especiales
-rutas.get("/docente/gestionar-actas-especiales", (req, res) => {
-  res.render("docente/gestionar-actas-especiales", {
+rutas.get("/docente/gestionar-acta-especial", (req, res) => {
+  res.render("docente/gestionarActaEspecial", {
     title: "Gestionar Actas Especiales - EduLink",
     user: "Docente",
+    estudiantes: [], 
+    materias: [],
+    secciones: [],
+    actas: []
   });
 });
 
