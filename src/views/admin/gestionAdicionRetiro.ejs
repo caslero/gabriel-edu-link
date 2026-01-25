@@ -4,6 +4,23 @@
   <div class="bg-gray-50 p-6 rounded shadow mb-8">
     <h3 class="text-lg font-semibold text-blue-700 mb-4">Registrar nueva solicitud</h3>
     <form id="form-nueva-solicitud" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+      <div class="md:col-span-2">
+        <label for="buscarCedula" class="block font-semibold text-gray-700">Buscar estudiante por cédula</label>
+        <div class="flex mb-2 rounded overflow-hidden border focus-within:ring-2 focus-within:ring-blue-500">
+          <select id="prefijoCedula" class="border-none px-3 py-2 bg-gray-100 focus:outline-none">
+            <option value="1">V-</option>
+            <option value="0">E-</option>
+          </select>
+          <input type="text" id="buscarCedula" placeholder="Ej: 28051690" class="flex-1 px-3 py-2 focus:outline-none">
+          <button type="button" id="btnBuscarCedula" class="bg-blue-600 text-white px-4 flex items-center justify-center hover:bg-blue-700 transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1110.5 3a7.5 7.5 0 016.15 13.65z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
       <div>
         <label for="estudiante_id" class="block font-semibold">Estudiante</label>
         <select id="estudiante_id" name="estudiante_id" class="w-full border p-2 rounded" required>
@@ -77,18 +94,28 @@
           </tr>
         </thead>
         <tbody class="divide-y">
-          <% pendientes.forEach(sol => { %>
-            <tr data-id="<%= sol.id %>">
-              <td class="px-4 py-2 text-center"><%= sol.id %></td>
-              <td class="px-4 py-2 text-center"><%= sol.estudiante_nombre %></td>
-              <td class="px-4 py-2 text-center"><%= sol.materia %></td>
-              <td class="px-4 py-2 text-center font-bold"><%= sol.tipo %></td>
-              <td class="px-4 py-2 text-center space-y-1">
-                <button onclick="gestionarSolicitud('<%= sol.id %>', 'Aprobada')" class="bg-green-600 text-white px-4 py-1 rounded text-sm hover:bg-green-700 w-24">Aprobar</button>
-                <button onclick="gestionarSolicitud('<%= sol.id %>', 'Rechazada')" class="bg-red-600 text-white px-4 py-1 rounded text-sm hover:bg-red-700 w-24">Rechazar</button>
+          <% if (pendientes && pendientes.length > 0) { %>
+            <% pendientes.forEach(sol => { %>
+              <tr data-id="<%= sol.id %>" class="hover:bg-gray-50 transition">
+                <td class="px-4 py-2 text-center"><%= sol.id %></td>
+                <td class="px-4 py-2 text-center"><%= sol.estudiante_nombre %></td>
+                <td class="px-4 py-2 text-center text-sm"><%= sol.materia %></td>
+                <td class="px-4 py-2 text-center font-bold text-xs"><%= sol.tipo %></td>
+                <td class="px-4 py-2 text-center space-y-1">
+                  <button onclick="gestionarSolicitud('<%= sol.id %>', 'Aprobada')" class="bg-green-600 text-white px-4 py-1 rounded text-sm hover:bg-green-700 w-24 shadow-sm">Aprobar</button>
+                  <button onclick="gestionarSolicitud('<%= sol.id %>', 'Rechazada')" class="bg-red-600 text-white px-4 py-1 rounded text-sm hover:bg-red-700 w-24 shadow-sm">Rechazar</button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="5" class="px-4 py-10 text-center text-gray-500 italic bg-gray-50">
+                <div class="flex flex-col items-center justify-center">
+                  No hay ninguna solicitud pendiente por procesar
+                </div>
               </td>
             </tr>
-          <% }) %>
+          <% } %>
         </tbody>
       </table>
     </div>
@@ -107,23 +134,58 @@
           </tr>
         </thead>
         <tbody class="divide-y">
-          <% procesadas.forEach(sol => { %>
+          <% if (procesadas && procesadas.length > 0) { %>
+            <% procesadas.forEach(sol => { %>
+              <tr class="hover:bg-gray-50 transition">
+                <td class="px-4 py-2 text-center"><%= sol.id %></td>
+                <td class="px-4 py-2 text-center"><%= sol.estudiante_nombre %></td>
+                <td class="px-4 py-2 text-center">
+                  <span class="px-2 py-1 rounded text-xs font-semibold <%= sol.estado === 'Aprobada' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200' %>">
+                    <%= sol.estado %>
+                  </span>
+                </td>
+                <td class="px-4 py-2 text-center">
+                  <button onclick="confirmarEliminarSolicitud('<%= sol.id %>')" class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition" title="Eliminar registro">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
             <tr>
-              <td class="px-4 py-2 text-center"><%= sol.id %></td>
-              <td class="px-4 py-2 text-center"><%= sol.estudiante_nombre %></td>
-              <td class="px-4 py-2 text-center">
-                <span class="px-2 py-1 rounded text-xs <%= sol.estado === 'Aprobada' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %>">
-                  <%= sol.estado %>
-                </span>
-              </td>
-              <td class="px-4 py-2 text-center">
-                <button onclick="confirmarEliminarSolicitud('<%= sol.id %>')" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Eliminar</button>
+              <td colspan="4" class="px-4 py-10 text-center text-gray-500 italic bg-gray-50">
+                <div class="flex flex-col items-center justify-center">
+                  No hay registros en el historial de solicitudes
+                </div>
               </td>
             </tr>
-          <% }) %>
+          <% } %>
         </tbody>
       </table>
     </div>
   </div>
+</div>
+<div id="modal-eliminar" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden flex items-center justify-center z-[60]">
+    <div class="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full mx-4">
+        <div class="text-center">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">¿Eliminar registro?</h3>
+            <p class="text-sm text-gray-500 mb-6">Esta acción no se puede deshacer. El registro desaparecerá del historial procesado.</p>
+        </div>
+        <div class="flex space-x-3">
+            <button onclick="cerrarModalEliminar()" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition font-semibold">
+                Cancelar
+            </button>
+            <button onclick="ejecutarEliminacion()" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-semibold">
+                Eliminar
+            </button>
+        </div>
+    </div>
 </div>
 <script src="/js/adicionRetiro.js"></script>

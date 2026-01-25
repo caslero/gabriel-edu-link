@@ -37,7 +37,7 @@ rutas.get("/registro-usuario", (req, res) => {
   });
 });
 
-// login de Usuario
+// login de Usuario 
 rutas.get("/login", (req, res) => {
   res.render("auth/login", { title: "Login - EduLink", user: null });
 });
@@ -53,7 +53,9 @@ rutas.get("/dashboard/admin/panel", (req, res) => {
 
 // Perfil
 rutas.get("/admin/perfil", (req, res) => {
-  res.render("admin/perfil", { title: "Perfil - EduLink", user: "Admin" });
+  res.render("admin/perfil", { 
+    title: "Perfil - EduLink", 
+    users: "Admin" }); 
 });
 
 // Gestionar Usuarios
@@ -78,33 +80,54 @@ rutas.get("/admin/gestionar-materias", (req, res) => {
 
 // Gestionar inscripciones
 rutas.get("/admin/gestionar-inscripciones", (req, res) => {
-  res.render("admin/gestionar-inscripciones", {
+  res.render("admin/gestionInscripcion", {
     title: "Gestionar Inscripciones - EduLink",
     user: "Admin",
+    semestres: [], 
+    solicitudes: [], 
+    inscripciones: [] 
   });
 });
-
+ 
 // Gestionar Adicion y Retiro
 rutas.get("/admin/gestionar-adicion-retiro", (req, res) => {
   res.render("admin/gestionAdicionRetiro", {
     title: "Gestionar Adición y Retiro - EduLink",
     user: "Admin",
+    estudiantes: [],
+    secciones: [],
+    materias: [],
+    semestres: [],
+    solicitudes: [],
+    pendientes: [],
+    procesadas: [],
+    inscripciones: []
   });
 });
 
 // Gestionar Actas Especiales
 rutas.get("/admin/gestionar-actas-especiales", (req, res) => {
   res.render("admin/gestionActaEspecial", {
-    title: "Gestionar Actas Especiales - EduLink",
+   title: "Gestión de Actas Especiales",
     user: "Admin",
+    docentes: [], 
+    estudiantes: [], 
+    materias: [], 
+    secciones: [],
+    solicitudes: [], 
+    procesadas: [],
+    actas: []
   });
 });
 
 // Gestionar Encuestas
 rutas.get("/admin/gestionar-encuestas", (req, res) => {
   res.render("admin/gestionEncuesta", {
-    title: "Gestionar Encuestas - EduLink",
+    title: "Gestión de Encuestas",
     user: "Admin",
+    semestres: [], 
+    materias: [],
+    encuestas: []
   });
 });
 

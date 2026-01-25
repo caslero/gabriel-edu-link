@@ -103,8 +103,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
-// --- MODAL DINÁMICO PARA EDITAR SECCIÓN (Incluye Cupos) ---
-function abrirModalEditarSeccion(id, nombre, materiaId, cupos) {
+
+
+
+
+// --- MODAL DINÁMICO PARA EDITAR SECCIÓN
+function abrirModalEditarSeccion(id, nombre, cupos) {
   let modal = document.getElementById("modal-editar-seccion-container");
   if (!modal) {
     modal = document.createElement("div");
@@ -126,12 +130,12 @@ function abrirModalEditarSeccion(id, nombre, materiaId, cupos) {
                     <label class="block text-sm font-semibold text-gray-600">Cupos</label>
                     <input type="number" name="cupos" value="${cupos || 0}" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
                 </div>
-                <div class="flex justify-end mt-4 space-x-2">
+                <div class="flex justify-center mt-4 space-x-2">
                     <button type="button" onclick="document.getElementById('modal-editar-seccion-container').innerHTML=''" 
                             class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition-colors">
                         Cancelar
                     </button>
-                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 shadow-md transition-colors">
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 shadow-md transition-colors">
                         Guardar Cambios
                     </button>
                 </div>
@@ -147,7 +151,7 @@ function abrirModalEditarSeccion(id, nombre, materiaId, cupos) {
       const info = Object.fromEntries(formData.entries());
 
       try {
-        const response = await fetch(`/api/materias/actualizar-seccion`, {
+        const response = await fetch(`/api/secciones/actualizar-seccion`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -173,7 +177,9 @@ function abrirModalEditarSeccion(id, nombre, materiaId, cupos) {
     });
 }
 
-// --- FUNCIONES DE APOYO (Eliminar, Notificar, Cargar) ---
+
+
+// --- FUNCIONES DE Eliminar
 function confirmarEliminarSeccion(id) {
   let modal = document.getElementById("modal-eliminar-seccion-container");
   if (!modal) {
@@ -196,7 +202,7 @@ function confirmarEliminarSeccion(id) {
 
   document.getElementById("btn-confirm-delete-seccion").onclick = async () => {
     try {
-      const response = await fetch(`/api/materias/eliminar-seccion`, {
+      const response = await fetch(`/api/secciones/eliminar-seccion`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: id, eliminar: true }),
@@ -487,44 +493,61 @@ async function cargarMateriasDinamicas() {
     </select>
     `;*/
 
+
 // LISTAR SECCIONES REGISTRADAS
 async function listarSecciones() {
   try {
-    // --- PETICIÓN AL SERVIDOR ---
-    // No envía body (es un GET). Solo solicita los datos.
     const response = await fetch("/api/secciones/todas-secciones", {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });
 
     const datos = await response.json();
-
-    const tbody = document.querySelector("table tbody");
+    const tbody = document.getElementById("tabla-secciones-body");
     if (!tbody) return;
+
     tbody.innerHTML = "";
 
+    // 1. Caso: Sin datos (Estilo similar al de usuarios)
     if (!datos.secciones || datos.secciones.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7">No hay secciones registradas.</td></tr>`;
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="text-center py-6 text-gray-500">
+            No hay secciones registradas.
+          </td>
+        </tr>`;
       return;
     }
 
+    // 2. Caso: Listado de secciones
     datos.secciones.forEach((sec) => {
       const fila = document.createElement("tr");
+      // Mismo hover y bordes que la tabla de usuarios
       fila.className = "hover:bg-gray-50 transition-colors border-b";
 
-      // Uso de los datos recibidos:
       fila.innerHTML = `
-        <td class="text-center">#${sec.id}</td>
-        <td class="text-center">${sec.semestre}°</td>
-        <td class="text-center">${sec.materia_nombre}</td>
-        <td class="text-center">${sec.seccion_nombre}</td>
-        <td class="text-center">${sec.cupos || 0}</td>
-        <td class="text-center">${sec.usuario_nombre || "N/A"}</td>
-        <td class="text-center">
-          <button onclick="abrirModalEditarSeccion('${sec.id}', '${sec.seccion_nombre}', '${sec.materia_id}', '${sec.cupos}')">
+        <td class="px-4 py-2 text-center text-gray-600 font-medium">#${sec.id}</td>
+        <td class="px-4 py-2 text-center font-semibold">${sec.semestre}°</td>
+        <td class="px-4 py-2 text-center text-sm">${sec.materia_nombre}</td>
+        <td class="px-4 py-2 text-center">
+          <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold uppercase">
+            ${sec.seccion_nombre}
+          </span>
+        </td>
+        <td class="px-4 py-2 text-center">
+          <span class="font-bold text-green-700">${sec.cupos || 0}</span>
+        </td>
+        <td class="px-4 py-2 text-center text-gray-500 text-xs">
+          ${sec.usuario_nombre || "Sin docente"}
+        </td>
+        <td class="px-4 py-2 text-center space-x-2">
+          <button onclick="abrirModalEditarSeccion('${sec.id}', '${sec.seccion_nombre}', '${sec.materia_id}', '${sec.cupos}')" 
+                  class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded transition duration-200 text-sm">
             Editar
           </button>
-          <button onclick="confirmarEliminarSeccion('${sec.id}')">
+          
+          <button onclick="confirmarEliminarSeccion('${sec.id}')" 
+                  class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded transition duration-200 text-sm">
             Eliminar
           </button>
         </td>
@@ -532,7 +555,7 @@ async function listarSecciones() {
       tbody.appendChild(fila);
     });
   } catch (error) {
-    console.error("Error al listar:", error);
+    console.error("Error al listar secciones:", error);
   }
 }
 
