@@ -176,22 +176,31 @@ rutas.get("/estudiante/inscripcion", (req, res) => {
   res.render("estudiante/inscripcion", {
     title: "Inscripción - EduLink",
     user: "Estudiante",
+    semestres: [], 
+    materias: [],
+    secciones: [],
+    solicitudes: []
   });
 });
 
 // Adición y Retiro
 rutas.get("/estudiante/adicion-retiro", (req, res) => {
-  res.render("estudiante/adicion-retiro", {
+  res.render("estudiante/adicionRetiro", {
     title: "Adición y Retiro - EduLink",
     user: "Estudiante",
+    semestres: [],
+    materias: [],
+    secciones: [], 
+    solicitudes: []
   });
-});
+}); 
 
 // Actas Especiales
-rutas.get("/estudiante/actas-especiales", (req, res) => {
-  res.render("estudiante/actas-especiales", {
+rutas.get("/estudiante/acta-especial", (req, res) => {
+  res.render("estudiante/actaEspecial", {
     title: "Actas Especiales - EduLink",
     user: "Estudiante",
+    actas: [] 
   });
 });
 
@@ -200,6 +209,7 @@ rutas.get("/estudiante/encuestas", (req, res) => {
   res.render("estudiante/encuestas", {
     title: "Encuestas - EduLink",
     user: "Estudiante",
+    encuestas: []
   });
 });
 
