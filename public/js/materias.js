@@ -104,12 +104,66 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // --- MODAL DINÁMICO PARA EDITAR SECCIÓN
-function abrirModalEditarSeccion(id, nombre, cupos, materia_id) { // Agregado materia_id como parámetro
+async function abrirModalEditarSeccion(id, nombre, materia_id, cupos) {
   let modal = document.getElementById("modal-editar-seccion-container");
   if (!modal) {
     modal = document.createElement("div");
     modal.id = "modal-editar-seccion-container";
     document.body.appendChild(modal);
+  }
+
+  // Cambié esta línea: ahora consulta a materias/todas-materias
+  const response = await fetch("/api/materias/todas-materias", {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const datos = await response.json();
+
+  // Encontrar la materia actual para obtener su semestre
+  const materiaActual = datos.materias
+    ? datos.materias.find((m) => m.id == materia_id)
+    : null;
+  const semestreActual = materiaActual ? materiaActual.semestre : null;
+
+  // Obtener materias únicas y semestres únicos de los datos de materias
+  const materiasUnicas = {};
+  const semestresSet = new Set();
+
+  if (datos.materias) {
+    datos.materias.forEach((materia) => {
+      if (materia.id && materia.nombre && materia.semestre) {
+        if (!materiasUnicas[materia.id]) {
+          materiasUnicas[materia.id] = {
+            nombre: materia.nombre,
+            semestre: materia.semestre,
+          };
+        }
+        semestresSet.add(materia.semestre);
+      }
+    });
+  }
+
+  // Convertir a array y ordenar semestres
+  const semestresUnicos = Array.from(semestresSet).sort((a, b) => a - b);
+
+  // Crear opciones de semestres
+  const opcionesSemestres = semestresUnicos
+    .map(
+      (sem) =>
+        `<option value="${sem}" ${sem == semestreActual ? "selected" : ""}>${sem}</option>`,
+    )
+    .join("");
+
+  // Filtrar materias del semestre actual (si existe)
+  let opcionesMaterias = '<option value="">Seleccione una materia</option>';
+  if (semestreActual) {
+    for (const [idMat, datosMat] of Object.entries(materiasUnicas)) {
+      if (datosMat.semestre == semestreActual) {
+        const selected = idMat == materia_id ? "selected" : "";
+        opcionesMaterias += `<option value="${idMat}" ${selected}>${datosMat.nombre}</option>`;
+      }
+    }
   }
 
   modal.innerHTML = `
@@ -118,7 +172,23 @@ function abrirModalEditarSeccion(id, nombre, cupos, materia_id) { // Agregado ma
             <h3 class="text-lg font-semibold text-blue-700 mb-4">Actualizar Sección</h3>
             <form id="form-editar-seccion" class="space-y-3">
                 <input type="hidden" name="idSeccion" value="${id}">
-                <input type="hidden" name="materia_id" value="${materia_id}"> <div>
+
+                <div>
+                  <label for="semestreEditar" class="block font-semibold text-gray-700">Semestre</label>
+                  <select id="semestreEditar" name="semestre" class="w-full border p-2 rounded" required>
+                    <option value="">Seleccione</option>
+                    ${opcionesSemestres}
+                  </select>
+                </div>
+
+                <div>
+                  <label for="materiaEditar" class="block font-semibold text-gray-700">Materia</label>
+                  <select id="materiaEditar" name="materia_id" class="w-full border p-2 rounded" required>
+                    ${opcionesMaterias}
+                  </select>
+                </div>
+
+                <div>
                     <label class="block text-sm font-semibold text-gray-600">Nombre de la Sección</label>
                     <input type="text" name="nombre" value="${nombre}" class="w-full border p-2 rounded focus:ring-2 focus:ring-blue-400 outline-none" required>
                 </div>
@@ -139,6 +209,31 @@ function abrirModalEditarSeccion(id, nombre, cupos, materia_id) { // Agregado ma
         </div>
     </div>`;
 
+  // Agregar event listener para cambiar las materias cuando se cambia el semestre
+  document
+    .getElementById("semestreEditar")
+    .addEventListener("change", function () {
+      const semestreSeleccionado = this.value;
+      const selectMateria = document.getElementById("materiaEditar");
+
+      // Limpiar y crear nuevas opciones
+      selectMateria.innerHTML =
+        '<option value="">Seleccione una materia</option>';
+
+      if (semestreSeleccionado) {
+        for (const [idMat, datosMat] of Object.entries(materiasUnicas)) {
+          if (datosMat.semestre == semestreSeleccionado) {
+            const option = document.createElement("option");
+            option.value = idMat;
+            option.textContent = datosMat.nombre;
+            if (idMat == materia_id) option.selected = true;
+            selectMateria.appendChild(option);
+          }
+        }
+      }
+    });
+
+  // Event listener para el formulario
   document
     .getElementById("form-editar-seccion")
     .addEventListener("submit", async (e) => {
@@ -200,7 +295,7 @@ function confirmarEliminarSeccion(id) {
       const response = await fetch(`/api/secciones/eliminar-seccion`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: id, eliminar: true }),
+        body: JSON.stringify({ idSeccion: id }),
       });
       if (response.ok) {
         window.location.reload();
@@ -387,7 +482,7 @@ async function listarSecciones() {
       fila.innerHTML = `
         <td class="px-4 py-2 text-center text-gray-600 font-medium">#${sec.id}</td>
         <td class="px-4 py-2 text-center font-semibold">${sec.semestre}°</td>
-        <td class="px-4 py-2 text-center text-sm">${sec.materia_nombre}</td>
+        <td class="px-4 py-2 text-center text-sm ${sec.borrado ? 'text-red-500' : 'text-gray-700'}">${sec.materia_nombre}</td>
         <td class="px-4 py-2 text-center">
           <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold uppercase">
             ${sec.seccion_nombre}

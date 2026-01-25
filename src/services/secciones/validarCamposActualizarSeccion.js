@@ -4,7 +4,7 @@ import ValidarCampos from "../ValidarCampos.js";
 
 export default async function validarCamposActualizarSeccion(req) {
   try {
-    const { id, nombre, materia_id, cupos } = req.body;
+    const { id, materia_id, nombre, cupos } = req.body;
 
     // 1. Validaciones individuales usando la clase
     const validarIdSeccion = ValidarCampos.validarCampoId(id, "seccion");
@@ -26,7 +26,7 @@ export default async function validarCamposActualizarSeccion(req) {
       id: validarIdSeccion.id,
       nombre: validarNombre.semestre,
       materiaId: validarIdMateria.id,
-      cupos: validarCupos.cupos,
+      cupos: validarCupos.cupo,
     });
   } catch (error) {
     console.log("Error interno campos actualizar sección:", error);

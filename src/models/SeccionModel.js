@@ -320,7 +320,6 @@ export class SeccionModel {
       FROM secciones s
       LEFT JOIN materias m ON s.materia_id = m.id
       LEFT JOIN users u ON s.usuario_id = u.id
-      WHERE s.borrado = 0
       ORDER BY s.id DESC
     `;
 
