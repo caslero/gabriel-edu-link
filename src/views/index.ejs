@@ -1,32 +1,41 @@
 
 <!-- Carrusel de bienvenida -->
-<div class="relative w-full mb-10">
-  <div class="overflow-hidden relative rounded-lg shadow-lg">
-    <!-- Slides -->
-    <div class="flex transition-transform duration-700 ease-in-out" id="carousel-slides">
-      <div class="w-full flex-shrink-0">
-        <img src="/../img/carruselle/img 1-bienvenida.png" alt="carrusele-1" class="w-full h-64 md:h-[710px] object-cover">
-      </div>
-      <div class="w-full flex-shrink-0">
-        <img src="/img/carruselle/img 2-solicitud de inscripcion.png" alt="carrusele-2" class="w-full h-64 md:h-[710px] object-cover">
-      </div>
-      <div class="w-full flex-shrink-0">
-        <img src="/img/carruselle/img 3-Adicion y Retiro.png" alt="carrusele-3" class="w-full h-64 md:h-[710px] object-cover">
-      </div>
-      <div class="w-full flex-shrink-0">
-        <img src="/img/carruselle/img 4-Actas Especiales.png" alt="carrusele-4" class="w-full h-64 md:h-[710px] object-cover">
-      </div>
-      <div class="w-full flex-shrink-0">
-        <img src="/img/carruselle/img 5-Encuestas.png" alt="carrusele-5" class="w-full h-64 md:h-[710px] object-cover">
-      </div>
+<div class="relative w-full mb-10 overflow-hidden">
+  <div class="flex transition-transform duration-500 ease-out" id="carousel-slides">
+    
+    <div class="w-[80%] md:w-[70%] flex-shrink-0 px-2 opacity-40 scale-95 transition-all duration-500">
+      <img src="/img/carruselle/img 5-Encuestas.png" class="w-full h-auto max-h-[710px] object-contain bg-gray-100 rounded-lg">
     </div>
 
-    <!-- Botones de navegación -->
-    <button onclick="moveSlide(-1)" class="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 hover:bg-opacity-100">◀</button>
-    <button onclick="moveSlide(1)" class="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white bg-opacity-70 rounded-full p-2 hover:bg-opacity-100">▶</button>
-  </div>
-</div>
+    <div class="w-[80%] md:w-[70%] flex-shrink-0 px-2 opacity-100 scale-100 transition-all duration-500">
+      <img src="/../img/carruselle/img 1-bienvenida.png" class="w-full h-auto max-h-[710px] object-contain bg-gray-100 rounded-lg shadow-lg">
+    </div>
 
+    <div class="w-[80%] md:w-[70%] flex-shrink-0 px-2 opacity-40 scale-95 transition-all duration-500">
+      <img src="/img/carruselle/img 2-solicitud de inscripcion.png" class="w-full h-auto max-h-[710px] object-contain bg-gray-100 rounded-lg shadow-lg">
+    </div>
+
+    <div class="w-[80%] md:w-[70%] flex-shrink-0 px-2 opacity-40 scale-95 transition-all duration-500">
+      <img src="/img/carruselle/img 3-Adicion y Retiro.png" class="w-full h-auto max-h-[710px] object-contain bg-gray-100 rounded-lg shadow-lg">
+    </div>
+
+    <div class="w-[80%] md:w-[70%] flex-shrink-0 px-2 opacity-40 scale-95 transition-all duration-500">
+      <img src="/img/carruselle/img 4-Actas Especiales.png" class="w-full h-auto max-h-[710px] object-contain bg-gray-100 rounded-lg shadow-lg">
+    </div>
+
+    <div class="w-[80%] md:w-[70%] flex-shrink-0 px-2 opacity-40 scale-95 transition-all duration-500">
+      <img src="/img/carruselle/img 5-Encuestas.png" class="w-full h-auto max-h-[710px] object-contain bg-gray-100 rounded-lg shadow-lg">
+    </div>
+
+    <div class="w-[80%] md:w-[70%] flex-shrink-0 px-2 opacity-40 scale-95 transition-all duration-500">
+      <img src="/../img/carruselle/img 1-bienvenida.png" class="w-full h-auto max-h-[710px] object-contain bg-gray-100 rounded-lg">
+    </div>
+
+  </div>
+
+  <button onclick="moveSlide(-1)" class="absolute top-1/2 left-4 z-20 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-xl">◀</button>
+  <button onclick="moveSlide(1)" class="absolute top-1/2 right-4 z-20 -translate-y-1/2 bg-white/90 p-3 rounded-full shadow-xl">▶</button>
+</div>
 <!-- Sección de tarjetas -->
 
 <h2 class="text-3xl font-bold text-blue-900 mb-6">Realiza tus gestiones con nosotros</h2>
@@ -78,21 +87,68 @@
 
 <!-- Script carrusel -->
 <script>
-  let currentSlide = 0;
-  const slides = document.getElementById("carousel-slides");
-  const totalSlides = slides.children.length;
+const container = document.getElementById('carousel-slides');
+const slides = Array.from(container.children);
+let currentIndex = 1; 
+let isTransitioning = false;
+let autoPlayInterval; // Variable para controlar el tiempo
 
-  function moveSlide(direction) {
-    currentSlide = (currentSlide + direction + totalSlides) % totalSlides;
-    updateSlide();
-  }
+function updateCarousel(animate = true) {
+    const slideWidth = slides[0].offsetWidth;
+    // Usamos el ancho del contenedor padre para mejor precisión responsiva
+    const containerWidth = container.parentElement.offsetWidth;
+    const centerOffset = (containerWidth - slideWidth) / 2;
+    const transformValue = - (currentIndex * slideWidth) + centerOffset;
 
-  function updateSlide() {
-    slides.style.transform = `translateX(-${currentSlide * 100}%)`;
-  }
+    container.style.transition = animate ? "transform 0.5s ease-out" : "none";
+    container.style.transform = `translateX(${transformValue}px)`;
 
-  // Cambio automático cada 10 segundos
-  setInterval(() => {
-    moveSlide(1);
-  }, 10000);
+    slides.forEach((slide, i) => {
+        slide.style.opacity = (i === currentIndex) ? "1" : "0.4";
+        slide.style.transform = (i === currentIndex) ? "scale(1)" : "scale(0.95)";
+    });
+}
+
+function moveSlide(step) {
+    if (isTransitioning) return;
+    resetAutoPlay(); // Reiniciar el contador cuando el usuario hace clic manualmente
+    isTransitioning = true;
+    currentIndex += step;
+    updateCarousel(true);
+}
+
+// Lógica de cambio automático
+function startAutoPlay() {
+    autoPlayInterval = setInterval(() => {
+        moveSlide(1);
+    }, 4000); // Cambia cada 4 segundos
+}
+
+function resetAutoPlay() {
+    clearInterval(autoPlayInterval);
+    startAutoPlay();
+}
+
+// Detener el auto-play si el mouse está encima (opcional pero recomendado)
+container.parentElement.addEventListener('mouseenter', () => clearInterval(autoPlayInterval));
+container.parentElement.addEventListener('mouseleave', () => startAutoPlay());
+
+container.addEventListener('transitionend', () => {
+    isTransitioning = false;
+    
+    if (currentIndex === slides.length - 1) {
+        currentIndex = 1;
+        updateCarousel(false);
+    }
+    if (currentIndex === 0) {
+        currentIndex = slides.length - 2;
+        updateCarousel(false);
+    }
+});
+
+window.addEventListener('resize', () => updateCarousel(false));
+window.onload = () => {
+    updateCarousel(false);
+    startAutoPlay(); // Iniciar al cargar
+};
 </script>
