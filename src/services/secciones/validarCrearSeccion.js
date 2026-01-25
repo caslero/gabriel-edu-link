@@ -28,13 +28,13 @@ export default async function validarCrearSeccion(req) {
       return respuestasAlBack(validarCampos.status, validarCampos.message);
     }
 
-    const seccionExiste = await SeccionModel.buscarSeccionNombreId(
+    const seccionExiste = await SeccionModel.buscarSeccionNombreIdMateria(
       validarCampos.nombre,
       validarCampos.materiaId,
     );
 
     if (seccionExiste) {
-      return respuestasAlBack("error", "Seccion ya existe", {
+      return respuestasAlBack("error", "Error seccion ya existe", {
         codigo: 409,
       });
     }

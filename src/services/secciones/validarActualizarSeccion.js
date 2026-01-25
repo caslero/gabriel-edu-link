@@ -1,5 +1,5 @@
 import obtenerDatosUsuarioToken from "../../libs/obtenerDatosUsuarioToken.js";
-import { UserModel } from "../../models/UserModel.js";
+import { SeccionModel } from "../../models/SeccionModel.js";
 import respuestasAlBack from "../../utils/respuestasAlBack.js";
 import validarCamposActualizarSeccion from "./validarCamposActualizarSeccion.js";
 
@@ -16,13 +16,22 @@ export default async function validarActualizarSeccion(req) {
       );
     }
 
+    if (validaciones.rolId !== 1) {
+      return respuestasAlBack(
+        "error",
+        "Error usuario no tiene permisos de actualizar",
+        {},
+        403,
+      );
+    }
+
     const validarCampos = await validarCamposActualizarSeccion(req);
 
     if (validarCampos.status === "error") {
       return respuestasAlBack(validarCampos.status, validarCampos.message);
     }
 
-    const seccionExiste = await UserModel.buscarSeccionActualizar(
+    const seccionExiste = await SeccionModel.buscarSeccionActualizar(
       validaciones.nombre,
       validaciones.id,
       validaciones.materiaId,
@@ -39,6 +48,7 @@ export default async function validarActualizarSeccion(req) {
       id: validarCampos.id,
       nombre: validarCampos.nombre,
       materiaId: validarCampos.materiaId,
+      cupos: validarCampos.cupos,
     });
   } catch (error) {
     console.error("Error interno validar actualizar seccion:", error);

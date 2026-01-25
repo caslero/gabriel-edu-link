@@ -103,10 +103,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 });
 
-
-
-
-
 // --- MODAL DINÁMICO PARA EDITAR SECCIÓN
 function abrirModalEditarSeccion(id, nombre, cupos) {
   let modal = document.getElementById("modal-editar-seccion-container");
@@ -176,8 +172,6 @@ function abrirModalEditarSeccion(id, nombre, cupos) {
       }
     });
 }
-
-
 
 // --- FUNCIONES DE Eliminar
 function confirmarEliminarSeccion(id) {
@@ -357,142 +351,6 @@ function cargarMateriasPorSemestre(semestre, contenedorMaterias) {
 
 // Llamar a la función cuando se cargue la página
 document.addEventListener("DOMContentLoaded", cargarMateriasDinamicas);
-
-/** 
-async function cargarMateriasDinamicas() {
-  try {
-    const response = await fetch("/api/materias/todas-materias", {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
-
-    const datos = await response.json();
-
-    if (datos.status === "error")
-      throw new Error("Error al obtener las materias");
-
-    const contenedor = document.getElementById("todos-semestres");
-    const contenedorMaterias = document.getElementById("materias-semestre");
-
-    // 1. Eliminar duplicados de materias (por id o por nombre)
-    const materiasUnicas = datos.materias.filter(
-      (materia, index, self) =>
-        index === self.findIndex((m) => m.id === materia.id),
-    );
-
-    // Guardar los datos de materias únicas
-    window.materiasData = materiasUnicas;
-
-    // 2. Extraer semestres únicos de las materias únicas
-    const semestresUnicos = [
-      ...new Set(materiasUnicas.map((materia) => materia.semestre)),
-    ].sort((a, b) => a - b);
-
-    const maxSemestre = Math.max(...semestresUnicos);
-
-    // 3. Crear opciones del 1 al semestre máximo
-    const opcionesSemestres = [];
-    for (let i = 1; i <= maxSemestre; i++) {
-      opcionesSemestres.push(`<option value="${i}">${i}</option>`);
-    }
-
-    // Función para cargar materias únicas por semestre
-    function cargarMateriasPorSemestre(semestre) {
-      const contenedorMaterias = document.getElementById("materias-semestre");
-
-      if (!semestre) {
-        contenedorMaterias.innerHTML = "";
-        return;
-      }
-
-      // Filtrar materias únicas por semestre
-      const materiasDelSemestre = window.materiasData.filter(
-        (materia) => materia.semestre == semestre,
-      );
-
-      // Eliminar duplicados por nombre dentro del mismo semestre (por si acaso)
-      const materiasSinDuplicados = materiasDelSemestre.filter(
-        (materia, index, self) =>
-          index === self.findIndex((m) => m.nombre === materia.nombre),
-      );
-
-      if (materiasSinDuplicados.length === 0) {
-        contenedorMaterias.innerHTML = `
-      <div class="p-3 bg-gray-100 rounded">
-        <p class="text-gray-600">No hay materias registradas para el semestre ${semestre}</p>
-      </div>
-    `;
-        return;
-      }
-
-      // Crear opciones con materias sin duplicados
-      const opcionesMaterias = materiasSinDuplicados
-        .map(
-          (materia) =>
-            `<option value="${materia.id}">${materia.nombre}</option>`,
-        )
-        .join("");
-
-      contenedorMaterias.innerHTML = `
-    <label for="materia" class="block font-semibold mb-2">Seleccionar Materia</label>
-    <select id="materia" name="materia" class="w-full border border-gray-300 p-3 rounded-lg" required>
-      <option value="">Seleccione</option>
-      ${opcionesMaterias}
-    </select>
-  `;
-    }
-
-    contenedor.innerHTML = `
-  <div class="space-y-6">
-    <div>
-      <label for="semestres" class="block font-semibold mb-2">Seleccionar Semestre</label>
-      <select id="semestres" name="semestres" class="w-full border border-gray-300 p-3 rounded-lg" required>
-        <option value="">Seleccione</option>
-        ${opcionesSemestres.join("")}
-      </select>
-    </div>
-    
-    
-  </div>
-`;
-
-    // Agregar el event listener
-    document
-      .getElementById("semestres")
-      .addEventListener("change", function () {
-        cargarMateriasPorSemestre(this.value);
-      });
-  } catch (error) {
-    console.error("Error al cargar materias:", error);
-  }
-}
-*/
-
-/** 
-    const datos = await response.json();
-
-    if (datos.status === "error")
-      throw new Error("Error al obtener las materias");
-
-    const contenedor = document.getElementById("todos-semestres");
-
-    // 1. Extraer y ordenar semestres únicos
-    const semestresUnicos = [
-      ...new Set(datos.materias.map((materia) => materia.semestre)),
-    ].sort((a, b) => a - b);
-
-    contenedor.innerHTML = `
-    <label for="rol" class="block font-semibold">Semestre</label>
-    <select id="semestres" name="semestres" class="w-full border p-2 rounded" required>
-      <option value="">Seleccione</option>
-      ${semestresUnicos
-        .map((semestre) => `<option value="${semestre}">${semestre}</option>`)
-        .join("")}
-    </select>
-    `;*/
-
 
 // LISTAR SECCIONES REGISTRADAS
 async function listarSecciones() {

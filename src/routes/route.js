@@ -12,11 +12,11 @@ rutas.get("/", (req, res) => {
   res.render("index", { title: "Inicio - EduLink", user: null });
 });
 
-rutas.get('/ayuda', (req, res) => {
-    res.render('ayuda', { 
-        title: 'Centro de Ayuda - EduLink', // <--- Asegúrate de que esta línea exista
-        user: req.user || null 
-    });
+rutas.get("/ayuda", (req, res) => {
+  res.render("ayuda", {
+    title: "Centro de Ayuda - EduLink", // <--- Asegúrate de que esta línea exista
+    user: req.user || null,
+  });
 });
 
 //----------Rutas de Partials------
@@ -35,7 +35,6 @@ rutas.get("/partials/footer", (req, res) => {
   res.render("partials/footer");
 });
 
-
 //----------Rutas de Autenticación------
 // Registro de Usuario
 rutas.get("/registro-usuario", (req, res) => {
@@ -45,7 +44,7 @@ rutas.get("/registro-usuario", (req, res) => {
   });
 });
 
-// login de Usuario 
+// login de Usuario
 rutas.get("/login", (req, res) => {
   res.render("auth/login", { title: "Login - EduLink", user: null });
 });
@@ -61,9 +60,10 @@ rutas.get("/dashboard/admin/panel", (req, res) => {
 
 // Perfil
 rutas.get("/admin/perfil", (req, res) => {
-  res.render("admin/perfil", { 
-    title: "Perfil - EduLink", 
-    users: "Admin" }); 
+  res.render("admin/perfil", {
+    title: "Perfil - EduLink",
+    users: "Admin",
+  });
 });
 
 // Gestionar Usuarios
@@ -91,12 +91,12 @@ rutas.get("/admin/gestionar-inscripciones", (req, res) => {
   res.render("admin/gestionInscripcion", {
     title: "Gestionar Inscripciones - EduLink",
     user: "Admin",
-    semestres: [], 
-    solicitudes: [], 
-    inscripciones: [] 
+    semestres: [],
+    solicitudes: [],
+    inscripciones: [],
   });
 });
- 
+
 // Gestionar Adicion y Retiro
 rutas.get("/admin/gestionar-adicion-retiro", (req, res) => {
   res.render("admin/gestionAdicionRetiro", {
@@ -109,22 +109,22 @@ rutas.get("/admin/gestionar-adicion-retiro", (req, res) => {
     solicitudes: [],
     pendientes: [],
     procesadas: [],
-    inscripciones: []
+    inscripciones: [],
   });
 });
 
 // Gestionar Actas Especiales
 rutas.get("/admin/gestionar-actas-especiales", (req, res) => {
   res.render("admin/gestionActaEspecial", {
-   title: "Gestión de Actas Especiales",
+    title: "Gestión de Actas Especiales",
     user: "Admin",
-    docentes: [], 
-    estudiantes: [], 
-    materias: [], 
+    docentes: [],
+    estudiantes: [],
+    materias: [],
     secciones: [],
-    solicitudes: [], 
+    solicitudes: [],
     procesadas: [],
-    actas: []
+    actas: [],
   });
 });
 
@@ -133,9 +133,9 @@ rutas.get("/admin/gestionar-encuestas", (req, res) => {
   res.render("admin/gestionEncuesta", {
     title: "Gestión de Encuestas",
     user: "Admin",
-    semestres: [], 
+    semestres: [],
     materias: [],
-    encuestas: []
+    encuestas: [],
   });
 });
 
@@ -158,10 +158,10 @@ rutas.get("/docente/gestionar-acta-especial", (req, res) => {
   res.render("docente/gestionarActaEspecial", {
     title: "Gestionar Actas Especiales - EduLink",
     user: "Docente",
-    estudiantes: [], 
+    estudiantes: [],
     materias: [],
     secciones: [],
-    actas: []
+    actas: [],
   });
 });
 
@@ -188,10 +188,10 @@ rutas.get("/estudiante/inscripcion", (req, res) => {
   res.render("estudiante/inscripcion", {
     title: "Inscripción - EduLink",
     user: "Estudiante",
-    semestres: [], 
+    semestres: [],
     materias: [],
     secciones: [],
-    solicitudes: []
+    solicitudes: [],
   });
 });
 
@@ -202,17 +202,17 @@ rutas.get("/estudiante/adicion-retiro", (req, res) => {
     user: "Estudiante",
     semestres: [],
     materias: [],
-    secciones: [], 
-    solicitudes: []
+    secciones: [],
+    solicitudes: [],
   });
-}); 
+});
 
 // Actas Especiales
 rutas.get("/estudiante/acta-especial", (req, res) => {
   res.render("estudiante/actaEspecial", {
     title: "Actas Especiales - EduLink",
     user: "Estudiante",
-    actas: [] 
+    actas: [],
   });
 });
 
@@ -221,7 +221,7 @@ rutas.get("/estudiante/encuestas", (req, res) => {
   res.render("estudiante/encuestas", {
     title: "Encuestas - EduLink",
     user: "Estudiante",
-    encuestas: []
+    encuestas: [],
   });
 });
 
@@ -241,8 +241,16 @@ rutas.post("/api/login/iniciar-sesion", LoginController.iniciarSesion);
 
 rutas.get("/api/materias/todas-materias", MateriaController.todasMaterias);
 
-rutas.get("/api/secciones/todas-secciones", SeccionController.todasSecciones);
 rutas.post("/api/secciones/crear-seccion", SeccionController.crearSeccion);
+rutas.get("/api/secciones/todas-secciones", SeccionController.todasSecciones);
+rutas.patch(
+  "/api/secciones/actualizar-seccion",
+  SeccionController.actualizarSeccion,
+);
+rutas.patch(
+  "/api/secciones/eliminar-seccion",
+  SeccionController.eliminarSeccion,
+);
 
 //API INSCRIPCIONES
 rutas.post(

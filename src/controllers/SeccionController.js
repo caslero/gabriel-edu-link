@@ -1,5 +1,7 @@
 import { SeccionModel } from "../models/SeccionModel.js";
+import validarActualizarSeccion from "../services/secciones/validarActualizarSeccion.js";
 import validarCrearSeccion from "../services/secciones/validarCrearSeccion.js";
+import validarEliminarSeccion from "../services/secciones/validarEliminarSeccion.js";
 import validarObtenerTodasSecciones from "../services/secciones/validarObtenerTodasSecciones.js";
 import { respuestaAlFront } from "../utils/respuestaAlFront.js";
 
@@ -99,6 +101,109 @@ export default class SeccionController {
         res,
         "error",
         "Error interno todas las secciones",
+        {},
+        500,
+      );
+    }
+  }
+
+  static async actualizarSeccion(req, res) {
+    try {
+      const validaciones = await validarActualizarSeccion(req);
+
+      if (validaciones.status === "error") {
+        return respuestaAlFront(
+          res,
+          validaciones.status,
+          validaciones.message,
+          {},
+          validaciones.codigo ? validaciones.codigo : 400,
+        );
+      }
+
+      const seccionActualizada = await SeccionModel.actualizarSeccion(
+        validaciones.id,
+        validaciones.materiaId,
+        validaciones.nombre,
+        validaciones.cupos,
+      );
+
+      if (!seccionActualizada) {
+        return respuestaAlFront(
+          res,
+          "error",
+          "Error al actualizar sección",
+          {},
+          400,
+        );
+      }
+
+      return respuestaAlFront(
+        res,
+        "ok",
+        "Sección actualizada con exito",
+        {
+          secciones: seccionActualizada,
+        },
+        200,
+      );
+    } catch (error) {
+      console.log("Error interno actualizar seccion:", error);
+
+      return respuestaAlFront(
+        res,
+        "error",
+        "Error interno actualizar seccion",
+        {},
+        500,
+      );
+    }
+  }
+
+  static async eliminarSeccion(req, res) {
+    try {
+      const validaciones = await validarEliminarSeccion(req);
+
+      if (validaciones.status === "error") {
+        return respuestaAlFront(
+          res,
+          validaciones.status,
+          validaciones.message,
+          {},
+          validaciones.codigo ? validaciones.codigo : 400,
+        );
+      }
+
+      const seccionEliminada = await SeccionModel.eliminarSeccion(
+        validaciones.id,
+      );
+
+      if (!seccionEliminada) {
+        return respuestaAlFront(
+          res,
+          "error",
+          "Error al eliminar seccion",
+          {},
+          400,
+        );
+      }
+
+      return respuestaAlFront(
+        res,
+        "ok",
+        "Sección eliminada con exito",
+        {
+          secciones: seccionEliminada,
+        },
+        200,
+      );
+    } catch (error) {
+      console.log("Error interno eliminar seccion:", error);
+
+      return respuestaAlFront(
+        res,
+        "error",
+        "Error interno eliminar seccion",
         {},
         500,
       );

@@ -186,14 +186,14 @@ export class SeccionModel {
   /**
    Busca una seccion por su seccion_nombre e id, esto es valido para crear secciones
    @param {string} seccion_nombre - El nombre a buscar
-   @param {number} id - El ID de la seccion a buscar
+   @param {number} materia_id - El ID de la materia a buscar
    @returns {Promise<Object|null>} - La seccion encontrada o null
   */
-  static async buscarSeccionNombreId(nombre, id) {
+  static async buscarSeccionNombreIdMateria(nombre, materia_id) {
     return new Promise((resolve, reject) => {
-      const sql = `SELECT * FROM secciones WHERE seccion_nombre = ? AND id = ? LIMIT 1`;
+      const sql = `SELECT * FROM secciones WHERE seccion_nombre = ? AND materia_id = ? LIMIT 1`;
 
-      db.get(sql, [nombre, id], (err, row) => {
+      db.get(sql, [nombre, materia_id], (err, row) => {
         if (err) {
           return reject(err);
         }
