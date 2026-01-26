@@ -168,7 +168,7 @@ function toggleModal(id, show) {
     if (modal) {
         if (show) {
             modal.classList.remove('hidden');
-            modal.classList.add('flex'); // Asegura que se centre si usas flex
+            modal.classList.add('flex'); 
         } else {
             modal.classList.add('hidden');
             modal.classList.remove('flex');

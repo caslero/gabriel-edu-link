@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = Object.fromEntries(formData.entries());
 
             try {
+                // ENVÍA (POST): Objeto JSON con los campos del formulario (estudiante_id, materia_id, nota, motivo).
+                // RECIBE: { status: "ok" } o mensaje de error.
                 const res = await fetch('/api/actas-especiales/crear-acta-especial', { // estudiante_id, materia_id, nota, motivo
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -35,6 +37,8 @@ async function gestionarActa(id, accion) {
     if (!confirmacion) return;
 
     try {
+        // ENVÍA (PATCH): JSON con el 'id' único del acta y el string 'accion' ("Aprobar" o "Rechazar").
+        // RECIBE: Status del proceso para confirmar el cambio de estado en la interfaz.
         const res = await fetch(`/api/actas-especiales/gestionar-actas-especiales`, { // id, accion ('Aprobar' o 'Rechazar'.)
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
@@ -58,6 +62,8 @@ async function eliminarActa(id) {
     if (!confirm('¿Deseas eliminar permanentemente esta acta?')) return;
 
     try {
+        // ENVÍA (PATCH): JSON que contiene solo el 'id' del acta que se desea marcar como eliminada.
+        // RECIBE: Código de respuesta HTTP (res.ok) para confirmar la operación.
         const res = await fetch(`/api/actas-especiales/eliminar-actas-especiales`, { // id
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },

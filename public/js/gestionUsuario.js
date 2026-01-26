@@ -286,6 +286,37 @@ function mostrarNotificacion(mensaje, tipo = "exito") {
 // refrescar cada 10 segundos
 //setInterval(cargarUsuarios, 10000);
 
+// --- FUNCIONALIDAD PARA VER/OCULTAR CONTRASEÑA CON CAMBIO DE ICONO ---
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('.toggle-password');
+    
+    if (btn) {
+        const targetId = btn.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        
+        // Seleccionamos ambos iconos dentro del botón
+        const eyeOpen = btn.querySelector('.eye-open');
+        const eyeClosed = btn.querySelector('.eye-closed');
+
+        if (input && eyeOpen && eyeClosed) {
+            if (input.type === 'password') {
+                input.type = 'text';
+                // Cambiar iconos
+                eyeOpen.classList.add('hidden');
+                eyeClosed.classList.remove('hidden');
+                btn.classList.add('text-blue-600');
+            } else {
+                input.type = 'password';
+                // Cambiar iconos de vuelta
+                eyeOpen.classList.remove('hidden');
+                eyeClosed.classList.add('hidden');
+                btn.classList.remove('text-blue-600');
+            }
+        }
+    }
+});
+
+
 // cargar al inicio
 cargarUsuarios();
 cargarRoles();

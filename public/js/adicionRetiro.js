@@ -17,7 +17,8 @@ document.addEventListener("DOMContentLoaded", () => {
             const cedula = buscarCedulaInput.value.trim();
             
             if (!cedula) return mostrarNotificacion("Ingrese una cédula", "error");
-
+                // DATOS: Envía 'cedula' (número) y 'tipo' (V/E) como parámetros de URL (GET).
+                // RECIBE: Objeto con status y datos del estudiante (id, nombre).
             try {
                 // El prefijo '1' suele ser V y '0' es E
                 const letra = prefijo === "1" ? "V" : "E";
@@ -103,6 +104,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!payload.estudiante_id) payload.estudiante_id = estudianteSelect.value;
 
             try {
+                // DATOS: Envía un JSON con: estudiante_id, semestre_id, materia_id, seccion_id y tipo (Adición/Retiro).
+                // RECIBE: Confirmación de registro exitoso o mensaje de error.
                 const res = await fetch("/api/adicion-retiro/crear-adicion-retiro", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -143,6 +146,7 @@ async function gestionarSolicitud(id, nuevoEstado) {
     if (!confirm(`¿Estás seguro de marcar esta solicitud como ${nuevoEstado}?`)) return;
 
     try {
+        //  id, estado
         const res = await fetch("/api/adicion-retiro/actualizar-estado", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },
@@ -180,6 +184,8 @@ async function ejecutarEliminacion() {
     if (!idAEliminar) return;
 
     try {
+         // DATOS: Envía únicamente el 'id' del registro a eliminar.
+         // RECIBE: Confirmación de eliminación lógica del historial.
         const res = await fetch("/api/adicion-retiro/eliminar", {
             method: "PATCH",
             headers: { "Content-Type": "application/json" },

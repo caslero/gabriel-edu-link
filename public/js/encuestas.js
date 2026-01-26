@@ -3,6 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const semestreSelect = document.getElementById('semestre');
 
     // --- 1. FILTRADO DINÁMICO (CREACIÓN) ---
+    // (Lógica local para mostrar/ocultar materias según el semestre seleccionado)
     if (semestreSelect) {
         semestreSelect.addEventListener('change', (e) => {
             const semestre = e.target.value;
@@ -28,13 +29,14 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const formData = new FormData(formCrear);
             
-            // Convertimos materias[] en un array real para el JSON
             const dataObj = Object.fromEntries(formData.entries());
             dataObj.materias = formData.getAll('materias[]');
 
             try {
-                const res = await fetch('/api/encuestas/crear-encuesta', { // titulo, descripcion, semestre, fecha_inicio, fecha_fin, materias id (para el array q muestra las materias a seleccionar)
-            method: 'POST',
+                // ENVÍA (POST): JSON con { titulo, descripcion, semestre, fecha_inicio, fecha_fin, materias: [id1, id2...] }
+                // RECIBE: Objeto con status: 'ok' y mensaje de éxito o error.
+                const res = await fetch('/api/encuestas/crear-encuesta', { 
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(dataObj)
                 });
@@ -62,7 +64,9 @@ async function actualizarEncuesta(e, id) {
     dataObj.materias = formData.getAll('materias[]');
 
     try {
-        const res = await fetch('/api/encuestas/actualizar-encuestas', { // id, titulo, descripcion, semestre, fecha_inicio, fecha_fin, estado, materias id (para el array q muestra las materias a seleccionar)
+        // ENVÍA (PATCH): JSON con { id (oculto en el form), titulo, descripcion, semestre, fecha_inicio, fecha_fin, estado, materias: [id1, id2...] }
+        // RECIBE: Confirmación de actualización exitosa.
+        const res = await fetch('/api/encuestas/actualizar-encuestas', { 
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(dataObj)
@@ -85,7 +89,9 @@ async function eliminarEncuesta(id) {
     if (!confirm("¿Seguro que deseas eliminar esta encuesta y sus votos asociados?")) return;
 
     try {
-        const res = await fetch('/api/encuestas/eliminar-encuesta', { // id
+        // ENVÍA (PATCH): JSON con { id } para realizar el borrado (normalmente lógico o con eliminación en cascada de votos).
+        // RECIBE: res.ok (true) si el servidor procesó la eliminación correctamente.
+        const res = await fetch('/api/encuestas/eliminar-encuesta', { 
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id })
@@ -98,24 +104,6 @@ async function eliminarEncuesta(id) {
     } catch (err) {
         mostrarToast("Error al eliminar", "error");
     }
-}
-
-// --- 5. UTILIDADES DE UI ---
-function abrirModalEditar(id) {
-    document.getElementById(`modal-${id}`).classList.remove('hidden');
-}
-
-function cerrarModal(modalId) {
-    document.getElementById(modalId).classList.add('hidden');
-}
-
-function filtrarMateriasEditar(encuestaId, semestre) {
-    const items = document.querySelectorAll(`.item-edit-${encuestaId}`);
-    items.forEach(item => {
-        const match = item.getAttribute('data-semestre') === semestre;
-        item.classList.toggle('hidden', !match);
-        if (!match) item.querySelector('input').checked = false;
-    });
 }
 
 function mostrarToast(mensaje, tipo = 'exito') {
