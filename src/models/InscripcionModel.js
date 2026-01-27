@@ -52,23 +52,52 @@ export class InscripcionModel {
     }
 
     // 3. Crear inscripción (Asegurando estado 'Pendiente' por defecto)
-    static async crearInscripcion(datos) {
-        return new Promise((resolve, reject) => {
-            const sql = `
-                INSERT INTO inscripciones (estudiante_id, seccion_id, usuario_id, estado) 
-                VALUES (?, ?, ?, 'Pendiente')
+static async crearInscripcion(datos) {
+    const { estudiante_id, seccion_id, usuario_id } = datos;
+
+    return new Promise((resolve, reject) => {
+        db.serialize(() => {
+            db.run("BEGIN TRANSACTION");
+
+            // 1. Insertar la inscripción usando un estado permitido por el CHECK constraint
+            const sqlInscripcion = `
+                INSERT INTO inscripciones (estudiante_id, seccion_id, usuario_id, estado)
+                VALUES (?, ?, ?, 'Aprobada')
             `;
-            
-            db.run(sql, [datos.estudiante_id, datos.seccion_id, datos.usuario_id], function(err) {
+
+            db.run(sqlInscripcion, [estudiante_id, seccion_id, usuario_id], function(err) {
                 if (err) {
                     console.error(" Error al insertar inscripción:", err.message);
+                    db.run("ROLLBACK");
                     return reject(err);
                 }
-                resolve({ id: this.lastID });
+
+                const idInscripcion = this.lastID;
+
+                // 2. Actualizar cupos en la tabla secciones
+                const sqlCupo = `UPDATE secciones SET cupos = cupos - 1 WHERE id = ? AND cupos > 0`;
+
+                db.run(sqlCupo, [seccion_id], function(err) {
+                    if (err) {
+                        console.error(" Error al actualizar cupo:", err.message);
+                        db.run("ROLLBACK");
+                        return reject(err);
+                    }
+
+                    if (this.changes === 0) {
+                        console.error(" No se pudo descontar el cupo");
+                        db.run("ROLLBACK");
+                        return reject(new Error("No hay cupos disponibles"));
+                    }
+
+                    // Todo correcto, guardamos cambios
+                    db.run("COMMIT");
+                    resolve({ id: idInscripcion });
+                });
             });
         });
-    }
-
+    });
+}
     // 4. METODO FALTANTE: Verificar si ya existe una inscripción activa
     static async verificarDuplicado(estudiante_id, materia_id) {
         return new Promise((resolve, reject) => {

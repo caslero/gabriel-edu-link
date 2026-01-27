@@ -30,33 +30,31 @@ static async buscarEstudiante(req, res) {
     }
 }
   // 2. Crear nueva inscripción (Manual o por solicitud)
-  static async crearInscripcion(req, res) {
+ static async crearInscripcion(req, res) {
     try {
-      console.log(" Datos recibidos para inscripción:", req.body);
+        // 1. Validar reglas de negocio
+        const validacion = await validarInscripcion(req.body);
+        if (validacion.status === "error") {
+            return respuestaAlFront(res, "error", validacion.message, {}, 400);
+        }
 
-      // Validación de reglas de negocio (Cupos, duplicados, etc.)
-      const validacion = await validarInscripcion(req.body);
-      if (validacion.status === "error") {
-        return respuestaAlFront(res, "error", validacion.message, {}, 400);
-      }
+        // 2. Preparar datos (usuario_id 1 por defecto si no hay sesión aún)
+        const datosFinales = {
+            estudiante_id: req.body.estudiante_id,
+            seccion_id: req.body.seccion_id,
+            usuario_id: req.session?.usuarioId || 1 
+        };
 
-      // Preparar datos para el modelo
-      const datosInscripcion = {
-        estudiante_id: req.body.estudiante_id,
-        seccion_id: req.body.seccion_id,
-        // Auditoría: Si no hay sesión, usamos el ID del estudiante o 1 por defecto
-        usuario_id: req.session?.usuarioId || req.body.estudiante_id || 1 
-      };
+        // 3. Ejecutar en DB
+        const resultado = await InscripcionModel.crearInscripcion(datosFinales);
+        
+        return respuestaAlFront(res, "ok", "¡Inscripción exitosa y cupo actualizado!", resultado);
 
-      const resultado = await InscripcionModel.crearInscripcion(datosInscripcion);
-
-      return respuestaAlFront(res, "ok", "¡Inscripción procesada exitosamente!", resultado);
     } catch (error) {
-      console.error(" Error en crearInscripcion:", error);
-      const msg = error.message === "No hay cupos disponibles" ? error.message : "No se pudo completar la inscripción";
-      return respuestaAlFront(res, "error", msg, {}, 500);
+        console.error("Error final en inscripción:", error);
+        return respuestaAlFront(res, "error", error.message, {}, 500);
     }
-  }
+}
 
   // 3. Listar inscripciones confirmadas para la tabla gris
   static async listarConfirmadas(req, res) {
