@@ -46,39 +46,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   };
 
-  // --- 2. CARGA DINÁMICA ---
-  // async function cargarMateriasDinamicas() {
-  //   try {
-  //     const response = await fetch("/api/materias/todas-materias");
-  //     const datos = await response.json();
-
-  //     if (datos.status === "ok" && datos.materias) {
-  //       // Guardamos el valor que el usuario pudo haber seleccionado mientras cargaba la API
-  //       const valorTemporal = materiaSelect.value;
-
-  //       materiaSelect.innerHTML = '<option value="">Seleccione una materia</option>';
-
-  //       datos.materias.forEach((materia) => {
-  //         const option = document.createElement("option");
-  //         option.value = materia.id;
-  //         option.textContent = materia.nombre;
-  //         // Inyectamos el semestre que viene de la base de datos
-  //         option.setAttribute("data-semestre", materia.semestre);
-  //         option.hidden = true;
-  //         option.disabled = true;
-  //         materiaSelect.appendChild(option);
-  //       });
-
-  //       if (valorTemporal) materiaSelect.value = valorTemporal;
-  //       console.log("Materias inyectadas desde API correctamente.");
-  //     }
-  //   } catch (error) {
-  //     console.warn("Error en fetch, se mantendrán las materias cargadas por EJS.");
-  //   } finally {
-  //     // SIEMPRE aplicar el filtro al terminar la carga
-  //     aplicarFiltroMaterias();
-  //   }
-  // }
 
   // --- 3. EVENTOS ---
   semestreSelect?.addEventListener("change", () => {

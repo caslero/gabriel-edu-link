@@ -146,10 +146,10 @@
       <thead class="bg-gray-800 text-white">
         <tr>
           <th class="px-4 py-2">ID</th>
-          <th class="px-4 py-2 text-left">Estudiante</th>
-          <th class="px-4 py-2">Materia</th>
-          <th class="px-4 py-2">Sección</th>
-          <th class="px-4 py-2">Fecha Registro</th>
+          <th class="px-4 py-2 text-center">Estudiante</th>
+          <th class="px-4 py-2 text-center">Materia</th>
+          <th class="px-4 py-2 text-center">Sección</th>
+          <th class="px-4 py-2 text-center">Fecha Registro</th>
         </tr>
       </thead>
       <tbody id="tabla-confirmadas-body" class="divide-y divide-gray-200">
@@ -159,8 +159,8 @@
           <% inscripciones.forEach(ins => { %>
             <tr class="text-sm">
               <td class="px-4 py-2 text-center text-gray-400 font-mono"><%= ins.id %></td>
-              <td class="px-4 py-2"><%= ins.estudiante_nombre %> <br><small class="text-blue-500 font-bold"><%= ins.id_usuario %></small></td>
-              <td class="px-4 py-2"><%= ins.materia %></td>
+              <td class="px-4 py-2 text-center"><%= ins.estudiante_nombre %> <br><small class="text-blue-500 font-bold"><%= ins.id_usuario %></small></td>
+              <td class="px-4 py-2 text-center"><%= ins.materia %></td>
               <td class="px-4 py-2 text-center"><%= ins.seccion %></td>
               <td class="px-4 py-2 text-center text-xs"><%= ins.creado_en %></td>
             </tr>

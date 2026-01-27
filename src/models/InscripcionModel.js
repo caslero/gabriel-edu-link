@@ -1,110 +1,177 @@
 import { db } from "../config/database.js";
 
 export class InscripcionModel {
-  
-  /** Obtiene todos los datos para la gestión (Admin) */
-  static async obtenerTodoGestion() {
-    return new Promise(async (resolve, reject) => {
-      try {
-        const queries = {
-          inscripciones: `SELECT i.id, i.creado_en, u.nombre AS estudiante_nombre, u.cedula,
-                         m.nombre AS materia, sec.nombre AS seccion FROM inscripciones i
-                         JOIN users u ON i.estudiante_id = u.id
-                         JOIN materias m ON i.materia_id = m.id
-                         JOIN secciones sec ON i.seccion_id = sec.id ORDER BY i.creado_en DESC`,
-          estudiantes: "SELECT id, nombre, cedula FROM users WHERE rol_id = 3 ORDER BY nombre",
-          semestres: "SELECT DISTINCT semestre FROM materias ORDER BY semestre",
-          materias: "SELECT id, nombre, semestre FROM materias ORDER BY semestre, nombre",
-          secciones: "SELECT id, nombre, materia_id FROM secciones ORDER BY nombre",
-          solicitudes: `SELECT s.id, s.creado_en, u.nombre AS estudiante_nombre, u.cedula, 
-                        m.nombre AS materia, sec.nombre AS seccion, s.estado, s.comentario
-                        FROM solicitudes_inscripcion s JOIN users u ON s.estudiante_id = u.id
-                        JOIN materias m ON s.materia_id = m.id LEFT JOIN secciones sec ON s.seccion_id = sec.id
-                        ORDER BY s.creado_en DESC`
-        };
-
-        const data = {
-          inscripciones: await new Promise((res, rej) => db.all(queries.inscripciones, [], (err, rows) => err ? rej(err) : res(rows))),
-          estudiantes: await new Promise((res, rej) => db.all(queries.estudiantes, [], (err, rows) => err ? rej(err) : res(rows))),
-          semestres: await new Promise((res, rej) => db.all(queries.semestres, [], (err, rows) => err ? rej(err) : res(rows))),
-          materias: await new Promise((res, rej) => db.all(queries.materias, [], (err, rows) => err ? rej(err) : res(rows))),
-          secciones: await new Promise((res, rej) => db.all(queries.secciones, [], (err, rows) => err ? rej(err) : res(rows))),
-          solicitudes: await new Promise((res, rej) => db.all(queries.solicitudes, [], (err, rows) => err ? rej(err) : res(rows)))
-        };
-
-        resolve(data);
-      } catch (error) {
-        reject(error);
-      }
-    });
-  }
-
-  /** Crea una solicitud de inscripción (Usada por el Estudiante) */
-  static async crearSolicitudEstudiante(datos) {
-    return new Promise((resolve, reject) => {
-      const sql = `INSERT INTO solicitudes_inscripcion (estudiante_id, materia_id, seccion_id, estado, creado_en)
-                   VALUES (?, ?, ?, 'Pendiente', CURRENT_TIMESTAMP)`;
-      
-      const params = [datos.estudiante_id, datos.materia_id, datos.seccion_id];
-
-      db.run(sql, params, function (err) {
-        if (err) return reject(err);
-        resolve({ id: this.lastID, ...datos });
-      });
-    });
-  }
-
-  /** Crea una inscripción manual (Directa por Admin) */
-  static async crearInscripcionManual(datos) {
-    return new Promise((resolve, reject) => {
-      const sql = `INSERT INTO inscripciones (estudiante_id, materia_id, seccion_id, creado_en)
-                   VALUES (?, ?, ?, CURRENT_TIMESTAMP)`;
-      
-      const params = [datos.estudiante_id, datos.materia_id, datos.seccion_id];
-
-      db.run(sql, params, function (err) {
-        if (err) return reject(err);
-        resolve({ id: this.lastID, ...datos });
-      });
-    });
-  }
-
-  /** Busca estudiante por cédula */
-  static async buscarEstudiantePorCedula(cedula) {
-    return new Promise((resolve, reject) => {
-      const sql = "SELECT id, nombre, cedula FROM users WHERE cedula = ? LIMIT 1";
-      db.get(sql, [cedula], (err, row) => {
-        if (err) return reject(err);
-        resolve(row || null);
-      });
-    });
-  }
-
-  /** Actualiza el estado de una solicitud y procesa la inscripción si es aprobada */
-  static async actualizarEstado(id, estado, comentario) {
-    return new Promise((resolve, reject) => {
-      const sql = "UPDATE solicitudes_inscripcion SET estado = ?, comentario = ? WHERE id = ?";
-      
-      db.run(sql, [estado, comentario, id], async function(err) {
-        if (err) return reject(err);
-        
-        // Si el estado es "Aprobada", insertamos automáticamente en la tabla final
-        if (estado === 'Aprobada') {
-          try {
-            const sol = await new Promise((res, rej) => 
-              db.get("SELECT estudiante_id, materia_id, seccion_id FROM solicitudes_inscripcion WHERE id = ?", [id], (e, r) => e ? rej(e) : res(r))
-            );
+    
+    // 1. Buscar Estudiante (Solo usuarios con rol_id = 3)
+    static async buscarEstudiantePorCedula(cedula, paisBit) {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                SELECT id, nombre, rol_id, pais, borrado
+                FROM users 
+                WHERE TRIM(cedula) = TRIM(?) 
+                LIMIT 1
+            `;
             
-            if (sol) {
-              await InscripcionModel.crearInscripcionManual(sol);
-            }
-          } catch (e) {
-            return reject(e);
-          }
+            db.get(sql, [cedula], (err, row) => {
+                if (err) return reject(err);
+                
+            
+                resolve(row);
+            });
+        });
+    }
+
+    // 2. Obtener inscripciones (Ajustado a tus estados de tabla)
+    static async obtenerConfirmadas() {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                SELECT 
+                    i.id, 
+                    u.nombre as estudiante_nombre,
+                    u.cedula as id_usuario,
+                    m.nombre as materia,
+                    s.seccion_nombre as seccion,
+                    i.estado,
+                    strftime('%d/%m/%Y %H:%M', i.created_at) as creado_en
+                FROM inscripciones i
+                JOIN users u ON i.estudiante_id = u.id 
+                JOIN secciones s ON i.seccion_id = s.id
+                JOIN materias m ON s.materia_id = m.id
+                WHERE i.borrado = 0 
+                  AND i.estado IN ('Aprobada', 'Pendiente') -- Ajustado a tus CHECKs
+                ORDER BY i.id DESC
+            `;
+            db.all(sql, [], (err, rows) => {
+                if (err) {
+                    console.error(" Error SQL en obtenerConfirmadas:", err.message);
+                    return reject(err);
+                }
+                resolve(rows);
+            });
+        });
+    }
+
+    // 3. Crear inscripción (Asegurando estado 'Pendiente' por defecto)
+    static async crearInscripcion(datos) {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                INSERT INTO inscripciones (estudiante_id, seccion_id, usuario_id, estado) 
+                VALUES (?, ?, ?, 'Pendiente')
+            `;
+            
+            db.run(sql, [datos.estudiante_id, datos.seccion_id, datos.usuario_id], function(err) {
+                if (err) {
+                    console.error(" Error al insertar inscripción:", err.message);
+                    return reject(err);
+                }
+                resolve({ id: this.lastID });
+            });
+        });
+    }
+
+    // 4. METODO FALTANTE: Verificar si ya existe una inscripción activa
+    static async verificarDuplicado(estudiante_id, materia_id) {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                SELECT i.id 
+                FROM inscripciones i
+                JOIN secciones s ON i.seccion_id = s.id
+                WHERE i.estudiante_id = ? 
+                  AND s.materia_id = ? 
+                  AND i.estado IN ('Pendiente', 'Aprobada') 
+                  AND i.borrado = 0 
+                LIMIT 1
+            `;
+            db.get(sql, [estudiante_id, materia_id], (err, row) => {
+                if (err) return reject(err);
+                resolve(row ? true : false);
+            });
+        });
+    }
+
+    // 5. METODO PARA GESTIONAR (Aprobar/Rechazar)
+    static async actualizarEstado(id, estado, comentario, usuario_id) {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                UPDATE inscripciones 
+                SET estado = ?, comentario = ?, gestionado_por = ?, updated_at = CURRENT_TIMESTAMP 
+                WHERE id = ?
+            `;
+            db.run(sql, [estado, comentario, usuario_id, id], function(err) {
+                if (err) return reject(err);
+                resolve(this.changes > 0);
+            });
+        });
+    }
+    // 6. Obtener semestres
+    static async obtenerSemestresUnicos() {
+        return new Promise((resolve, reject) => {
+            // Usamos DISTINCT sobre la columna 'semestre' de tu tabla 'materias'
+            const sql = `
+            SELECT DISTINCT semestre 
+            FROM materias 
+            WHERE borrado = 0 
+            ORDER BY semestre ASC
+            `;
+            db.all(sql, [], (err, rows) => {
+            if (err) return reject(err);
+            resolve(rows); // Retorna [{semestre: 1}, {semestre: 2}, ...]
+            });
+        });
         }
-        
-        resolve(this.changes > 0);
-      });
-    });
-  }
+        // 7. obtener materias
+        static async obtenerMateriasPorSemestre(semestre) {
+        return new Promise((resolve, reject) => {
+            const sql = `SELECT DISTINCT nombre FROM materias WHERE semestre = ? AND borrado = 0 ORDER BY nombre ASC`;
+            db.all(sql, [semestre], (err, rows) => {
+                if (err) return reject(err);
+                resolve(rows);
+            });
+        });
+    }
+        // obtener secciones
+       static async obtenerSeccionesPorNombreMateria(nombreMateria) {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                SELECT s.id, s.seccion_nombre, s.cupos 
+                FROM secciones s
+                JOIN materias m ON s.materia_id = m.id
+                WHERE m.nombre = ? 
+                  AND s.borrado = 0 
+                  AND m.borrado = 0
+                ORDER BY s.seccion_nombre ASC
+            `;
+            db.all(sql, [nombreMateria], (err, rows) => {
+                if (err) return reject(err);
+                resolve(rows);
+            });
+        });
+    }
+
+    static async obtenerSeccionPorId(id) {
+            return new Promise((resolve, reject) => {
+                const sql = `SELECT id, materia_id, cupos FROM secciones WHERE id = ?`;
+                db.get(sql, [id], (err, row) => {
+                    if (err) reject(err);
+                    resolve(row);
+                });
+            });
+        }
+
+    // Verificar si el alumno ya está en esa materia
+    static async verificarDuplicado(estudianteId, materiaId) {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                SELECT i.id 
+                FROM inscripciones i
+                JOIN secciones s ON i.seccion_id = s.id
+                WHERE i.estudiante_id = ? AND s.materia_id = ? AND i.borrado = 0
+            `;
+            db.get(sql, [estudianteId, materiaId], (err, row) => {
+                if (err) reject(err);
+                resolve(row ? true : false);
+            });
+        });
 }
+}
+          

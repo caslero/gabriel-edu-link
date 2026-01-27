@@ -126,11 +126,41 @@ export const initSeccionesTable = () => {
   });
 };
 
+  export const initInscripcionesTable = () => {
+    const sql = `
+      CREATE TABLE IF NOT EXISTS inscripciones (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        estudiante_id INTEGER NOT NULL,          
+        seccion_id INTEGER NOT NULL,            
+        usuario_id INTEGER NOT NULL,             
+        estado TEXT NOT NULL 
+          CHECK (estado IN ('Pendiente', 'Aprobada', 'Rechazada')) DEFAULT 'Pendiente',
+        comentario TEXT,                        
+        gestionado_por INTEGER,                  
+        borrado BOOLEAN NOT NULL DEFAULT 0,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (estudiante_id) REFERENCES users(id),
+        FOREIGN KEY (seccion_id) REFERENCES secciones(id) ON DELETE CASCADE,
+        FOREIGN KEY (usuario_id) REFERENCES users(id),
+        FOREIGN KEY (gestionado_por) REFERENCES users(id)
+      );
+    `;
+    db.run(sql, (err) => {
+      if (err) {
+        console.error("Error al crear tabla inscripciones:", err.message);
+      } else {
+        console.log("Tabla inscripciones creada.");
+      }
+    });
+  };
+
 export const initDatabase = () => {
   initRolesTable();
   initUsersTable();
   initMateriasTable();
   initSeccionesTable();
+  initInscripcionesTable();
 };
 
 /**

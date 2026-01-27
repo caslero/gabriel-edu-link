@@ -1,10 +1,11 @@
 import express from "express";
 import UserController from "../controllers/UserController.js";
-import InscripcionesController from "../controllers/InscripcionesController.js";
 import LoginController from "../controllers/LoginController.js";
 import RolController from "../controllers/RolController.js";
 import MateriaController from "../controllers/MateriaController.js";
 import SeccionController from "../controllers/SeccionController.js";
+import InscripcionController from "../controllers/InscripcionController.js";
+
 
 const rutas = express.Router();
 
@@ -253,11 +254,14 @@ rutas.patch(
 );
 
 //API INSCRIPCIONES
-rutas.post(
-  "/api/inscripciones/crear-inscripcion",
-  InscripcionesController.crearInscripcion,
-); // estudiante_id, semestre_id, materia_id, seccion_id
-//rutas.post("/api/inscripciones/gestionar-solicitud", InscripcionesController.actualizarEstadoSolicitud); // solicitud_id, estado
+rutas.post("/api/inscripcion/crear-inscripcion", InscripcionController.crearInscripcion);
+rutas.post("/api/inscripcion/gestionar/:id", InscripcionController.gestionarSolicitud);
+rutas.get("/api/inscripcion/confirmadas", InscripcionController.listarConfirmadas);
+
+rutas.post("/api/inscripcion/buscar-estudiante", InscripcionController.buscarEstudiante);
+rutas.get("/api/inscripcion/semestres", InscripcionController.listarSemestres);
+rutas.get("/api/inscripcion/materias", InscripcionController.listarMaterias);
+rutas.get("/api/inscripcion/secciones", InscripcionController.listarSecciones);
 
 //API MATERIAS
 //rutas.post("/api/materias/crear-seccion", MateriaController.crearSeccion); //semestre, materia_id, seccion_nombre
