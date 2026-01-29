@@ -5,9 +5,11 @@ import RolController from "../controllers/RolController.js";
 import MateriaController from "../controllers/MateriaController.js";
 import SeccionController from "../controllers/SeccionController.js";
 import InscripcionController from "../controllers/InscripcionController.js";
+import { AdicionRetiroController } from '../controllers/AdicionRetiroController.js';
 
 
 const rutas = express.Router();
+
 
 rutas.get("/", (req, res) => {
   res.render("index", { title: "Inicio - EduLink", user: null });
@@ -186,9 +188,14 @@ rutas.get("/estudiante/perfil", (req, res) => {
 
 // inscripcion
 rutas.get("/estudiante/inscripcion", (req, res) => {
-  res.render("estudiante/inscripcion", {
+ // if (!req.session || !req.session.user) {
+   //     console.log(" Intento de acceso sin sesión activa.");
+     //   return res.redirect('/login'); 
+    //}
+    //const usuario = req.session.user;
+    res.render('estudiante/inscripcions', { 
     title: "Inscripción - EduLink",
-    user: "Estudiante",
+    user: usuario,
     semestres: [],
     materias: [],
     secciones: [],
@@ -262,6 +269,17 @@ rutas.post("/api/inscripcion/buscar-estudiante", InscripcionController.buscarEst
 rutas.get("/api/inscripcion/semestres", InscripcionController.listarSemestres);
 rutas.get("/api/inscripcion/materias", InscripcionController.listarMaterias);
 rutas.get("/api/inscripcion/secciones", InscripcionController.listarSecciones);
+rutas.post("/api/inscripciones/solicitar-inscripcion", InscripcionController.solicitarInscripcion);
+
+
+rutas.post("/api/adicion-retiro/buscar-estudiante", AdicionRetiroController.buscarEstudiante);
+rutas.get("/api/adicion-retiro/semestres", AdicionRetiroController.listarSemestres);
+rutas.get("/api/adicion-retiro/materias", AdicionRetiroController.listarMaterias);
+rutas.get("/api/adicion-retiro/secciones", AdicionRetiroController.listarSecciones);
+//rutas.get("/api/adicion-retiro/listar-historial", AdicionRetiroController.listarHistorial);
+rutas.post('/api/adicion-retiro/crear-adicion-retiro', AdicionRetiroController.crearAdicionRetiro);
+rutas.patch('/api/adicion-retiro/actualizar-estado', AdicionRetiroController.actualizarEstado);
+rutas.patch('/api/adicion-retiro/eliminar', AdicionRetiroController.eliminar);
 
 //API MATERIAS
 //rutas.post("/api/materias/crear-seccion", MateriaController.crearSeccion); //semestre, materia_id, seccion_nombre

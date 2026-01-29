@@ -2,6 +2,7 @@ import { InscripcionModel } from "../models/InscripcionModel.js";
 import { respuestaAlFront } from "../utils/respuestaAlFront.js";
 import { validarInscripcion } from "../services/inscripciones/validarInscripcion.js";
 import { validarGestion } from "../services/inscripciones/validarGestion.js";
+import { validarSolicitud } from "../services/inscripciones/validarSolicitud.js";
 
 export default class InscripcionController {
   
@@ -145,5 +146,48 @@ static async buscarEstudiante(req, res) {
             return res.status(500).json({ status: "error", message: "Error interno" });
         }
     }
+
+  
+
+// 5. Solicitar inscripción (Vista Estudiante)
+static async solicitarInscripcion(req, res) {
+    try {
+        // Extraemos solo lo necesario: quién se inscribe y en qué sección
+        const { usuario_id, seccion_id } = req.body;
+
+        console.log(" Recibiendo solicitud para usuario:", usuario_id, "Sección:", seccion_id);
+
+        // 1. Validar (Asegúrate de que validarSolicitud ya no pida estudiante_id)
+        const validacion = await validarSolicitud({ usuario_id, seccion_id });
+        
+        if (validacion.status === "error") {
+            console.warn(" Validación fallida:", validacion.message);
+            return res.status(400).json(validacion);
+        }
+
+        // 2. Llamada al modelo 
+        const resultado = await InscripcionModel.crearSolicitud({ 
+            usuario_id, 
+            seccion_id,
+            estado: 'Pendiente' 
+        });
+
+        // 3. Respuesta exitosa
+        return res.status(200).json({
+            status: "ok",
+            message: "Solicitud enviada con éxito.",
+            datos: resultado
+        });
+
+    } catch (error) {
+        // Este log en tu terminal de VS Code te dirá si la DB rechazó el INSERT
+        console.error(" ERROR EN EL SERVIDOR:", error.message); 
+        
+        return res.status(500).json({
+            status: "error",
+            message: "Error al procesar la inscripción: " + error.message
+        });
+    }
+}
 }
 

@@ -118,17 +118,54 @@ static async crearInscripcion(datos) {
         });
     }
 
-    // 5. METODO PARA GESTIONAR (Aprobar/Rechazar)
+    // 5. METODO PARA GESTIONAR (Aprobar/Rechazar con manejo de cupos)
     static async actualizarEstado(id, estado, comentario, usuario_id) {
         return new Promise((resolve, reject) => {
-            const sql = `
-                UPDATE inscripciones 
-                SET estado = ?, comentario = ?, gestionado_por = ?, updated_at = CURRENT_TIMESTAMP 
-                WHERE id = ?
-            `;
-            db.run(sql, [estado, comentario, usuario_id, id], function(err) {
-                if (err) return reject(err);
-                resolve(this.changes > 0);
+            db.serialize(() => {
+                db.run("BEGIN TRANSACTION");
+
+                // 1. Obtener la sección de esta inscripción para saber a qué restarle cupo
+                const sqlGetSeccion = `SELECT seccion_id FROM inscripciones WHERE id = ?`;
+                
+                db.get(sqlGetSeccion, [id], (err, row) => {
+                    if (err || !row) {
+                        db.run("ROLLBACK");
+                        return reject(err || new Error("Inscripción no encontrada"));
+                    }
+
+                    const seccion_id = row.seccion_id;
+
+                    // 2. Actualizar el estado de la inscripción
+                    const sqlUpdate = `
+                        UPDATE inscripciones 
+                        SET estado = ?, comentario = ?, usuario_id = ?, updated_at = CURRENT_TIMESTAMP 
+                        WHERE id = ?
+                    `;
+
+                    db.run(sqlUpdate, [estado, comentario, usuario_id, id], function(err) {
+                        if (err) {
+                            db.run("ROLLBACK");
+                            return reject(err);
+                        }
+
+                        // 3. SI SE APRUEBA: Descontar cupo. SI SE RECHAZA: No hacer nada al cupo.
+                        if (estado === 'Aprobada') {
+                            const sqlCupo = `UPDATE secciones SET cupos = cupos - 1 WHERE id = ? AND cupos > 0`;
+                            db.run(sqlCupo, [seccion_id], function(err) {
+                                if (err || this.changes === 0) {
+                                    db.run("ROLLBACK");
+                                    return reject(new Error("No hay cupos disponibles para aprobar esta solicitud"));
+                                }
+                                db.run("COMMIT");
+                                resolve(true);
+                            });
+                        } else {
+                            // Si es Rechazada, solo guardamos el estado y ya
+                            db.run("COMMIT");
+                            resolve(true);
+                        }
+                    });
+                });
             });
         });
     }
@@ -201,6 +238,19 @@ static async crearInscripcion(datos) {
                 resolve(row ? true : false);
             });
         });
+}
+
+
+// 8. Crear Solicitud (Para Estudiantes - Estado Pendiente)
+static async crearSolicitud({ usuario_id, seccion_id, estado }) {
+    const sql = `INSERT INTO inscripciones (usuario_id, seccion_id, estado, estudiante_id) VALUES (?, ?, ?, ?)`;
+    // Como 'estudiante_id' ya no nos interesa, le mandamos el mismo 'usuario_id' para cumplir con la DB
+    return new Promise((resolve, reject) => {
+        db.run(sql, [usuario_id, seccion_id, estado, usuario_id], function(err) {
+            if (err) reject(err);
+            resolve({ id: this.lastID });
+        });
+    });
 }
 }
           

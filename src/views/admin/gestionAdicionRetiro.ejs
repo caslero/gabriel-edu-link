@@ -22,14 +22,12 @@
       </div>
 
       <div>
-        <label for="estudiante_id" class="block font-semibold">Estudiante</label>
-        <select id="estudiante_id" name="estudiante_id" class="w-full border p-2 rounded" required>
-          <option value="">Seleccione un estudiante</option>
-          <% estudiantes.forEach(est => { %>
-            <option value="<%= est.id %>"><%= est.nombre %> - <%= est.cedula %></option>
-          <% }) %>
-        </select>
+        <label for="estudiante_id" class="block font-semibold">Estudiante Seleccionado</label>
+        <select id="estudiante_id" name="estudiante_id" class="w-full border p-2 rounded bg-gray-100" required disabled>
+          <option value="">Realice una búsqueda por cédula...</option>
+          </select>
       </div>
+
 
       <div>
         <label for="semestre_id" class="block font-semibold">Semestre</label>
@@ -133,19 +131,20 @@
             <th class="px-4 py-2">Acciones</th>
           </tr>
         </thead>
-        <tbody class="divide-y">
+          <tbody class="divide-y">
           <% if (procesadas && procesadas.length > 0) { %>
             <% procesadas.forEach(sol => { %>
               <tr class="hover:bg-gray-50 transition">
                 <td class="px-4 py-2 text-center"><%= sol.id %></td>
                 <td class="px-4 py-2 text-center"><%= sol.estudiante_nombre %></td>
                 <td class="px-4 py-2 text-center">
-                  <span class="px-2 py-1 rounded text-xs font-semibold <%= sol.estado === 'Aprobada' ? 'bg-green-100 text-green-700 border border-green-200' : 'bg-red-100 text-red-700 border border-red-200' %>">
+                  <span class="px-2 py-1 rounded text-xs font-semibold 
+                    <%= sol.estado === 'Aprobada' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %>">
                     <%= sol.estado %>
                   </span>
                 </td>
                 <td class="px-4 py-2 text-center">
-                  <button onclick="confirmarEliminarSolicitud('<%= sol.id %>')" class="text-red-600 hover:text-red-800 p-2 rounded-full hover:bg-red-50 transition" title="Eliminar registro">
+                  <button onclick="confirmarEliminarSolicitud('<%= sol.id %>')" class="text-red-600 hover:text-red-800">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
@@ -155,10 +154,8 @@
             <% }) %>
           <% } else { %>
             <tr>
-              <td colspan="4" class="px-4 py-10 text-center text-gray-500 italic bg-gray-50">
-                <div class="flex flex-col items-center justify-center">
-                  No hay registros en el historial de solicitudes
-                </div>
+              <td colspan="4" class="px-4 py-10 text-center text-gray-500 italic">
+                No hay registros en el historial de solicitudes
               </td>
             </tr>
           <% } %>
@@ -188,4 +185,5 @@
         </div>
     </div>
 </div>
+<div id="contenedor-notificaciones" class="fixed top-5 right-5 z-50 flex flex-col gap-2"></div>
 <script src="/js/adicionRetiro.js"></script>

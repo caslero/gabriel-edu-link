@@ -314,5 +314,106 @@ function mostrarNotificacion(mensaje, tipo = 'exito') {
     setTimeout(() => { toast.style.opacity = '0'; setTimeout(() => toast.remove(), 500); }, 3000);
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const formInscripcion = document.querySelector('form.space-y-4');
+    const selectSemestre = document.getElementById('semestre');
+    const selectMateria = document.getElementById('materia_id');
+    const selectSeccion = document.getElementById('seccion_id');
+
+    // --- 1. FILTRADO DINÁMICO: Semestre -> Materia ---
+    selectSemestre.addEventListener('change', () => {
+        const semestreSeleccionado = selectSemestre.value;
+        
+        // Reset de hijos
+        selectMateria.value = "";
+        selectSeccion.value = "";
+        selectSeccion.disabled = true;
+
+        if (!semestreSeleccionado) {
+            selectMateria.disabled = true;
+            return;
+        }
+
+        selectMateria.disabled = false;
+        Array.from(selectMateria.options).forEach(opt => {
+            if (opt.value === "") return;
+            // Mostramos solo materias que coincidan con el dataset semestre
+            opt.hidden = opt.dataset.semestre !== semestreSeleccionado;
+        });
+    });
+
+    // --- 2. FILTRADO DINÁMICO: Materia -> Sección ---
+    selectMateria.addEventListener('change', () => {
+        const materiaSeleccionada = selectMateria.value;
+        
+        selectSeccion.value = "";
+        if (!materiaSeleccionada) {
+            selectSeccion.disabled = true;
+            return;
+        }
+
+        selectSeccion.disabled = false;
+        Array.from(selectSeccion.options).forEach(opt => {
+            if (opt.value === "") return;
+            // Mostramos secciones según el dataset materia
+            opt.hidden = opt.dataset.materia !== materiaSeleccionada;
+        });
+    });
+
+    // --- 3. ENVÍO DE SOLICITUD ---
+    if (formInscripcion) {
+        formInscripcion.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(formInscripcion);
+            const payload = Object.fromEntries(formData.entries());
+
+            // Validación extra
+            if (!payload.seccion_id) {
+                return mostrarNotificacion("Debe seleccionar una sección", "error");
+            }
+
+            try {
+                // Ajusta esta URL a tu endpoint de solicitudes de estudiante
+                const res = await fetch('/api/inscripcion/solicitar', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (data.status === "ok") {
+                    mostrarNotificacion("Solicitud enviada con éxito");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    mostrarNotificacion(data.message || "Error al procesar", "error");
+                }
+            } catch (err) {
+                console.error("Error:", err);
+                mostrarNotificacion("Error de conexión al servidor", "error");
+            }
+        });
+    }
+});
+
+// --- UTILIDAD: NOTIFICACIONES ---
+function mostrarNotificacion(mensaje, tipo = 'exito') {
+    const color = tipo === 'exito' ? 'bg-green-600' : 'bg-red-600';
+    const previa = document.getElementById('toast-estudiante');
+    if (previa) previa.remove();
+
+    const toast = document.createElement('div');
+    toast.id = 'toast-estudiante';
+    toast.className = `fixed bottom-5 right-5 ${color} text-white px-6 py-3 rounded-lg shadow-2xl z-[100] transition-opacity duration-500`;
+    toast.innerHTML = `<span class="font-medium">${mensaje}</span>`;
+    
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => toast.remove(), 500);
+    }, 3000);
+}
+
 // Hacer toggleModal global para los onclick del HTML
 window.toggleModal = toggleModal;
