@@ -158,21 +158,19 @@ export const initSeccionesTable = () => {
   
   export const initAdicionRetiroTable = () => {
     const sql = `
-      CREATE TABLE IF NOT EXISTS adicion_retiro (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        estudiante_id INTEGER NOT NULL,          -- El estudiante que solicita
-        seccion_id INTEGER NOT NULL,             -- La sección involucrada
-        tipo TEXT NOT NULL 
-          CHECK (tipo IN ('Adicion', 'Retiro')), -- Solo estos dos valores
-        estado TEXT NOT NULL 
-          CHECK (estado IN ('Pendiente', 'Aprobada', 'Rechazada')) DEFAULT 'Pendiente',
-        fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
-        borrado BOOLEAN NOT NULL DEFAULT 0,      -- Para borrado lógico
-        FOREIGN KEY (estudiante_id) REFERENCES users(usuario_id),
-        FOREIGN KEY (seccion_id) REFERENCES secciones(id) ON DELETE CASCADE
-      );
-    `;
-    db.run(sql, (err) => {
+          CREATE TABLE IF NOT EXISTS adicion_retiro (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            estudiante_id INTEGER NOT NULL,
+            seccion_id INTEGER NOT NULL,
+            tipo TEXT NOT NULL CHECK (tipo IN ('Adicion', 'Retiro')),
+            estado TEXT NOT NULL CHECK (estado IN ('Pendiente', 'Aprobada', 'Rechazada')) DEFAULT 'Pendiente',
+            fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
+            borrado BOOLEAN NOT NULL DEFAULT 0,
+            FOREIGN KEY (estudiante_id) REFERENCES users(id), -- Ajustado a 'id' de tu tabla users
+            FOREIGN KEY (seccion_id) REFERENCES secciones(id) ON DELETE CASCADE
+          );
+        `;
+        db.run(sql, (err) => {
       if (err) {
         console.error("Error al crear tabla adicion_retiro:", err.message);
       } else {

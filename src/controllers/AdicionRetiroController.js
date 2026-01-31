@@ -84,16 +84,30 @@ export class AdicionRetiroController {
     }
 
     // 6. CREAR REGISTRO (Desde el formulario del Admin)
-  static async crearAdicionRetiro(req, res) {
-    try {
-        const { estudiante_id, seccion_id, tipo } = req.body;
-        await AdicionRetiroModel.crearSolicitud({ estudiante_id, seccion_id, tipo });
-        return res.json({ status: "ok", message: "Procesado con éxito" });
-    } catch (error) {
-        console.log("Error capturado en controlador:", error.message);
-        return res.status(400).json({ status: "error", message: error.message });
+    static async crearAdicionRetiro(req, res) {
+        try {
+            const { estudiante_id, seccion_id, tipo } = req.body;
+            
+
+            if (!estudiante_id || !seccion_id || !tipo) {
+                return res.status(400).json({ status: "error", message: "Faltan parámetros" });
+            }
+
+            // Llamamos al modelo (asegúrate de que el método se llame igual)
+            await AdicionRetiroModel.crearSolicitud({ 
+                estudiante_id, 
+                seccion_id, 
+                tipo, 
+                estado: 'Aprobada' 
+            });
+
+            res.json({ status: "ok", message: "Registro exitoso" });
+        } catch (error) {
+            console.error(" Error en Controlador:", error.message);
+            res.status(400).json({ status: "error", message: error.message });
+        }
     }
-}
+
 
     // 7. ACTUALIZAR ESTADO (Aprobar/Rechazar desde la tabla de pendientes)
     static async actualizarEstado(req, res) {
@@ -116,19 +130,18 @@ export class AdicionRetiroController {
             res.status(500).json({ status: "error", message: error.message });
         }
     }
-    static async mostrarVista(req, res) {
-        try {
-            // Ejecutamos la función del modelo que me pasaste
-            const listaProcesadas = await AdicionRetiroModel.obtenerProcesadas();
-            
-            // Enviamos 'procesadas' a la vista EJS
-          const procesadas = await AdicionRetiroModel.obtenerProcesadas();
-            res.render('adicion_retiro', { procesadas });
-                // ... otras variables (semestres, pendientes, etc)
-            
-        } catch (error) {
-            console.error("Error al obtener procesadas:", error);
-            res.render('tu_archivo_vista', { procesadas: [] });
-        }
+    // 9.
+   static async listarProcesadas(req, res) {
+    try {
+        const registros = await AdicionRetiroModel.obtenerSoloAprobadas();
+        return res.json({ 
+            status: "ok", 
+            datos: registros || [] // Siempre devolver un array
+        });
+    } catch (error) {
+        console.error("❌ Error en el Controlador:", error.message);
+        return res.status(500).json({ status: "error", message: error.message });
     }
+    }
+
 }

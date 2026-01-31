@@ -276,7 +276,7 @@ rutas.post("/api/adicion-retiro/buscar-estudiante", AdicionRetiroController.busc
 rutas.get("/api/adicion-retiro/semestres", AdicionRetiroController.listarSemestres);
 rutas.get("/api/adicion-retiro/materias", AdicionRetiroController.listarMaterias);
 rutas.get("/api/adicion-retiro/secciones", AdicionRetiroController.listarSecciones);
-//rutas.get("/api/adicion-retiro/listar-historial", AdicionRetiroController.listarHistorial);
+rutas.get('/api/adicion-retiro/listar-procesadas', AdicionRetiroController.listarProcesadas);
 rutas.post('/api/adicion-retiro/crear-adicion-retiro', AdicionRetiroController.crearAdicionRetiro);
 rutas.patch('/api/adicion-retiro/actualizar-estado', AdicionRetiroController.actualizarEstado);
 rutas.patch('/api/adicion-retiro/eliminar', AdicionRetiroController.eliminar);

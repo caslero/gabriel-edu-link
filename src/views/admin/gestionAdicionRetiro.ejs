@@ -122,45 +122,34 @@
   <div class="bg-white rounded-lg shadow-lg p-8">
     <h3 class="text-lg font-semibold text-blue-700 mb-4">Solicitudes procesadas</h3>
     <div class="overflow-x-auto">
-      <table id="tabla-procesadas" class="min-w-full border border-gray-200">
+     <table class="min-w-full border border-gray-200">
         <thead class="bg-blue-600 text-white">
-          <tr>
-            <th class="px-4 py-2">ID</th>
-            <th class="px-4 py-2">Estudiante</th>
-            <th class="px-4 py-2">Estado</th>
-            <th class="px-4 py-2">Acciones</th>
-          </tr>
-        </thead>
-          <tbody class="divide-y">
-          <% if (procesadas && procesadas.length > 0) { %>
-            <% procesadas.forEach(sol => { %>
-              <tr class="hover:bg-gray-50 transition">
-                <td class="px-4 py-2 text-center"><%= sol.id %></td>
-                <td class="px-4 py-2 text-center"><%= sol.estudiante_nombre %></td>
-                <td class="px-4 py-2 text-center">
-                  <span class="px-2 py-1 rounded text-xs font-semibold 
-                    <%= sol.estado === 'Aprobada' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %>">
-                    <%= sol.estado %>
-                  </span>
-                </td>
-                <td class="px-4 py-2 text-center">
-                  <button onclick="confirmarEliminarSolicitud('<%= sol.id %>')" class="text-red-600 hover:text-red-800">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </td>
-              </tr>
-            <% }) %>
-          <% } else { %>
             <tr>
-              <td colspan="4" class="px-4 py-10 text-center text-gray-500 italic">
-                No hay registros en el historial de solicitudes
-              </td>
+                <th class="px-4 py-2">ID</th>
+                <th class="px-4 py-2">Estudiante</th>
+                <th class="px-4 py-2">Tipo</th> <th class="px-4 py-2">Estado</th>
             </tr>
-          <% } %>
+        </thead>
+        <tbody id="cuerpo-tabla-procesadas"> <% if (typeof procesadas !== 'undefined' && procesadas.length > 0) { %>
+                <% procesadas.forEach(reg => { %>
+                    <tr class="text-sm border-b">
+                        <td class="px-4 py-2 text-center"><%= reg.id %></td>
+                        <td class="px-4 py-2 text-center"><%= reg.estudiante_nombre %></td>
+                        <td class="px-4 py-2 text-center"><%= reg.tipo %></td>
+                        <td class="px-4 py-2 text-center">
+                            <span class="<%= reg.estado === 'Aprobada' ? 'text-green-600' : 'text-red-600' %>">
+                                <%= reg.estado %>
+                            </span>
+                        </td>
+                    </tr>
+                <% }) %>
+            <% } else { %>
+                <tr>
+                    <td colspan="4" class="text-center py-4">No hay registros procesados.</td>
+                </tr>
+            <% } %>
         </tbody>
-      </table>
+    </table>
     </div>
   </div>
 </div>

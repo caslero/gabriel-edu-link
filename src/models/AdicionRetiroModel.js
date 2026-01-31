@@ -107,10 +107,12 @@ export class AdicionRetiroModel {
                 SELECT 
                     ar.id, 
                     u.nombre AS estudiante_nombre, 
-                    ar.estado 
+                    ar.estado,
+                    ar.tipo
                 FROM adicion_retiro ar
                 JOIN users u ON ar.usuario_id = u.id
-                WHERE ar.estado IN ('Aprobada', 'Rechazada') AND ar.borrado = 0
+                WHERE ar.estado IN ('Aprobada', 'Rechazada') 
+                AND ar.borrado = 0
                 ORDER BY ar.id DESC
             `;
             db.all(sql, [], (err, rows) => {
@@ -120,51 +122,53 @@ export class AdicionRetiroModel {
         });
     }
 
-    /**
-     * CREAR SOLICITUD
-     */
-    static async crearSolicitud({ estudiante_id, seccion_id, tipo, estado = 'Aprobada' }) {
+    // obtener la materias aprobadas
+    static async obtenerSoloAprobadas() {
         return new Promise((resolve, reject) => {
-            // Log para ver qué llega al modelo
-            console.log("DEBUG MODELO - Datos recibidos:", { estudiante_id, seccion_id, tipo });
-
-            const sqlCheck = `
-                SELECT ar.id FROM adicion_retiro ar
-                JOIN secciones s_nueva ON s_nueva.id = ?
-                JOIN secciones s_existente ON ar.seccion_id = s_existente.id
-                WHERE ar.usuario_id = ? 
-                AND s_existente.materia_id = s_nueva.materia_id
-                AND ar.estado IN ('Aprobada', 'Pendiente')
-                AND ar.borrado = 0
+            // Usamos u.id porque verificamos que así se llama en tu tabla 'users'
+            const sql = `
+                SELECT 
+                    ar.id, 
+                    u.nombre AS estudiante_nombre, 
+                    ar.tipo, 
+                    ar.estado
+                FROM adicion_retiro ar
+                INNER JOIN users u ON ar.estudiante_id = u.id
+                WHERE ar.borrado = 0
+                ORDER BY ar.id DESC
             `;
-
-            db.get(sqlCheck, [seccion_id, estudiante_id], (err, row) => {
+            
+            db.all(sql, [], (err, rows) => {
                 if (err) {
-                    console.error("ERROR EN SQL_CHECK:", err.message);
+                    // ESTA LÍNEA TE DIRÁ EL ERROR REAL EN LA CONSOLA NEGRA
+                    console.error("❌ ERROR EN CONSULTA SQL:", err.message);
                     return reject(err);
                 }
-
-                if (row && tipo === 'Adicion') {
-                    console.log("VALIDACIÓN: El estudiante ya tiene esta materia.");
-                    return reject(new Error("Materia ya registrada para este alumno"));
-                }
-
-                const sqlInsert = `
-                    INSERT INTO adicion_retiro (usuario_id, seccion_id, tipo, estado, fecha) 
-                    VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
-                `;
-                
-                db.run(sqlInsert, [estudiante_id, seccion_id, tipo, estado], function(err) {
-                    if (err) {
-                        console.error("ERROR EN INSERT:", err.message);
-                        return reject(err);
-                    }
-                    console.log("INSERCIÓN EXITOSA - ID:", this.lastID);
-                    resolve({ id: this.lastID });
-                });
+                resolve(rows);
             });
         });
     }
+
+    /**
+     * CREAR SOLICITUD
+     */
+    static async crearSolicitud({ estudiante_id, seccion_id, tipo, estado }) {
+        return new Promise((resolve, reject) => {
+            const sql = `
+                INSERT INTO adicion_retiro (estudiante_id, seccion_id, tipo, estado, borrado)
+                VALUES (?, ?, ?, ?, 0)
+            `;
+            db.run(sql, [estudiante_id, seccion_id, tipo, estado], function(err) {
+                if (err) {
+                    console.error(" Error SQL al insertar:", err.message);
+                    return reject(err);
+                }
+                resolve({ id: this.lastID });
+            });
+        });
+    }
+
+   
 
     /**
      * Actualiza el estado (Aprobada/Rechazada)

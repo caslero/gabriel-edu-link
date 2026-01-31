@@ -11,33 +11,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const seccionSelect    = document.getElementById("seccion_id");
     const tipoSelect       = document.getElementById("tipo");
 
-    // --- 2. CARGA DE SEMESTRES ---
-    const cargarSemestres = async () => {
-        try {
-            const res = await fetch('/api/adicion-retiro/semestres'); 
-            const data = await res.json();
-            
-            if (data.status === "ok" && data.semestres) {
-                semestreSelect.innerHTML = '<option value="">Selecciona el Semestre</option>';
-                data.semestres.forEach(item => {
-                    const option = document.createElement('option');
-                    option.value = item.semestre; 
-                    option.textContent = `Semestre ${item.semestre}`;
-                    semestreSelect.appendChild(option);
-                });
-                semestreSelect.disabled = false;
-            }
-        } catch (err) {
-            console.error("Error cargando semestres:", err);
-            mostrarNotificacion("No se pudieron cargar los semestres", "error");
-        }
-    };
+    // --- 2. CARGA INICIAL ---
+    listarSolicitudesProcesadas();
 
     // --- 3. LÓGICA DE BÚSQUEDA DE ESTUDIANTE ---
     const realizarBusqueda = async () => {
         const cedula = buscarCedulaInput.value.trim();
-        const prefijo = prefijoCedula ? prefijoCedula.value : "1";
-        const letra = prefijo === "1" ? "V" : "E";
+        const letra = prefijoCedula?.value === "1" ? "V" : "E";
         
         if (!cedula) return mostrarNotificacion("Ingrese una cédula", "error");
 
@@ -53,135 +33,154 @@ document.addEventListener("DOMContentLoaded", () => {
                 estudianteSelect.innerHTML = `<option value="${data.estudiante.id}" selected>${data.estudiante.nombre} (${letra}-${cedula})</option>`;
                 estudianteSelect.disabled = false;
                 
-                // Cargamos semestres al encontrar estudiante
                 await cargarSemestres();
                 if (tipoSelect) tipoSelect.disabled = false;
-                
                 mostrarNotificacion("Estudiante encontrado: " + data.estudiante.nombre);
             } else {
                 mostrarNotificacion(data.message || "Estudiante no registrado", "error");
                 resetCascada();
             }
         } catch (err) {
-            console.error("Error:", err);
             mostrarNotificacion("Error al conectar con el servidor", "error");
         }
     };
 
     if (btnBuscarCedula) btnBuscarCedula.onclick = (e) => { e.preventDefault(); realizarBusqueda(); };
-    if (buscarCedulaInput) {
-        buscarCedulaInput.onkeypress = (e) => { if (e.key === 'Enter') { e.preventDefault(); realizarBusqueda(); } };
+
+    // --- 4. CARGA DE SEMESTRES ---
+    async function cargarSemestres() {
+        try {
+            const res = await fetch('/api/adicion-retiro/semestres'); 
+            const data = await res.json();
+            if (data.status === "ok" && data.semestres) {
+                semestreSelect.innerHTML = '<option value="">Selecciona el Semestre</option>';
+                data.semestres.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.semestre; 
+                    option.textContent = `Semestre ${item.semestre}`;
+                    semestreSelect.appendChild(option);
+                });
+                semestreSelect.disabled = false;
+            }
+        } catch (err) {
+            console.error(err);
+        }
     }
 
-    // --- 4. FILTRADO DINÁMICO (MATERIAS Y SECCIONES) ---
+    // --- 5. FILTRADO DINÁMICO ---
     if (semestreSelect) {
         semestreSelect.addEventListener('change', async (e) => {
             const semestre = e.target.value;
-            materiaSelect.innerHTML = '<option value="">Cargando materias...</option>';
-            materiaSelect.disabled = true;
-            seccionSelect.innerHTML = '<option value="">Selecciona la Sección</option>';
-            seccionSelect.disabled = true;
-
             if (!semestre) return;
-
             try {
                 const res = await fetch(`/api/adicion-retiro/materias?semestre=${semestre}`);
                 const data = await res.json();
-
-                if (data.status === "ok" && data.materias) {
+                if (data.status === "ok") {
                     materiaSelect.innerHTML = '<option value="">Selecciona la Materia</option>';
                     data.materias.forEach(mat => {
-                        const option = document.createElement('option');
-                        option.value = mat.nombre; 
-                        option.textContent = mat.nombre;
-                        materiaSelect.appendChild(option);
+                        materiaSelect.innerHTML += `<option value="${mat.nombre}">${mat.nombre}</option>`;
                     });
                     materiaSelect.disabled = false;
                 }
-            } catch (err) {
-                mostrarNotificacion("Error al obtener materias", "error");
-            }
+            } catch (err) { console.error(err); }
         });
     }
 
     if (materiaSelect) {
         materiaSelect.addEventListener('change', async (e) => {
             const nombreMateria = e.target.value;
-            seccionSelect.innerHTML = '<option value="">Cargando secciones...</option>';
-            seccionSelect.disabled = true;
-
             if (!nombreMateria) return;
-
             try {
                 const res = await fetch(`/api/adicion-retiro/secciones?nombreMateria=${encodeURIComponent(nombreMateria)}`);
                 const data = await res.json();
-
-                if (data.status === "ok" && data.secciones) {
+                if (data.status === "ok") {
                     seccionSelect.innerHTML = '<option value="">Selecciona la Sección</option>';
                     data.secciones.forEach(sec => {
-                        const option = document.createElement('option');
-                        option.value = sec.id; 
-                        option.textContent = `${sec.seccion_nombre} (Cupos: ${sec.cupos})`;
-                        seccionSelect.appendChild(option);
+                        seccionSelect.innerHTML += `<option value="${sec.id}">${sec.seccion_nombre} (Cupos: ${sec.cupos})</option>`;
                     });
                     seccionSelect.disabled = false;
                 }
+            } catch (err) { console.error(err); }
+        });
+    }
+
+    // --- 6. ENVÍO DEL FORMULARIO ---
+    if (formNueva) {
+        formNueva.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+           // Dentro de formNueva.addEventListener("submit"...)
+            const payload = {
+                estudiante_id: parseInt(document.getElementById("estudiante_id").value),
+                seccion_id: parseInt(document.getElementById("seccion_id").value),
+                tipo: document.getElementById("tipo").value
+            };
+
+
+            if (isNaN(payload.estudiante_id) || isNaN(payload.seccion_id) || !payload.tipo) {
+                return mostrarNotificacion("Error: Datos del formulario incompletos", "error");
+            }
+
+            try {
+                const res = await fetch("/api/adicion-retiro/crear-adicion-retiro", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                
+                if (res.ok && data.status === "ok") {
+                    mostrarNotificacion(data.message || "Registro guardado", "success"); 
+                    formNueva.reset();
+                    resetCascada();
+                    await listarSolicitudesProcesadas(); 
+                } else {
+                    mostrarNotificacion(data.message || "Error al procesar", "error");
+                }
             } catch (err) {
-                mostrarNotificacion("Error al cargar secciones", "error");
+                mostrarNotificacion("Error de conexión", "error");
             }
         });
     }
 
-    // --- 5. ENVÍO DE FORMULARIO ---
-  if (formNueva) {
-    formNueva.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const payload = {
-            estudiante_id: document.getElementById("estudiante_id").value,
-            seccion_id: document.getElementById("seccion_id").value,
-            tipo: document.getElementById("tipo").value
-        };
-
-        console.log("Datos a enviar:", payload); // Revisa esto en la consola del navegador
-
-        if (!payload.estudiante_id || !payload.seccion_id) {
-            return mostrarNotificacion("Debe completar todos los campos", "error");
-        }
-
-       try {
-            const res = await fetch("/api/adicion-retiro/crear-adicion-retiro", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload)
-            });
-
-            const data = await res.json();
-            
-            if (res.ok && data.status === "ok") {
-                // CASO ÉXITO
-                mostrarNotificacion(data.message, "success"); 
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                // CASO ERROR (Aquí entrará el mensaje "Materia ya registrada...")
-                // Usamos el mensaje que viene del servidor (data.message)
-                mostrarNotificacion(data.message || "Error al procesar", "error");
-            }
-        } catch (err) {
-            mostrarNotificacion("Error de conexión con el servidor", "error");
-        }
-    });
-}
-
     function resetCascada() {
         estudianteSelect.innerHTML = '<option value="">Realice una búsqueda...</option>';
         estudianteSelect.disabled = true;
-        if (semestreSelect) { semestreSelect.value = ""; semestreSelect.disabled = true; }
-        if (materiaSelect) { materiaSelect.value = ""; materiaSelect.disabled = true; }
-        if (seccionSelect) { seccionSelect.value = ""; seccionSelect.disabled = true; }
-        if (tipoSelect) tipoSelect.disabled = true;
+        [semestreSelect, materiaSelect, seccionSelect].forEach(sel => {
+            if(sel) { sel.innerHTML = '<option value="">--</option>'; sel.disabled = true; }
+        });
     }
 });
+
+// --- FUNCIONES QUE DEBEN SER GLOBALES (Fuera del DOMContentLoaded) ---
+
+async function listarSolicitudesProcesadas() {
+    try {
+        const res = await fetch("/api/adicion-retiro/listar-procesadas");
+        const data = await res.json();
+        const tbody = document.querySelector("#cuerpo-tabla-procesadas"); 
+        if (!tbody || data.status !== "ok") return;
+
+        if (!data.datos || data.datos.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-gray-400 italic">No hay registros</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = data.datos.map(reg => `
+            <tr class="text-sm border-b hover:bg-gray-50">
+                <td class="px-4 py-3 text-center text-gray-500 font-mono">${reg.id}</td>
+                <td class="px-4 py-3 text-center font-medium">${reg.estudiante_nombre}</td>
+                <td class="px-4 py-3 text-center">
+                    <span class="${reg.tipo === 'Adicion' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'} px-2 py-1 rounded text-xs font-bold">${reg.tipo}</span>
+                </td>
+                <td class="px-4 py-3 text-center">
+                    <span class="${reg.estado === 'Aprobada' ? 'text-green-600' : 'text-red-600'} font-bold">${reg.estado}</span>
+                </td>
+            </tr>`).join("");
+    } catch (e) { console.error(e); }
+}
+
 
 // --- FUNCIONES GLOBALES (Para botones en la tabla EJS) ---
 
