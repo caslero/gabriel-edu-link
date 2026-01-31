@@ -5,11 +5,19 @@ import RolController from "../controllers/RolController.js";
 import MateriaController from "../controllers/MateriaController.js";
 import SeccionController from "../controllers/SeccionController.js";
 import InscripcionController from "../controllers/InscripcionController.js";
-import { AdicionRetiroController } from '../controllers/AdicionRetiroController.js';
-
+import { AdicionRetiroController } from "../controllers/AdicionRetiroController.js";
+import {
+  adminLimiter,
+  busquedaLimiter,
+  gestionLimiter,
+  inscripcionLimiter,
+  loginLimiter,
+  readLimiter,
+  writeLimiter,
+} from "../middlewares/rateLimited.js";
+import AuthMiddleware from "../middlewares/authMiddleware.js";
 
 const rutas = express.Router();
-
 
 rutas.get("/", (req, res) => {
   res.render("index", { title: "Inicio - EduLink", user: null });
@@ -54,12 +62,17 @@ rutas.get("/login", (req, res) => {
 
 //--------------Rutas Admin-------------
 // Panel de inicio
-rutas.get("/dashboard/admin/panel", (req, res) => {
-  res.render("admin/panel", {
-    title: "Panel de Administración - EduLink",
-    user: "Admin",
-  });
-});
+rutas.get(
+  "/dashboard/admin/panel",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAdmin,
+  (req, res) => {
+    res.render("admin/panel", {
+      title: "Panel de Administración - EduLink",
+      user: "Admin",
+    });
+  },
+);
 
 // Perfil
 rutas.get("/admin/perfil", (req, res) => {
@@ -70,13 +83,18 @@ rutas.get("/admin/perfil", (req, res) => {
 });
 
 // Gestionar Usuarios
-rutas.get("/admin/gestionar-usuarios", (req, res) => {
-  res.render("admin/gestionUsuario", {
-    title: "Gestionar Usuarios - EduLink",
-    user: "Admin",
-    usuarios: [],
-  });
-});
+rutas.get(
+  "/admin/gestionar-usuarios",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAdmin,
+  (req, res) => {
+    res.render("admin/gestionUsuario", {
+      title: "Gestionar Usuarios - EduLink",
+      user: "Admin",
+      usuarios: [],
+    });
+  },
+);
 
 // Gestionar Materias
 rutas.get("/admin/gestionar-materias", (req, res) => {
@@ -188,12 +206,7 @@ rutas.get("/estudiante/perfil", (req, res) => {
 
 // inscripcion
 rutas.get("/estudiante/inscripcion", (req, res) => {
- // if (!req.session || !req.session.user) {
-   //     console.log(" Intento de acceso sin sesión activa.");
-     //   return res.redirect('/login'); 
-    //}
-    //const usuario = req.session.user;
-    res.render('estudiante/inscripcions', { 
+  res.render("estudiante/inscripcions", {
     title: "Inscripción - EduLink",
     user: usuario,
     semestres: [],
@@ -233,53 +246,148 @@ rutas.get("/estudiante/encuestas", (req, res) => {
   });
 });
 
-rutas.post("/api/usuarios/crear-usuario", UserController.crearUsuario);
-rutas.get("/api/usuarios/todos-usuarios", UserController.todosUsuarios);
+rutas.post(
+  "/api/usuarios/crear-usuario",
+  adminLimiter,
+  UserController.crearUsuario,
+);
+rutas.get(
+  "/api/usuarios/todos-usuarios",
+  readLimiter,
+  UserController.todosUsuarios,
+);
 rutas.patch(
   "/api/usuarios/actualizar-usuario",
+  adminLimiter,
   UserController.actualizarUsuario,
 );
 
-rutas.patch("/api/usuarios/eliminar-usuario", UserController.eliminarUsuario);
+rutas.patch(
+  "/api/usuarios/eliminar-usuario",
+  adminLimiter,
+  UserController.eliminarUsuario,
+);
 
-rutas.post("/api/roles/crear-rol", RolController.crearRol);
-rutas.get("/api/roles/todos-roles", RolController.todosRoles);
+rutas.post("/api/roles/crear-rol", adminLimiter, RolController.crearRol);
+rutas.get("/api/roles/todos-roles", readLimiter, RolController.todosRoles);
 
-rutas.post("/api/login/iniciar-sesion", LoginController.iniciarSesion);
+rutas.post(
+  "/api/login/iniciar-sesion",
+  loginLimiter,
+  LoginController.iniciarSesion,
+);
 
-rutas.get("/api/materias/todas-materias", MateriaController.todasMaterias);
+rutas.get(
+  "/api/materias/todas-materias",
+  readLimiter,
+  MateriaController.todasMaterias,
+);
 
-rutas.post("/api/secciones/crear-seccion", SeccionController.crearSeccion);
-rutas.get("/api/secciones/todas-secciones", SeccionController.todasSecciones);
+rutas.post(
+  "/api/secciones/crear-seccion",
+  writeLimiter,
+  SeccionController.crearSeccion,
+);
+rutas.get(
+  "/api/secciones/todas-secciones",
+  readLimiter,
+  SeccionController.todasSecciones,
+);
 rutas.patch(
   "/api/secciones/actualizar-seccion",
+  writeLimiter,
   SeccionController.actualizarSeccion,
 );
 rutas.patch(
   "/api/secciones/eliminar-seccion",
+  writeLimiter,
   SeccionController.eliminarSeccion,
 );
 
 //API INSCRIPCIONES
-rutas.post("/api/inscripcion/crear-inscripcion", InscripcionController.crearInscripcion);
-rutas.post("/api/inscripcion/gestionar/:id", InscripcionController.gestionarSolicitud);
-rutas.get("/api/inscripcion/confirmadas", InscripcionController.listarConfirmadas);
+rutas.post(
+  "/api/inscripcion/crear-inscripcion",
+  inscripcionLimiter,
+  InscripcionController.crearInscripcion,
+);
+rutas.post(
+  "/api/inscripcion/gestionar/:id",
+  gestionLimiter,
+  InscripcionController.gestionarSolicitud,
+);
+rutas.post(
+  "/api/inscripcion/buscar-estudiante",
+  busquedaLimiter,
+  InscripcionController.buscarEstudiante,
+);
 
-rutas.post("/api/inscripcion/buscar-estudiante", InscripcionController.buscarEstudiante);
-rutas.get("/api/inscripcion/semestres", InscripcionController.listarSemestres);
-rutas.get("/api/inscripcion/materias", InscripcionController.listarMaterias);
-rutas.get("/api/inscripcion/secciones", InscripcionController.listarSecciones);
-rutas.post("/api/inscripciones/solicitar-inscripcion", InscripcionController.solicitarInscripcion);
+rutas.get(
+  "/api/inscripcion/confirmadas",
+  readLimiter,
+  InscripcionController.listarConfirmadas,
+);
+rutas.get(
+  "/api/inscripcion/semestres",
+  readLimiter,
+  InscripcionController.listarSemestres,
+);
+rutas.get(
+  "/api/inscripcion/materias",
+  readLimiter,
+  InscripcionController.listarMaterias,
+);
+rutas.get(
+  "/api/inscripcion/secciones",
+  readLimiter,
+  InscripcionController.listarSecciones,
+);
 
+rutas.post(
+  "/api/inscripciones/solicitar-inscripcion",
+  inscripcionLimiter,
+  InscripcionController.solicitarInscripcion,
+);
 
-rutas.post("/api/adicion-retiro/buscar-estudiante", AdicionRetiroController.buscarEstudiante);
-rutas.get("/api/adicion-retiro/semestres", AdicionRetiroController.listarSemestres);
-rutas.get("/api/adicion-retiro/materias", AdicionRetiroController.listarMaterias);
-rutas.get("/api/adicion-retiro/secciones", AdicionRetiroController.listarSecciones);
-rutas.get('/api/adicion-retiro/listar-procesadas', AdicionRetiroController.listarProcesadas);
-rutas.post('/api/adicion-retiro/crear-adicion-retiro', AdicionRetiroController.crearAdicionRetiro);
-rutas.patch('/api/adicion-retiro/actualizar-estado', AdicionRetiroController.actualizarEstado);
-rutas.patch('/api/adicion-retiro/eliminar', AdicionRetiroController.eliminar);
+rutas.post(
+  "/api/adicion-retiro/buscar-estudiante",
+  busquedaLimiter,
+  AdicionRetiroController.buscarEstudiante,
+);
+rutas.get(
+  "/api/adicion-retiro/semestres",
+  readLimiter,
+  AdicionRetiroController.listarSemestres,
+);
+rutas.get(
+  "/api/adicion-retiro/materias",
+  readLimiter,
+  AdicionRetiroController.listarMaterias,
+);
+rutas.get(
+  "/api/adicion-retiro/secciones",
+  readLimiter,
+  AdicionRetiroController.listarSecciones,
+);
+rutas.get(
+  "/api/adicion-retiro/listar-procesadas",
+  readLimiter,
+  AdicionRetiroController.listarProcesadas,
+);
+rutas.post(
+  "/api/adicion-retiro/crear-adicion-retiro",
+  inscripcionLimiter,
+  AdicionRetiroController.crearAdicionRetiro,
+);
+rutas.patch(
+  "/api/adicion-retiro/actualizar-estado",
+  gestionLimiter,
+  AdicionRetiroController.actualizarEstado,
+);
+rutas.patch(
+  "/api/adicion-retiro/eliminar",
+  adminLimiter,
+  AdicionRetiroController.eliminar,
+);
 
 //API MATERIAS
 //rutas.post("/api/materias/crear-seccion", MateriaController.crearSeccion); //semestre, materia_id, seccion_nombre
