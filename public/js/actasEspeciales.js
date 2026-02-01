@@ -1,70 +1,141 @@
 document.addEventListener('DOMContentLoaded', () => {
     const formActa = document.getElementById('form-acta-especial');
 
+    // Inicialización de la página
+    cargarDocentes();
+    cargarEstudiantes();
+    listarSolicitudesProcesadas();
+
     // --- CREAR NUEVA ACTA ---
     if (formActa) {
         formActa.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const formData = new FormData(formActa);
-            const payload = Object.fromEntries(formData.entries());
+
+            const payload = {
+                titulo: document.getElementById("titulo").value,
+                descripcion: document.getElementById("descripcion").value,
+                tipo: document.getElementById("tipo").value,
+                docente_id: document.getElementById("docente_id").value,
+                estudiante_id: document.getElementById("estudiante_id").value || null
+            };
+
+            if (!payload.titulo || !payload.docente_id) {
+                return mostrarNotificacion("Título y Docente son obligatorios", "error");
+            }
 
             try {
-                // ENVÍA (POST): Objeto JSON con los campos del formulario (estudiante_id, materia_id, nota, motivo).
-                // RECIBE: { status: "ok" } o mensaje de error.
-                const res = await fetch('/api/actas-especiales/crear-acta-especial', { // estudiante_id, materia_id, nota, motivo
+                const res = await fetch("/api/actas-especiales/crear-acta-especial", {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
+                    headers: { 'Content-Type': 'application/json' }
                 });
-                const data = await res.json();
 
-                if (data.status === "ok") {
-                    mostrarNotificacion("Acta creada exitosamente");
-                    setTimeout(() => location.reload(), 1500);
+                const result = await res.json();
+
+                if (result.status === "ok") {
+                    mostrarNotificacion("¡Acta creada con éxito!");
+                    formActa.reset();
+                    // Refrescamos la tabla dinámicamente
+                    listarSolicitudesProcesadas(); 
                 } else {
-                    mostrarNotificacion(data.message || "Error al crear", "error");
+                    mostrarNotificacion("Error: " + result.message, "error");
                 }
             } catch (err) {
+                console.error("Error en el fetch:", err);
                 mostrarNotificacion("Error de conexión al servidor", "error");
             }
         });
     }
 });
 
-// --- GESTIONAR PENDIENTES (APROBAR/RECHAZAR) ---
-async function gestionarActa(id, accion) {
-    const confirmacion = confirm(`¿Estás seguro de que deseas ${accion.toLowerCase()} esta acta?`);
-    if (!confirmacion) return;
+// --- FUNCIONES DE CARGA DE DATOS ---
+
+async function cargarDocentes() {
+    const selectDocente = document.getElementById('docente_id');
+    if (!selectDocente) return;
 
     try {
-        // ENVÍA (PATCH): JSON con el 'id' único del acta y el string 'accion' ("Aprobar" o "Rechazar").
-        // RECIBE: Status del proceso para confirmar el cambio de estado en la interfaz.
-        const res = await fetch(`/api/actas-especiales/gestionar-actas-especiales`, { // id, accion ('Aprobar' o 'Rechazar'.)
-            method: 'PATCH',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id, accion }) // accion: 'Aprobar' o 'Rechazar'
-        });
-        const data = await res.json();
+        const res = await fetch('/api/actas-especiales/obtener-docentes');
+        const result = await res.json();
 
-        if (data.status === "ok") {
-            mostrarNotificacion(`Acta ${accion === 'Aprobar' ? 'aprobada' : 'rechazada'} correctamente`);
-            setTimeout(() => location.reload(), 1000);
-        } else {
-            mostrarNotificacion(data.message, "error");
+        if (result.status === "ok") {
+            selectDocente.innerHTML = '<option value="">Seleccione un docente</option>';
+            result.data.forEach(doc => {
+                selectDocente.innerHTML += `<option value="${doc.id}">${doc.nombre}</option>`;
+            });
         }
     } catch (err) {
-        mostrarNotificacion("Error al procesar la solicitud", "error");
+        console.error("Error cargando docentes:", err);
     }
 }
 
-// --- ELIMINAR ACTA ---
+async function cargarEstudiantes() {
+    const selectEstudiante = document.getElementById('estudiante_id');
+    if (!selectEstudiante) return;
+
+    try {
+        const res = await fetch('/api/actas-especiales/obtener-estudiantes');
+        const result = await res.json();
+
+        if (result.status === "ok") {
+            selectEstudiante.innerHTML = '<option value="">Seleccione un estudiante (opcional)</option>';
+            result.data.forEach(est => {
+                selectEstudiante.innerHTML += `<option value="${est.id}">${est.nombre}</option>`;
+            });
+        }
+    } catch (err) {
+        console.error("Error cargando estudiantes:", err);
+    }
+}
+
+async function listarSolicitudesProcesadas() {
+    const tbody = document.getElementById("cuerpo-tabla-procesadas");
+    if (!tbody) return;
+
+    try {
+        const res = await fetch("/api/actas-especiales/listar-actas");
+        if (!res.ok) throw new Error("Error al obtener datos");
+
+        const result = await res.json();
+
+        if (result.status === "ok" && result.data.length > 0) {
+            tbody.innerHTML = result.data.map(acta => `
+                <tr class="border-b hover:bg-gray-50 transition">
+                    <td class="px-4 py-2 text-center font-mono text-xs">${acta.id}</td>
+                    <td class="px-4 py-2 text-center font-medium">${acta.titulo}</td>
+                    <td class="px-4 py-2 text-center">${acta.docente || 'N/A'}</td>
+                    <td class="px-4 py-2 text-center text-sm">${acta.tipo}</td>
+                    <td class="px-4 py-2 text-center">
+                        <span class="px-2 py-1 rounded-full text-xs ${
+                            acta.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'
+                        }">
+                            ${acta.estado}
+                        </span>
+                    </td>
+                    <td class="px-4 py-2 text-center">
+                        <button onclick="eliminarActa('${acta.id}')" 
+                                class="bg-red-500 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            `).join("");
+        } else {
+            tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-gray-500 italic">No hay registros encontrados.</td></tr>`;
+        }
+    } catch (e) {
+        console.error("Error al listar actas:", e.message);
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-red-500">Error al cargar datos.</td></tr>`;
+    }
+}
+
+// --- ACCIONES DE GESTIÓN ---
+
 async function eliminarActa(id) {
     if (!confirm('¿Deseas eliminar permanentemente esta acta?')) return;
 
     try {
-        // ENVÍA (PATCH): JSON que contiene solo el 'id' del acta que se desea marcar como eliminada.
-        // RECIBE: Código de respuesta HTTP (res.ok) para confirmar la operación.
-        const res = await fetch(`/api/actas-especiales/eliminar-actas-especiales`, { // id
+        const res = await fetch(`/api/actas-especiales/eliminar-actas-especiales`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ id })
@@ -72,7 +143,7 @@ async function eliminarActa(id) {
 
         if (res.ok) {
             mostrarNotificacion("Acta eliminada correctamente");
-            setTimeout(() => location.reload(), 1000);
+            listarSolicitudesProcesadas(); // Actualización inmediata sin recargar
         } else {
             mostrarNotificacion("No se pudo eliminar el acta", "error");
         }
@@ -81,7 +152,7 @@ async function eliminarActa(id) {
     }
 }
 
-// --- UTILIDAD: NOTIFICACIONES (TOAST) ---
+// --- UTILIDAD: NOTIFICACIONES ---
 function mostrarNotificacion(mensaje, tipo = 'exito') {
     const color = tipo === 'exito' ? 'bg-green-600' : 'bg-red-600';
     const toast = document.createElement('div');

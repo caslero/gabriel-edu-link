@@ -23,10 +23,10 @@
         <div>
           <label for="docente_id" class="block font-semibold">Docente destinatario</label>
           <select id="docente_id" name="docente_id" class="w-full border p-2 rounded" required>
-            <option value="">Seleccione un docente</option>
-            <% docentes.forEach(doc => { %>
-              <option value="<%= doc.id %>"><%= doc.nombre %></option>
-            <% }) %>
+              <option value="">Seleccione un docente</option>
+              <% docentes.forEach(doc => { %>
+                  <option value="<%= doc.id %>"><%= doc.nombre %></option>
+              <% }) %>
           </select>
         </div>
         <div>
@@ -86,38 +86,41 @@
     <h3 class="text-lg font-semibold text-blue-700 mb-4">Actas procesadas</h3>
     <div class="overflow-x-auto">
       <table class="min-w-full border border-gray-200 rounded-lg shadow-sm">
-        <thead class="bg-blue-600 text-white">
-          <tr>
-            <th class="px-4 py-2">ID</th>
-            <th class="px-4 py-2">Título</th>
-            <th class="px-4 py-2">Docente</th>
-            <th class="px-4 py-2">Tipo</th>
-            <th class="px-4 py-2">Estado</th>
-            <th class="px-4 py-2">Acciones</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y">
-          <% if (!actas || actas.length === 0) { %>
-            <tr><td colspan="6" class="text-center py-6 text-gray-500">No hay actas procesadas.</td></tr>
-          <% } else { %>
-            <% actas.forEach(acta => { %>
+          <thead class="bg-blue-600 text-white">
               <tr>
-                <td class="px-4 py-2 text-center"><%= acta.id %></td>
-                <td class="px-4 py-2 text-center"><%= acta.titulo %></td>
-                <td class="px-4 py-2 text-center"><%= acta.docente %></td>
-                <td class="px-4 py-2 text-center"><%= acta.tipo %></td>
-                <td class="px-4 py-2 text-center">
-                  <span class="px-2 py-1 rounded-full text-xs <%= acta.estado === 'ProcesadaAdmin' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %>">
-                    <%= acta.estado %>
-                  </span>
-                </td>
-                <td class="px-4 py-2 text-center">
-                  <button onclick="eliminarActa('<%= acta.id %>')" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Eliminar</button>
-                </td>
+                  <th class="px-4 py-2">ID</th>
+                  <th class="px-4 py-2">Título</th>
+                  <th class="px-4 py-2">Docente</th>
+                  <th class="px-4 py-2">Tipo</th>
+                  <th class="px-4 py-2">Estado</th>
+                  <th class="px-4 py-2">Acciones</th>
               </tr>
-            <% }) %>
-          <% } %>
-        </tbody>
+          </thead>
+          <tbody id="cuerpo-tabla-procesadas" class="divide-y">
+              <% if (!actas || actas.length === 0) { %>
+                  <tr><td colspan="6" class="text-center py-6 text-gray-500">No hay actas procesadas.</td></tr>
+              <% } else { %>
+                  <% actas.forEach(acta => { %>
+                      <tr>
+                          <td class="px-4 py-2 text-center"><%= acta.id %></td>
+                          <td class="px-4 py-2 text-center"><%= acta.titulo %></td>
+                          <td class="px-4 py-2 text-center"><%= acta.docente %></td>
+                          <td class="px-4 py-2 text-center"><%= acta.tipo %></td>
+                          <td class="px-4 py-2 text-center">
+                              <span class="px-2 py-1 rounded-full text-xs <%= acta.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700' %>">
+                                  <%= acta.estado %>
+                              </span>
+                          </td>
+                          <td class="px-4 py-2 text-center">
+                              <%= acta.fecha_creacion ? new Date(acta.fecha_creacion).toLocaleDateString() : 'S/F' %>
+                          </td>
+                          <td class="px-4 py-2 text-center">
+                              <button onclick="eliminarActa('<%= acta.id %>')" class="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">Eliminar</button>
+                          </td>
+                      </tr>
+                  <% }) %>
+              <% } %>
+          </tbody>
       </table>
     </div>
   </div>

@@ -6,6 +6,7 @@ import MateriaController from "../controllers/MateriaController.js";
 import SeccionController from "../controllers/SeccionController.js";
 import InscripcionController from "../controllers/InscripcionController.js";
 import { AdicionRetiroController } from "../controllers/AdicionRetiroController.js";
+import { ActasEspecialesController } from '../controllers/ActasEspecialesController.js';
 import {
   adminLimiter,
   busquedaLimiter,
@@ -393,6 +394,24 @@ rutas.patch(
   "/api/adicion-retiro/eliminar",
   adminLimiter,
   AdicionRetiroController.eliminar,
+);
+
+
+rutas.post(
+  "/api/actas-especiales/crear-acta-especial",
+   ActasEspecialesController.crearActaEspecial
+);
+rutas.get(
+  "/api/actas-especiales/obtener-docentes",
+  ActasEspecialesController.obtenerDocentes
+);
+rutas.get(
+  '/api/actas-especiales/obtener-estudiantes',
+  ActasEspecialesController.obtenerEstudiantes
+);
+rutas.get(
+  '/api/actas-especiales/listar-actas', 
+  ActasEspecialesController.listarActas
 );
 
 //API MATERIAS

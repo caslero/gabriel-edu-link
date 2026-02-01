@@ -179,6 +179,36 @@ export const initSeccionesTable = () => {
     });
   };
 
+
+  export const initActasEspecialesTable = () => {
+  const sql = `
+    CREATE TABLE IF NOT EXISTS actas_especiales (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      titulo TEXT NOT NULL,
+      descripcion TEXT,
+      tipo TEXT NOT NULL CHECK (tipo IN ('Solicitud', 'Acta Directa')),
+      docente_id INTEGER NOT NULL,      -- El docente asignado
+      estudiante_id INTEGER,           -- Estudiante (puede ser NULL si es acta general)
+      creado_por INTEGER,              -- ID del admin/usuario que creó el registro
+      estado TEXT NOT NULL DEFAULT 'Pendiente' 
+        CHECK (estado IN ('Pendiente', 'Procesada', 'Anulada')),
+      fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+      borrado BOOLEAN NOT NULL DEFAULT 0,
+      FOREIGN KEY (docente_id) REFERENCES users(id),
+      FOREIGN KEY (estudiante_id) REFERENCES users(id),
+      FOREIGN KEY (creado_por) REFERENCES users(id)
+    );
+  `;
+
+  db.run(sql, (err) => {
+    if (err) {
+      console.error("Error al crear tabla actas_especiales:", err.message);
+    } else {
+      console.log("Tabla actas_especiales creada.");
+    }
+  });
+};
+
 export const initDatabase = () => {
   initRolesTable();
   initUsersTable();
@@ -186,6 +216,7 @@ export const initDatabase = () => {
   initSeccionesTable();
   initInscripcionesTable();
   initAdicionRetiroTable();
+  initActasEspecialesTable();
 };
 
 /**
