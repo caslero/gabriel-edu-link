@@ -1,0 +1,72 @@
+<div class="max-w-7xl mx-auto mt-10 mb-20 bg-white rounded-lg shadow-xl overflow-hidden">
+  <div class="bg-red-600 p-8 text-white text-center">
+    <h1 class="text-3xl font-bold flex items-center justify-center">
+      <i class="bi bi-shield-lock-fill mr-3"></i> Acceso Restringido
+    </h1>
+    <p class="mt-2 text-red-100">Seguridad de Rutas EduLink</p>
+  </div>
+
+  <div class="flex flex-col md:flex-row">
+    <aside class="w-full md:w-64 bg-gray-50 border-r border-gray-200 p-6">
+      <div class="text-center">
+        <div class="inline-flex items-center justify-center w-20 h-20 bg-red-100 rounded-full mb-4">
+          <i class="bi bi-exclamation-triangle-fill text-3xl text-red-600"></i>
+        </div>
+        <h3 class="font-bold text-gray-800">Error 403</h3>
+        <p class="text-sm text-gray-500">Usuario No Autorizado</p>
+      </div>
+      
+      <div class="mt-8 space-y-3">
+        <a href="/" class="block w-full text-center px-4 py-2 rounded font-semibold bg-blue-700 text-white hover:bg-blue-800 transition">
+          Ir al Inicio
+        </a>
+        <button onclick="window.history.back()" class="block w-full text-center px-4 py-2 rounded font-semibold border border-gray-300 text-gray-600 hover:bg-gray-100 transition">
+          Volver atrás
+        </button>
+      </div>
+    </aside>
+
+    <main class="flex-1 p-8">
+      <div class="space-y-6">
+        <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">Lo sentimos, no tienes permiso aquí</h2>
+        <p class="text-gray-600 italic">
+            Has intentado acceder a una sección protegida del sistema. Tu rol actual no cuenta con los privilegios necesarios para ver esta información.
+        </p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="p-4 border rounded-lg bg-gray-50 border-l-4 border-red-500">
+            <h4 class="font-bold text-red-800 flex items-center">
+                <i class="bi bi-info-circle-fill mr-2"></i> ¿Por qué veo esto?
+            </h4>
+            <ul class="text-sm space-y-2 mt-2 text-gray-700">
+              <li><span class="font-bold text-red-600">•</span> Estás intentando acceder a una ruta de <strong>Administrador</strong> siendo Estudiante/Docente.</li>
+              <li><span class="font-bold text-red-600">•</span> Tu sesión ha expirado y el sistema no reconoce tus credenciales.</li>
+              <li><span class="font-bold text-red-600">•</span> No estás asignado a la sección o materia que intentas consultar.</li>
+            </ul>
+          </div>
+
+          <div class="p-4 border rounded-lg bg-blue-50 border-l-4 border-blue-500">
+            <h4 class="font-bold text-blue-800 flex items-center">
+                <i class="bi bi-person-badge-fill mr-2"></i> ¿Qué puedo hacer?
+            </h4>
+            <p class="text-sm mt-2 text-gray-700">
+                Si crees que esto es un error, por favor contacta al <strong>Administrador de Control de Estudios</strong> para verificar tu <code>rol_id</code> en el sistema.
+            </p>
+            <div class="mt-3">
+                <a href="/ayuda" class="text-sm font-bold text-blue-700 hover:underline">
+                    Visitar Centro de Ayuda 
+                </a>
+            </div>
+          </div>
+        </div>
+
+        <section class="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+            <h3 class="text-sm font-bold text-yellow-800 uppercase tracking-wider">Protocolo de Seguridad</h3>
+            <p class="text-xs text-yellow-700 mt-1">
+                Todas las tentativas de acceso no autorizado a rutas críticas son registradas en el log de auditoría del sistema para garantizar la integridad de los datos académicos.
+            </p>
+        </section>
+      </div>
+    </main>
+  </div>
+</div>
