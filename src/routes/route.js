@@ -31,7 +31,7 @@ rutas.get("/ayuda", (req, res) => {
 });
 
 rutas.get("/no-autorizado", (req, res) =>{
-  res.render("/noAutorizado", {
+  res.render("noAutorizado", {
     title: "Usuario no autoreizado - EduLink"
   });
 });
