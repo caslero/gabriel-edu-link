@@ -6,7 +6,6 @@ import MateriaController from "../controllers/MateriaController.js";
 import SeccionController from "../controllers/SeccionController.js";
 import InscripcionController from "../controllers/InscripcionController.js";
 import { AdicionRetiroController } from "../controllers/AdicionRetiroController.js";
-import { ActasEspecialesController } from '../controllers/ActasEspecialesController.js';
 import {
   adminLimiter,
   busquedaLimiter,
@@ -17,6 +16,7 @@ import {
   writeLimiter,
 } from "../middlewares/rateLimited.js";
 import AuthMiddleware from "../middlewares/authMiddleware.js";
+import { ActasEspecialesController } from "../controllers/ActasEspecialesController.js";
 
 const rutas = express.Router();
 
@@ -31,9 +31,9 @@ rutas.get("/ayuda", (req, res) => {
   });
 });
 
-rutas.get("/no-autorizado", (req, res) =>{
+rutas.get("/no-autorizado", (req, res) => {
   res.render("noAutorizado", {
-    title: "Usuario no autoreizado - EduLink"
+    title: "Usuario no autorizado - EduLink",
   });
 });
 
@@ -82,12 +82,17 @@ rutas.get(
 );
 
 // Perfil
-rutas.get("/admin/perfil", (req, res) => {
-  res.render("admin/perfil", {
-    title: "Perfil - EduLink",
-    users: "Admin",
-  });
-});
+rutas.get(
+  "/admin/perfil",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAdmin,
+  (req, res) => {
+    res.render("admin/perfil", {
+      title: "Perfil - EduLink",
+      users: "Admin",
+    });
+  },
+);
 
 // Gestionar Usuarios
 rutas.get(
@@ -104,165 +109,260 @@ rutas.get(
 );
 
 // Gestionar Materias
-rutas.get("/admin/gestionar-materias", (req, res) => {
-  res.render("admin/gestionMateria", {
-    title: "Gestionar Materias - EduLink",
-    user: "Admin",
-    semestres: [],
-    materias: [],
-    secciones: [],
-  });
-});
+rutas.get(
+  "/admin/gestionar-materias",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAdmin,
+  (req, res) => {
+    res.render("admin/gestionMateria", {
+      title: "Gestionar Materias - EduLink",
+      user: "Admin",
+      semestres: [],
+      materias: [],
+      secciones: [],
+    });
+  },
+);
 
 // Gestionar inscripciones
-rutas.get("/admin/gestionar-inscripciones", (req, res) => {
-  res.render("admin/gestionInscripcion", {
-    title: "Gestionar Inscripciones - EduLink",
-    user: "Admin",
-    semestres: [],
-    solicitudes: [],
-    inscripciones: [],
-  });
-});
+rutas.get(
+  "/admin/gestionar-inscripciones",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAdmin,
+  (req, res) => {
+    res.render("admin/gestionInscripcion", {
+      title: "Gestionar Inscripciones - EduLink",
+      user: "Admin",
+      semestres: [],
+      solicitudes: [],
+      inscripciones: [],
+    });
+  },
+);
 
 // Gestionar Adicion y Retiro
-rutas.get("/admin/gestionar-adicion-retiro", (req, res) => {
-  res.render("admin/gestionAdicionRetiro", {
-    title: "Gestionar Adición y Retiro - EduLink",
-    user: "Admin",
-    estudiantes: [],
-    secciones: [],
-    materias: [],
-    semestres: [],
-    solicitudes: [],
-    pendientes: [],
-    procesadas: [],
-    inscripciones: [],
-  });
-});
+rutas.get(
+  "/admin/gestionar-adicion-retiro",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAdmin,
+  (req, res) => {
+    res.render("admin/gestionAdicionRetiro", {
+      title: "Gestionar Adición y Retiro - EduLink",
+      user: "Admin",
+      estudiantes: [],
+      secciones: [],
+      materias: [],
+      semestres: [],
+      solicitudes: [],
+      pendientes: [],
+      procesadas: [],
+      inscripciones: [],
+    });
+  },
+);
 
 // Gestionar Actas Especiales
-rutas.get("/admin/gestionar-actas-especiales", (req, res) => {
-  res.render("admin/gestionActaEspecial", {
-    title: "Gestión de Actas Especiales",
-    user: "Admin",
-    docentes: [],
-    estudiantes: [],
-    materias: [],
-    secciones: [],
-    solicitudes: [],
-    procesadas: [],
-    actas: [],
-  });
-});
+rutas.get(
+  "/admin/gestionar-actas-especiales",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAdmin,
+  (req, res) => {
+    res.render("admin/gestionActaEspecial", {
+      title: "Gestión de Actas Especiales",
+      user: "Admin",
+      docentes: [],
+      estudiantes: [],
+      materias: [],
+      secciones: [],
+      solicitudes: [],
+      procesadas: [],
+      actas: [],
+    });
+  },
+);
 
 // Gestionar Encuestas
-rutas.get("/admin/gestionar-encuestas", (req, res) => {
-  res.render("admin/gestionEncuesta", {
-    title: "Gestión de Encuestas",
-    user: "Admin",
-    semestres: [],
-    materias: [],
-    encuestas: [],
-  });
-});
+rutas.get(
+  "/admin/gestionar-encuestas",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAdmin,
+  (req, res) => {
+    res.render("admin/gestionEncuesta", {
+      title: "Gestión de Encuestas",
+      user: "Admin",
+      semestres: [],
+      materias: [],
+      encuestas: [],
+    });
+  },
+);
 
 //--------------Rutas Docentes------------
 // Panel de inicio
-rutas.get("/dashboard/docente/panel", (req, res) => {
-  res.render("docente/panel", {
-    title: "Panel de Docente - EduLink",
-    user: "Docente",
-  });
-});
+rutas.get(
+  "/dashboard/docente/panel",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloProfesor,
+  (req, res) => {
+    res.render("docente/panel", {
+      title: "Panel de Docente - EduLink",
+      user: "Docente",
+    });
+  },
+);
 
 // Perfil
-rutas.get("/docente/perfil", (req, res) => {
-  res.render("docente/perfil", { title: "Perfil - EduLink", user: "Docente" });
-});
+rutas.get(
+  "/docente/perfil",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloProfesor,
+  (req, res) => {
+    res.render("docente/perfil", {
+      title: "Perfil - EduLink",
+      user: "Docente",
+    });
+  },
+);
 
 // Gestionar Actas Especiales
-rutas.get("/docente/gestionar-acta-especial", (req, res) => {
-  res.render("docente/gestionarActaEspecial", {
-    title: "Gestionar Actas Especiales - EduLink",
-    user: "Docente",
-    estudiantes: [],
-    materias: [],
-    secciones: [],
-    actas: [],
-  });
-});
+rutas.get(
+  "/docente/gestionar-acta-especial",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloProfesor,
+  (req, res) => {
+    res.render("docente/gestionarActaEspecial", {
+      title: "Gestionar Actas Especiales - EduLink",
+      user: "Docente",
+      estudiantes: [],
+      materias: [],
+      secciones: [],
+      actas: [],
+    });
+  },
+);
+
+// Gestionar Actas Especiales
+rutas.get(
+  "/admin/gestionar-actas-especiales",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAdmin,
+  (req, res) => {
+    res.render("admin/gestionActaEspecial", {
+      title: "Gestión de Actas Especiales",
+      user: "Admin",
+      docentes: [],
+      estudiantes: [],
+      materias: [],
+      secciones: [],
+      solicitudes: [],
+      procesadas: [],
+      actas: [],
+    });
+  },
+);
+
+// Actas Especiales
+rutas.get(
+  "/estudiante/acta-especial",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAlumno,
+  (req, res) => {
+    res.render("estudiante/actaEspecial", {
+      title: "Actas Especiales - EduLink",
+      user: "Estudiante",
+      actas: [],
+    });
+  },
+);
 
 //--------------Rutas Estudiantes------------
 // Panel de inicio
-rutas.get("/dashboard/estudiante/panel", (req, res) => {
-  res.render("estudiante/panel", {
-    title: "Panel de Estudiante - EduLink",
-    user: "Estudiante",
-    semestre: null,
-  });
-});
+rutas.get(
+  "/dashboard/estudiante/panel",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAlumno,
+  (req, res) => {
+    res.render("estudiante/panel", {
+      title: "Panel de Estudiante - EduLink",
+      user: "Estudiante",
+      semestre: null,
+    });
+  },
+);
 
 // Perfil
-rutas.get("/estudiante/perfil", (req, res) => {
-  res.render("estudiante/perfil", {
-    title: "Perfil - EduLink",
-    user: "Estudiante",
-  });
-});
+rutas.get(
+  "/estudiante/perfil",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAlumno,
+  (req, res) => {
+    res.render("estudiante/perfil", {
+      title: "Perfil - EduLink",
+      user: "Estudiante",
+    });
+  },
+);
 
 // inscripcion
-rutas.get("/estudiante/inscripcion", (req, res) => {
-  res.render("estudiante/inscripcions", {
-    title: "Inscripción - EduLink",
-    user: usuario,
-    semestres: [],
-    materias: [],
-    secciones: [],
-    solicitudes: [],
-  });
-});
+rutas.get(
+  "/estudiante/inscripcion",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAlumno,
+  (req, res) => {
+    res.render("estudiante/inscripcions", {
+      title: "Inscripción - EduLink",
+      user: usuario,
+      semestres: [],
+      materias: [],
+      secciones: [],
+      solicitudes: [],
+    });
+  },
+);
 
 // Adición y Retiro
-rutas.get("/estudiante/adicion-retiro", (req, res) => {
-  res.render("estudiante/adicionRetiro", {
-    title: "Adición y Retiro - EduLink",
-    user: "Estudiante",
-    semestres: [],
-    materias: [],
-    secciones: [],
-    solicitudes: [],
-  });
-});
-
-// Actas Especiales
-rutas.get("/estudiante/acta-especial", (req, res) => {
-  res.render("estudiante/actaEspecial", {
-    title: "Actas Especiales - EduLink",
-    user: "Estudiante",
-    actas: [],
-  });
-});
+rutas.get(
+  "/estudiante/adicion-retiro",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAlumno,
+  (req, res) => {
+    res.render("estudiante/adicionRetiro", {
+      title: "Adición y Retiro - EduLink",
+      user: "Estudiante",
+      semestres: [],
+      materias: [],
+      secciones: [],
+      solicitudes: [],
+    });
+  },
+);
 
 // Encuestas
-rutas.get("/estudiante/encuestas", (req, res) => {
-  res.render("estudiante/encuestas", {
-    title: "Encuestas - EduLink",
-    user: "Estudiante",
-    encuestas: [],
-  });
-});
+rutas.get(
+  "/estudiante/encuestas",
+  AuthMiddleware.authenticado,
+  AuthMiddleware.soloAlumno,
+  (req, res) => {
+    res.render("estudiante/encuestas", {
+      title: "Encuestas - EduLink",
+      user: "Estudiante",
+      encuestas: [],
+    });
+  },
+);
 
 rutas.post(
   "/api/usuarios/crear-usuario",
   adminLimiter,
   UserController.crearUsuario,
 );
+
 rutas.get(
   "/api/usuarios/todos-usuarios",
   readLimiter,
   UserController.todosUsuarios,
 );
+
 rutas.patch(
   "/api/usuarios/actualizar-usuario",
   adminLimiter,
@@ -276,6 +376,7 @@ rutas.patch(
 );
 
 rutas.post("/api/roles/crear-rol", adminLimiter, RolController.crearRol);
+
 rutas.get("/api/roles/todos-roles", readLimiter, RolController.todosRoles);
 
 rutas.post(
@@ -283,6 +384,8 @@ rutas.post(
   loginLimiter,
   LoginController.iniciarSesion,
 );
+
+rutas.get("/api/login/cerrar-sesion", LoginController.logout);
 
 rutas.get(
   "/api/materias/todas-materias",
@@ -295,11 +398,13 @@ rutas.post(
   writeLimiter,
   SeccionController.crearSeccion,
 );
+
 rutas.get(
   "/api/secciones/todas-secciones",
   readLimiter,
   SeccionController.todasSecciones,
 );
+
 rutas.patch(
   "/api/secciones/actualizar-seccion",
   writeLimiter,
@@ -360,6 +465,12 @@ rutas.post(
   busquedaLimiter,
   AdicionRetiroController.buscarEstudiante,
 );
+rutas.post(
+  "/api/adicion-retiro/crear-adicion-retiro",
+  inscripcionLimiter,
+  AdicionRetiroController.crearAdicionRetiro,
+);
+
 rutas.get(
   "/api/adicion-retiro/semestres",
   readLimiter,
@@ -380,11 +491,7 @@ rutas.get(
   readLimiter,
   AdicionRetiroController.listarProcesadas,
 );
-rutas.post(
-  "/api/adicion-retiro/crear-adicion-retiro",
-  inscripcionLimiter,
-  AdicionRetiroController.crearAdicionRetiro,
-);
+
 rutas.patch(
   "/api/adicion-retiro/actualizar-estado",
   gestionLimiter,
@@ -396,41 +503,26 @@ rutas.patch(
   AdicionRetiroController.eliminar,
 );
 
-
 rutas.post(
   "/api/actas-especiales/crear-acta-especial",
-   ActasEspecialesController.crearActaEspecial
+  adminLimiter,
+  ActasEspecialesController.crearActaEspecial,
 );
+
 rutas.get(
   "/api/actas-especiales/obtener-docentes",
-  ActasEspecialesController.obtenerDocentes
+  adminLimiter,
+  ActasEspecialesController.obtenerDocentes,
 );
 rutas.get(
-  '/api/actas-especiales/obtener-estudiantes',
-  ActasEspecialesController.obtenerEstudiantes
+  "/api/actas-especiales/obtener-estudiantes",
+  adminLimiter,
+  ActasEspecialesController.obtenerEstudiantes,
 );
 rutas.get(
-  '/api/actas-especiales/listar-actas', 
-  ActasEspecialesController.listarActas
+  "/api/actas-especiales/listar-actas",
+  adminLimiter,
+  ActasEspecialesController.listarActas,
 );
-
-//API MATERIAS
-//rutas.post("/api/materias/crear-seccion", MateriaController.crearSeccion); //semestre, materia_id, seccion_nombre
-//rutas.patch("/api/materias/actualizar-seccion", MateriaController.actualizarSeccion); // id, nombre
-//rutas.patch("/api/materias/eliminar-seccion", MateriaController.eliminarSeccion); //id
-
-//API ADICION Y RETIRO
-//rutas.post("/api/adicion-retiro/crear-adicion-retiro", AdicionRetiroController.crearAdicionRetiro);  // estudiante_id, semestre_id, materia_id, seccion_id, tipo
-//rutas.patch("/api/adicion-retiro/actualizar-estado", AdicionRetiroController.actualizarAdicioRetiro); // id, estado ('Aprobada', 'Rechazada', 'Procesada').
-
-//API ACTAS ESPECIALES
-//rutas.post("/api/actas-especiales/crear-actas-especiales", ActasEspecialesController.crearActasEspeciales);  // estudiante_id, materia_id, nota, motivo
-//rutas.patch("/api/actas-especiales/gestionar-actas-especiales", ActasEspecialesController.gestionarActasEspeciales); // id, accion ('Aprobar' o 'Rechazar')
-//rutas.patch("/api/actas-especiales/eliminar-actas-especiales", ActasEspecialesController.eliminarActasEspeciales); // id
-
-//API ENCUESTAS
-//rutas.post("/api/encuestas/crear-encuesta", EncuestasController.crearEncuestas); // titulo, descripcion, semestre, fecha_inicio, fecha_fin, materias id (para el array q muestra las materias a seleccionar)
-//rutas.patch("/api/encuestas/actualizar-encuestas", EncuestasController.actualizarEncuestas); // id, titulo, descripcion, semestre, fecha_inicio, fecha_fin, estado, materias id (para el array q muestra las materias a seleccionar)
-//rutas.patch("/api/encuestas/eliminar-encuesta", EncuestasController.eliminarEncuestas); //id
 
 export default rutas;

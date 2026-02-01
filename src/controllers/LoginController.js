@@ -49,11 +49,19 @@ export default class LoginController {
 
   static async logout(req, res) {
     try {
+      // AGREGA ESTOS HEADERS ANTICACHE
+      res.setHeader(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate, private",
+      );
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
+
       // 1. Elimina la cookie en Express
       res.clearCookie(nombreToken, {
         path: "/",
         httpOnly: true,
-        secure: process.env.NODE_ENV === "production", // Coincidir con la creación
+        secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
       });
 
@@ -62,7 +70,10 @@ export default class LoginController {
         res,
         "ok",
         "Cerrando sesion",
-        { redirect: "/" },
+        {
+          redirect: "/",
+          timestamp: Date.now(), // Agrega timestamp para evitar cache
+        },
         200,
       );
     } catch (error) {

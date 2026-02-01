@@ -2,17 +2,24 @@ import obtenerDatosUsuarioToken from "../libs/obtenerDatosUsuarioToken.js";
 
 export default class AuthMiddleware {
   // Middleware base que obtiene y valida el token UNA VEZ
+
   static async authenticado(req, res, next) {
     try {
+      // AGREGA ESTAS 3 LÍNEAS AL INICIO
+      res.setHeader(
+        "Cache-Control",
+        "no-store, no-cache, must-revalidate, private",
+      );
+      res.setHeader("Pragma", "no-cache");
+      res.setHeader("Expires", "0");
+
       const validaciones = await obtenerDatosUsuarioToken(req);
 
       if (validaciones.status === "error") {
         return res.redirect("/no-autorizado");
       }
 
-      // Guardar las validaciones en la request para reutilizar
       req.authData = validaciones;
-
       next();
     } catch (error) {
       console.log("Error en autenticación:", error);
