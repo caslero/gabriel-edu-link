@@ -126,8 +126,8 @@ export const initSeccionesTable = () => {
   });
 };
 
-  export const initInscripcionesTable = () => {
-    const sql = `
+export const initInscripcionesTable = () => {
+  const sql = `
       CREATE TABLE IF NOT EXISTS inscripciones (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         estudiante_id INTEGER NOT NULL,          
@@ -146,18 +146,17 @@ export const initSeccionesTable = () => {
         FOREIGN KEY (gestionado_por) REFERENCES users(id)
       );
     `;
-    db.run(sql, (err) => {
-      if (err) {
-        console.error("Error al crear tabla inscripciones:", err.message);
-      } else {
-        console.log("Tabla inscripciones creada.");
-      }
-    });
-  };
+  db.run(sql, (err) => {
+    if (err) {
+      console.error("Error al crear tabla inscripciones:", err.message);
+    } else {
+      console.log("Tabla inscripciones creada.");
+    }
+  });
+};
 
-  
-  export const initAdicionRetiroTable = () => {
-    const sql = `
+export const initAdicionRetiroTable = () => {
+  const sql = `
           CREATE TABLE IF NOT EXISTS adicion_retiro (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             estudiante_id INTEGER NOT NULL,
@@ -170,17 +169,16 @@ export const initSeccionesTable = () => {
             FOREIGN KEY (seccion_id) REFERENCES secciones(id) ON DELETE CASCADE
           );
         `;
-        db.run(sql, (err) => {
-      if (err) {
-        console.error("Error al crear tabla adicion_retiro:", err.message);
-      } else {
-        console.log("Tabla adicion_retiro creada.");
-      }
-    });
-  };
+  db.run(sql, (err) => {
+    if (err) {
+      console.error("Error al crear tabla adicion_retiro:", err.message);
+    } else {
+      console.log("Tabla adicion_retiro creada.");
+    }
+  });
+};
 
-
-  export const initActasEspecialesTable = () => {
+export const initActasEspecialesTable = () => {
   const sql = `
     CREATE TABLE IF NOT EXISTS actas_especiales (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
