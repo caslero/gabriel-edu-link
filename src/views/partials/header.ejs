@@ -66,7 +66,11 @@
             <img src="<%= user.foto ? user.foto : '/img/usuario.png' %>" class="w-12 h-12 rounded-full border-2 border-blue-400">
             <div>
               <p class="text-sm font-bold"><%= user.nombre %></p>
-              <a href="/auth/logout" class="text-xs text-red-300 flex items-center"><i class="bi bi-power mr-1"></i> Cerrar Sesión</a>
+              <button id="cerrarSesion" class="text-xs text-red-300 flex items-center">
+                <i class="bi bi-box-arrow-right mr-2">
+                  Cerrar sesión
+                </i> 
+              </button>
             </div>
         </div>
         <a href="/dashboard/<%= (user && user.rol) ? user.rol.toLowerCase() : 'usuario' %>/panel" class="py-2 border-b border-blue-700">Panel de Control</a>

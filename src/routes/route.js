@@ -17,6 +17,7 @@ import {
 } from "../middlewares/rateLimited.js";
 import AuthMiddleware from "../middlewares/authMiddleware.js";
 import { ActasEspecialesController } from "../controllers/ActasEspecialesController.js";
+import EncuestasController from '../controllers/EncuestasController.js';
 
 const rutas = express.Router();
 
@@ -523,6 +524,28 @@ rutas.get(
   "/api/actas-especiales/listar-actas",
   adminLimiter,
   ActasEspecialesController.listarActas,
+);
+
+
+rutas.get(
+  "/api/encuestas/obtener-semestres",
+  EncuestasController.listarSemestres
+);
+rutas.get(
+  "/api/encuestas/listar-materias",
+  EncuestasController.listarMateriasPorSemestre
+);
+rutas.post("/api/encuestas/crear-encuesta", 
+  EncuestasController.crearEncuesta
+);
+rutas.get("/api/encuestas/listar-encuestas", 
+  EncuestasController.listarEncuestas
+);
+rutas.patch("api/encuestas/actualizar-encuesta", 
+  EncuestasController.actualizarEncuesta
+);
+rutas.patch("/api/encuestas/eliminar-encuesta", 
+  EncuestasController.eliminarEncuesta
 );
 
 export default rutas;

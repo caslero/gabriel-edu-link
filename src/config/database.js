@@ -197,12 +197,53 @@ export const initActasEspecialesTable = () => {
       FOREIGN KEY (creado_por) REFERENCES users(id)
     );
   `;
-
   db.run(sql, (err) => {
     if (err) {
       console.error("Error al crear tabla actas_especiales:", err.message);
     } else {
       console.log("Tabla actas_especiales creada.");
+    }
+  });
+};
+export const initEncuestasTable = () => {
+  const sql = `
+    CREATE TABLE IF NOT EXISTS encuestas (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          titulo TEXT NOT NULL,
+          descripcion TEXT,
+          semestre TEXT NOT NULL,
+          fecha_inicio DATE NOT NULL,
+          fecha_fin DATE NOT NULL,
+          estado TEXT DEFAULT 'Pendiente' CHECK (estado IN ('Pendiente', 'Activa', 'Finalizada')),
+          creado_por INTEGER,
+          fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+          borrado BOOLEAN DEFAULT 0,
+          FOREIGN KEY (creado_por) REFERENCES users(id)
+      );
+  `;
+  db.run(sql, (err) => {
+    if (err) {
+      console.error("Error al crear tabla encuestas:", err.message);
+    } else {
+      console.log("Tabla encuestas creada.");
+    }
+  });
+};
+export const initEncuestasMateriasTable = () => {
+  const sql = `
+    CREATE TABLE IF NOT EXISTS encuesta_materias (
+          encuesta_id INTEGER,
+          materia_id INTEGER,
+          PRIMARY KEY (encuesta_id, materia_id),
+          FOREIGN KEY (encuesta_id) REFERENCES encuestas(id) ON DELETE CASCADE,
+          FOREIGN KEY (materia_id) REFERENCES materias(id)
+        );
+    `;
+    db.run(sql, (err) => {
+    if (err) {
+      console.error("Error al crear tabla encuestas:", err.message);
+    } else {
+      console.log("Tabla encuestas materias creada.");
     }
   });
 };
@@ -215,6 +256,8 @@ export const initDatabase = () => {
   initInscripcionesTable();
   initAdicionRetiroTable();
   initActasEspecialesTable();
+  initEncuestasTable();
+  initEncuestasMateriasTable();
 };
 
 /**

@@ -81,8 +81,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
 
                 if (data.status === "ok") {
-                    mostrarNotificacion("Inscripción realizada con éxito");
-                    setTimeout(() => window.location.reload(), 1500);
+                    // mostrarNotificacion("Inscripción realizada con éxito"); <-- Opcional quitarlo
+                    mostrarModalExito("La inscripción del estudiante se ha realizado correctamente.");
                 } else {
                     mostrarNotificacion(data.message, "error");
                 }
@@ -113,9 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
 
                 if (data.status === "ok") {
-                    mostrarNotificacion(`Solicitud ${info.estado} correctamente`);
-                    toggleModal(modalId, false);
-                    setTimeout(() => window.location.reload(), 1000);
+                    toggleModal(modalId, false); // Cierra el modal de la pregunta
+                    mostrarModalExito(`La solicitud ha sido ${info.estado} con éxito.`);
                 } else {
                     mostrarNotificacion(data.message, "error");
                 }
@@ -181,4 +180,27 @@ function mostrarNotificacion(mensaje, tipo = 'exito') {
         toast.classList.add('opacity-0', 'translate-y-10');
         setTimeout(() => toast.remove(), 500);
     }, 3500);
+}
+
+function mostrarModalExito(mensaje) {
+    const modal = document.getElementById('successModal');
+    const container = document.getElementById('modalContainer');
+    const textElement = document.getElementById('successModalMessage');
+
+    if (mensaje) textElement.innerText = mensaje;
+
+    // Mostrar el fondo (flex lo hace visible)
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    // Trigger de la animación de entrada (escala y opacidad)
+    setTimeout(() => {
+        container.classList.remove('scale-90', 'opacity-0');
+        container.classList.add('scale-100', 'opacity-100');
+    }, 10);
+
+    // Redirección o recarga después de 2.5 segundos
+    setTimeout(() => {
+        window.location.reload();
+    }, 2500);
 }

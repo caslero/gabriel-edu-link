@@ -15,26 +15,15 @@
       <div>
         <label for="semestre" class="block font-semibold">Semestre</label>
         <select id="semestre" name="semestre" class="w-full border p-2 rounded" required>
-          <option value="">Seleccione un semestre</option>
-          <% semestres.forEach(sem => { %>
-            <option value="<%= sem.semestre %>"><%= sem.semestre %></option>
-          <% }) %>
+            <option value="">Cargando semestres...</option>
         </select>
       </div>
 
       <div id="materias-container" class="mt-4 hidden">
-        <label class="block font-semibold">Materias asociadas</label>
-        <div id="materias-list" class="space-y-2">
-          <% materias.forEach(mat => { %>
-            <div class="materia-item hidden" data-semestre="<%= mat.semestre %>">
-              <input type="checkbox" id="mat-<%= mat.id %>" name="materias[]" value="<%= mat.id %>" class="mr-2">
-              <label for="mat-<%= mat.id %>"><%= mat.nombre %> (<%= mat.semestre %>)</label>
-            </div>
-          <% }) %>
-        </div>
-        <p class="text-xs text-gray-500 mt-1">Seleccione las materias que estarán en la encuesta.</p>
+          <label class="block font-semibold">Materias asociadas</label>
+          <div id="materias-list" class="space-y-2 flex flex-col">
+              </div>
       </div>
-
       <div class="flex space-x-4">
         <div class="flex-1">
           <label for="fecha_inicio" class="block font-semibold">Fecha de inicio</label>
@@ -85,7 +74,11 @@
                 </span>
               </td>
               <td class="px-4 py-2 text-center space-x-1">
-                <button onclick="abrirModalEditar('<%= encuesta.id %>')" class="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600">Editar</button>
+                <button 
+                    onclick="abrirModalEditar('<%= encuesta.id %>')" 
+                    class="bg-blue-500 text-white px-3 py-1 rounded">
+                    Editar
+                </button>
                 <button onclick="eliminarEncuesta('<%= encuesta.id %>')" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">Eliminar</button>
                 <% if (encuesta.estado === 'Finalizada') { %>
                   <button onclick="abrirModalResultados('<%= encuesta.id %>')" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">Resultados</button>
@@ -93,64 +86,54 @@
               </td>
             </tr>
 
-            <div id="modal-<%= encuesta.id %>" class="hidden fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-              <div class="bg-white rounded-lg shadow-xl w-full max-w-md flex flex-col max-h-[90vh]">
-                <div class="p-4 border-b"><h3 class="text-lg font-bold text-blue-700">Editar Encuesta</h3></div>
-                <form id="form-edit-<%= encuesta.id %>" onsubmit="actualizarEncuesta(event, '<%= encuesta.id %>')" class="flex-1 overflow-y-auto p-4 space-y-4">
-                  <input type="hidden" name="id" value="<%= encuesta.id %>">
-                  <div>
-                    <label class="block text-sm font-bold">Título</label>
-                    <input type="text" name="titulo" value="<%= encuesta.titulo %>" class="w-full border p-2 rounded" required>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-bold">Descripción</label>
-                    <textarea name="descripcion" class="w-full border p-2 rounded"><%= encuesta.descripcion %></textarea>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-bold">Semestre</label>
-                    <select name="semestre" class="w-full border p-2 rounded" required onchange="filtrarMateriasEditar('<%= encuesta.id %>', this.value)">
-                      <% semestres.forEach(sem => { %>
-                        <option value="<%= sem.semestre %>" <%= encuesta.semestre == sem.semestre ? 'selected' : '' %>>Semestre <%= sem.semestre %></option>
-                      <% }) %>
-                    </select>
-                  </div>
-                  <div class="p-3 bg-gray-50 rounded border">
-                    <label class="block text-sm font-bold mb-2">Materias</label>
-                    <div id="list-edit-<%= encuesta.id %>" class="space-y-1">
-                      <% materias.forEach(mat => { %>
-                        <div class="item-edit-<%= encuesta.id %> <%= encuesta.semestre == mat.semestre ? '' : 'hidden' %>" data-semestre="<%= mat.semestre %>">
-                          <input type="checkbox" name="materias[]" value="<%= mat.id %>" 
-                            <%= encuesta.materias && encuesta.materias.some(m => m.id === mat.id) ? 'checked' : '' %>>
-                          <span class="text-sm"><%= mat.nombre %></span>
-                        </div>
-                      <% }) %>
-                    </div>
-                  </div>
-                  <div class="flex space-x-2">
-                    <div class="flex-1">
-                      <label class="block text-sm font-bold">Inicio</label>
-                      <input type="date" name="fecha_inicio" value="<%= encuesta.fecha_inicio %>" class="w-full border p-2 rounded" required>
-                    </div>
-                    <div class="flex-1">
-                      <label class="block text-sm font-bold">Fin</label>
-                      <input type="date" name="fecha_fin" value="<%= encuesta.fecha_fin %>" class="w-full border p-2 rounded" required>
-                    </div>
-                  </div>
-                  <div>
-                    <label class="block text-sm font-bold">Estado</label>
-                    <select name="estado" class="w-full border p-2 rounded">
-                      <option value="Pendiente" <%= encuesta.estado === 'Pendiente' ? 'selected' : '' %>>Pendiente</option>
-                      <option value="Activa" <%= encuesta.estado === 'Activa' ? 'selected' : '' %>>Activa</option>
-                      <option value="Finalizada" <%= encuesta.estado === 'Finalizada' ? 'selected' : '' %>>Finalizada</option>
-                    </select>
-                  </div>
-                  <div class="flex justify-end space-x-2 pt-4 border-t">
-                    <button type="button" onclick="cerrarModal('modal-<%= encuesta.id %>')" class="px-4 py-2 bg-gray-400 text-white rounded">Cancelar</button>
-                    <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">Guardar</button>
-                  </div>
-                </form>
-              </div>
+            <div id="modal-editar-global" class="hidden fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md flex flex-col max-h-[90vh]">
+        <div class="p-4 border-b"><h3 class="text-lg font-bold text-blue-700">Editar Encuesta</h3></div>
+        <form id="form-editar-encuesta" onsubmit="actualizarEncuesta(event)" class="flex-1 overflow-y-auto p-4 space-y-4">
+            <input type="hidden" id="edit-id" name="id">
+            <div>
+                <label class="block text-sm font-bold">Título</label>
+                <input type="text" id="edit-titulo" name="titulo" class="w-full border p-2 rounded" required>
             </div>
+            <div>
+                <label class="block text-sm font-bold">Descripción</label>
+                <textarea id="edit-descripcion" name="descripcion" class="w-full border p-2 rounded"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-bold">Semestre</label>
+                <select id="edit-semestre" name="semestre" class="w-full border p-2 rounded" required onchange="cargarMateriasPorSemestreEdicion(this.value)">
+                    </select>
+            </div>
+            <div class="p-3 bg-gray-50 rounded border">
+                <label class="block text-sm font-bold mb-2">Materias</label>
+                <div id="edit-materias-list" class="space-y-1">
+                    </div>
+            </div>
+            <div class="flex space-x-2">
+                <div class="flex-1">
+                    <label class="block text-sm font-bold">Inicio</label>
+                    <input type="date" id="edit-fecha-inicio" name="fecha_inicio" class="w-full border p-2 rounded" required>
+                </div>
+                <div class="flex-1">
+                    <label class="block text-sm font-bold">Fin</label>
+                    <input type="date" id="edit-fecha-fin" name="fecha_fin" class="w-full border p-2 rounded" required>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-bold">Estado</label>
+                <select id="edit-estado" name="estado" class="w-full border p-2 rounded">
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="Activa">Activa</option>
+                    <option value="Finalizada">Finalizada</option>
+                </select>
+            </div>
+            <div class="flex justify-end space-x-2 pt-4 border-t">
+                <button type="button" onclick="cerrarModal('modal-editar-global')" class="px-4 py-2 bg-gray-400 text-white rounded">Cancelar</button>
+                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">Guardar</button>
+            </div>
+        </form>
+    </div>
+</div>
           <% }) %>
         <% } %>
       </tbody>
