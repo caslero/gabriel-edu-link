@@ -77,6 +77,31 @@
       <% } %>
     </nav>
   </div>
+
+<div id="logoutOverlay" class="fixed inset-0 z-[300] hidden items-center justify-center bg-gray-900/60 backdrop-blur-sm transition-all duration-500">
+    
+    <div id="logoutContent" class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl border border-gray-100 dark:border-slate-700 max-w-sm w-full mx-4 text-center transform scale-95 opacity-0 transition-all duration-500">
+        
+        <div class="relative mx-auto w-20 h-20 mb-6 flex items-center justify-center bg-blue-50 dark:bg-slate-700 rounded-full">
+            <div class="absolute inset-0 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
+            <svg class="w-10 h-10 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+            </svg>
+        </div>
+        
+        <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2 font-sans">Cerrando Sesión</h2>
+        <p class="text-gray-500 dark:text-slate-300 text-base mb-6">Estamos finalizando tu conexión de forma segura...</p>
+        
+        <div class="w-full h-2 bg-gray-100 dark:bg-slate-700 rounded-full overflow-hidden">
+            <div id="logoutProgress" class="h-full bg-gradient-to-r from-cyan-200 to-blue-500 to-blue-700 w-0 transition-all duration-[3000ms] ease-linear"></div>
+        </div>
+
+        <div class="mt-4 text-xs font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider animate-pulse">
+            EduLink Security
+        </div>
+    </div>
+</div>
+
 </header>
 
 <script>
@@ -84,27 +109,56 @@
   const mobileMenu = document.getElementById("mobileMenu");
   const profileToggle = document.getElementById("profileToggle");
   const profileMenu = document.getElementById("profileMenu");
-
   const cerrarSesionBtn = document.getElementById("cerrarSesion");
-  cerrarSesionBtn.addEventListener("click", logOut)
 
-  async function logOut() {    
+  if (cerrarSesionBtn) {
+    cerrarSesionBtn.addEventListener("click", logOut);
+  }
+
+  async function logOut() {
+    // 1. Referencias de los elementos del Overlay (asegúrate de haber pegado el HTML)
+    const overlay = document.getElementById('logoutOverlay');
+    const content = document.getElementById('logoutContent');
+    const progressBar = document.getElementById('logoutProgress');
+
     try {
+      // 2. Iniciar Animación Visual inmediatamente
+      if (overlay) {
+        overlay.classList.remove('hidden');
+        overlay.classList.add('flex');
+        
+        // Pequeño delay para que Tailwind detecte la transición
+        setTimeout(() => {
+          content.classList.remove('scale-95', 'opacity-0');
+          content.classList.add('scale-100', 'opacity-100');
+          progressBar.style.width = '100%'; 
+        }, 50);
+      }
+
+      // 3. Petición al servidor (sucede en segundo plano mientras el usuario ve la animación)
       const response = await fetch('/api/login/cerrar-sesion', {
         method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' }
       });
 
+      // 4. El setTimeout que ya tenías (coincide con la duración de la barra de carga)
       setTimeout(() => {
-        window.location.href = '/';
+        // Efecto de desvanecimiento final
+        if (overlay) overlay.classList.add('opacity-0');
+        
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 400);
       }, 3000);
+
     } catch (error) {
       console.log('Error al cerrar sesión:', error);
+      // Si hay error, ocultamos el overlay para no dejar al usuario atrapado
+      if (overlay) overlay.classList.add('hidden');
     }
   }
 
+  // --- Lógica de Menús ---
   if (menuToggle) {
     menuToggle.addEventListener("click", () => {
       mobileMenu.classList.toggle("hidden");
