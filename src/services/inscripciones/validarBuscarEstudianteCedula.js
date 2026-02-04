@@ -1,5 +1,6 @@
 import obtenerDatosUsuarioToken from "../../libs/obtenerDatosUsuarioToken.js";
 import respuestasAlBack from "../../utils/respuestasAlBack.js";
+import ValidarCampos from "../ValidarCampos.js";
 
 export default async function validarObtenerEstudianteCedula(req) {
   try {

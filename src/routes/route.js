@@ -535,18 +535,22 @@ rutas.get(
   "/api/encuestas/listar-materias",
   EncuestasController.listarMateriasPorSemestre,
 );
+// API para la tabla y selects del Admin
+rutas.get("/api/encuestas/listar-encuestas", EncuestasController.listarEncuestas);
+rutas.get("/api/encuestas/obtener-semestres", EncuestasController.listarSemestres);
+rutas.get("/api/encuestas/listar-materias", EncuestasController.listarMateriasPorSemestre);
+
+// Acciones de CRUD (Admin)
 rutas.post("/api/encuestas/crear-encuesta", EncuestasController.crearEncuesta);
-rutas.get(
-  "/api/encuestas/listar-encuestas",
-  EncuestasController.listarEncuestas,
-);
-rutas.patch(
-  "api/encuestas/actualizar-encuesta",
-  EncuestasController.actualizarEncuesta,
-);
-rutas.patch(
-  "/api/encuestas/eliminar-encuesta",
-  EncuestasController.eliminarEncuesta,
-);
+rutas.patch("/api/encuestas/actualizar-encuesta", EncuestasController.actualizarEncuesta);
+rutas.patch("/api/encuestas/eliminar-encuesta", EncuestasController.eliminarEncuesta);
+
+rutas.get("/api/encuestas/obtener/:id", EncuestasController.obtenerPorId);
+
+// Vista de encuestas disponibles para el estudiante
+rutas.get("/estudiante/encuestas", EncuestasController.vistaEstudiante);
+
+// Acción de votar (Recibe encuestaId por URL y materias por Body)
+rutas.post("/api/encuestas/votar/:encuestaId", EncuestasController.votar);
 
 export default rutas;

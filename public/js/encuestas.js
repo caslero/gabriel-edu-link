@@ -131,7 +131,11 @@ async function listarEncuestas() {
                         </span>
                     </td>
                     <td class="px-4 py-2 text-center space-x-1">
-                        <button onclick="abrirModalEditar('${encuesta.id}')" class="bg-blue-500 text-white px-3 py-1 rounded text-xs hover:bg-blue-600 transition">Editar</button>
+                        <button 
+                            onclick="window.abrirModalEditar(${encuesta.id})"
+                            class="bg-yellow-500 text-white px-2 py-1 rounded">
+                            Editar
+                        </button>
                         <button onclick="eliminarEncuesta('${encuesta.id}')" class="bg-red-600 text-white px-3 py-1 rounded text-xs hover:bg-red-700 transition">Eliminar</button>
                     </td>
                 </tr>`;
@@ -142,79 +146,126 @@ async function listarEncuestas() {
     }
 }
 
-// --- 4. ACCIONES DE EDICIÓN Y ELIMINACIÓN ---
+// --- FUNCIONES GLOBALES ---
 
-function abrirModalEditar(id) {
-    const modal = document.getElementById(`modal-${id}`);
-    if (modal) modal.classList.remove('hidden');
-}
+window.abrirModalEditar = async function(id) {
+    const modal = document.getElementById('modal-editar-global');
+    if (!modal) return console.error("No existe el modal global");
 
-function cerrarModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) modal.classList.add('hidden');
-}
+    // Mostrar el modal primero para dar feedback visual
+    modal.classList.remove('hidden');
+    console.log("Cargando datos encuesta ID:", id);
 
-function filtrarMateriasEditar(encuestaId, semestre) {
-    const items = document.querySelectorAll(`.item-edit-${encuestaId}`);
-    items.forEach(item => {
-        const match = item.getAttribute('data-semestre') == semestre;
-        item.classList.toggle('hidden', !match);
-        if (!match) {
-            const cb = item.querySelector('input');
-            if (cb) cb.checked = false;
+    try {
+        // CAMBIO AQUÍ: Usa /obtener/${id} en lugar de /actualizar-encuesta
+        const res = await fetch(`/api/encuestas/obtener/${id}`);
+        
+        // Verificamos si la respuesta es correcta antes de parsear JSON
+        if (!res.ok) throw new Error(`Error en el servidor: ${res.status}`);
+
+        const result = await res.json();
+
+        if (result.status === 'ok') {
+            const e = result.data;
+            
+            // Llenar los campos del modal
+            document.getElementById('edit-id').value = e.id;
+            document.getElementById('edit-titulo').value = e.titulo;
+            
+            // Si tienes estos campos, asegúrate de que el ID coincida en el HTML
+            if(document.getElementById('edit-descripcion')) 
+                document.getElementById('edit-descripcion').value = e.descripcion || "";
+
+            // Cargar materias asociadas
+            await cargarMateriasEdicion(e.semestre, e.materias_seleccionadas);
         }
+    } catch (err) { 
+        console.error("Error al cargar datos del modal:", err);
+        alert("No se pudieron cargar los datos de la encuesta.");
+    }
+}
+window.eliminarEncuesta = async function(id) {
+    if (!confirm("¿Eliminar encuesta?")) return;
+    const res = await fetch('/api/encuestas/eliminar-encuesta', { 
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }) 
     });
-}
-
-async function actualizarEncuesta(e, id) {
-    e.preventDefault();
-    const form = e.target;
-    const formData = new FormData(form);
-    const dataObj = Object.fromEntries(formData.entries());
-    
-    // Aseguramos que el ID vaya en el objeto y las materias sean array
-    dataObj.id = id; 
-    dataObj.materias = formData.getAll('materias[]');
-
-    try {
-        const res = await fetch('/api/encuestas/actualizar-encuesta', { 
-            method: 'PATCH', // Cambiado a PATCH
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dataObj)
-        });
-        const result = await res.json();
-
-        if (result.status === 'ok') {
-            mostrarNotificacion("Cambios guardados");
-            setTimeout(() => location.reload(), 1000);
-        } else {
-            alert(result.message);
-        }
-    } catch (err) {
-        console.error(err);
+    if ((await res.json()).status === 'ok') {
+        mostrarNotificacion("Eliminada");
+        listarEncuestas();
     }
 }
 
-async function eliminarEncuesta(id) {
-    if (!confirm("¿Seguro que deseas eliminar esta encuesta?")) return;
+/*document.addEventListener('DOMContentLoaded', () => {
+    // Escuchar el envío del formulario de edición
+    const formEditar = document.getElementById('form-editar-encuesta');
+    if (formEditar) {
+        formEditar.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(formEditar);
+            const dataObj = Object.fromEntries(formData.entries());
+            dataObj.materias = formData.getAll('materias[]');
+
+            try {
+                // USANDO TU RUTA EXACTA
+                const res = await fetch('/api/encuestas/actualizar-encuestas', {
+                    method: 'PATCH', // O POST, según como lo tengas en tu router
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataObj)
+                });
+
+                const result = await res.json();
+                if (result.status === 'ok') {
+                    window.cerrarModal('modal-editar-global');
+                    mostrarNotificacion("Encuesta actualizada con éxito");
+                    listarEncuestas(); // Refresca la tabla
+                } else {
+                    alert("Error: " + result.message);
+                }
+            } catch (err) {
+                console.error("Error al actualizar:", err);
+            }
+        });
+    }
+});
+
+// Función global para abrir el modal
+window.abrirModalEditar = async function(id) {
+    const modal = document.getElementById('modal-editar-global');
+    if (!modal) return console.error("No se encontró el modal global en el DOM");
 
     try {
-        const res = await fetch('/api/encuestas/eliminar-encuesta', { 
-            method: 'PATCH', // Cambiado a PATCH según tu ruta
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ id }) // Enviamos el ID en el body
-        });
-
+        const res = await fetch(`/api/encuestas/actualizar-encuesta`);
         const result = await res.json();
+
         if (result.status === 'ok') {
-            mostrarNotificacion("Encuesta eliminada");
-            setTimeout(() => location.reload(), 1000);
+            const e = result.data;
+            document.getElementById('edit-id').value = e.id;
+            document.getElementById('edit-titulo').value = e.titulo;
+            document.getElementById('edit-semestre').value = e.semestre;
+
+            // Cargar materias del semestre y marcar las que ya tiene
+            await cargarMateriasEdicion(e.semestre, e.materias_seleccionadas);
+            
+            modal.classList.remove('hidden');
         }
     } catch (err) {
-        console.error("Error:", err);
+        console.error("Error al cargar datos:", err);
     }
 }
 
+// Asegúrate de que esto esté bien escrito en tu archivo JS
+window.cerrarModal = function(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+        modal.classList.add('hidden');
+    } else {
+        console.error("No se pudo cerrar, no existe ID:", id);
+    }
+};
+*/
 // --- 5. UTILIDADES ---
 
 function mostrarNotificacion(mensaje, tipo = 'exito') {

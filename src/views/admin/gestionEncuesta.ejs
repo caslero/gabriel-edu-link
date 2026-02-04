@@ -54,91 +54,45 @@
           <th class="px-4 py-2">Acciones</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-gray-200">
-        <% if (!encuestas || encuestas.length === 0) { %>
-          <tr><td colspan="7" class="text-center py-6 text-gray-500">No hay encuestas registradas.</td></tr>
-        <% } else { %>
-          <% encuestas.forEach(encuesta => { %>
-            <tr>
-              <td class="px-4 py-2 text-center"><%= encuesta.id %></td>
-              <td class="px-4 py-2 text-center font-medium"><%= encuesta.titulo %></td>
-              <td class="px-4 py-2 text-center"><%= encuesta.semestre %></td>
-              <td class="px-4 py-2 text-center"><%= encuesta.fecha_inicio %></td>
-              <td class="px-4 py-2 text-center"><%= encuesta.fecha_fin %></td>
-              <td class="px-4 py-2 text-center">
-                <span class="px-3 py-1 rounded-full text-xs font-bold
-                  <%= encuesta.estado === 'Activa' ? 'bg-green-100 text-green-700' : 
-                      encuesta.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-700' : 
-                      'bg-red-100 text-red-700' %>">
-                  <%= encuesta.estado %>
-                </span>
-              </td>
-              <td class="px-4 py-2 text-center space-x-1">
-                <button 
-                    onclick="abrirModalEditar('<%= encuesta.id %>')" 
-                    class="bg-blue-500 text-white px-3 py-1 rounded">
-                    Editar
-                </button>
-                <button onclick="eliminarEncuesta('<%= encuesta.id %>')" class="bg-red-600 text-white px-3 py-1 rounded text-sm hover:bg-red-700">Eliminar</button>
-                <% if (encuesta.estado === 'Finalizada') { %>
-                  <button onclick="abrirModalResultados('<%= encuesta.id %>')" class="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700">Resultados</button>
-                <% } %>
-              </td>
-            </tr>
+     <tbody class="divide-y divide-gray-200">
+  <% if (!encuestas || encuestas.length === 0) { %>
+    <tr><td colspan="7" class="text-center py-6 text-gray-500">No hay encuestas registradas.</td></tr>
+  <% } else { %>
+    <% encuestas.forEach(encuesta => { %>
+      <tr>
+        <td class="px-4 py-2 text-center"><%= encuesta.id %></td>
+        <td class="px-4 py-2 text-center font-medium"><%= encuesta.titulo %></td>
+        <td class="px-4 py-2 text-center"><%= encuesta.semestre %></td>
+        <td class="px-4 py-2 text-center"><%= encuesta.fecha_inicio %></td>
+        <td class="px-4 py-2 text-center"><%= encuesta.fecha_fin %></td>
+        <td class="px-4 py-2 text-center">
+          <span class="px-3 py-1 rounded-full text-xs font-bold <%= encuesta.estado === 'Activa' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' %>">
+            <%= encuesta.estado %>
+          </span>
+        </td>
+        <td class="px-4 py-2 text-center space-x-1">
+          <button onclick="abrirModalEditar('<%= encuesta.id %>')" class="bg-blue-500 text-white px-3 py-1 rounded">Editar</button>
+          <button onclick="eliminarEncuesta('<%= encuesta.id %>')" class="bg-red-600 text-white px-3 py-1 rounded">Eliminar</button>
+        </td>
+      </tr>
+    <% }) %> <% } %> </tbody>
+</table>
 
-            <div id="modal-editar-global" class="hidden fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-    <div class="bg-white rounded-lg shadow-xl w-full max-w-md flex flex-col max-h-[90vh]">
-        <div class="p-4 border-b"><h3 class="text-lg font-bold text-blue-700">Editar Encuesta</h3></div>
-        <form id="form-editar-encuesta" onsubmit="actualizarEncuesta(event)" class="flex-1 overflow-y-auto p-4 space-y-4">
-            <input type="hidden" id="edit-id" name="id">
-            <div>
-                <label class="block text-sm font-bold">Título</label>
-                <input type="text" id="edit-titulo" name="titulo" class="w-full border p-2 rounded" required>
+<div id="modal-editar-global" class="hidden fixed inset-0 flex items-center justify-center bg-black/50 z-[9999]">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
+        <h2 class="text-xl font-bold mb-4">Editar Encuesta</h2>
+        <form id="form-editar-encuesta">
+            <input type="hidden" name="id" id="edit-id">
+            <div class="space-y-4">
+                <input type="text" name="titulo" id="edit-titulo" class="w-full border p-2 rounded" placeholder="Título">
+                <div id="edit-materias-list" class="border p-2 max-h-40 overflow-y-auto bg-gray-50"></div>
             </div>
-            <div>
-                <label class="block text-sm font-bold">Descripción</label>
-                <textarea id="edit-descripcion" name="descripcion" class="w-full border p-2 rounded"></textarea>
-            </div>
-            <div>
-                <label class="block text-sm font-bold">Semestre</label>
-                <select id="edit-semestre" name="semestre" class="w-full border p-2 rounded" required onchange="cargarMateriasPorSemestreEdicion(this.value)">
-                    </select>
-            </div>
-            <div class="p-3 bg-gray-50 rounded border">
-                <label class="block text-sm font-bold mb-2">Materias</label>
-                <div id="edit-materias-list" class="space-y-1">
-                    </div>
-            </div>
-            <div class="flex space-x-2">
-                <div class="flex-1">
-                    <label class="block text-sm font-bold">Inicio</label>
-                    <input type="date" id="edit-fecha-inicio" name="fecha_inicio" class="w-full border p-2 rounded" required>
-                </div>
-                <div class="flex-1">
-                    <label class="block text-sm font-bold">Fin</label>
-                    <input type="date" id="edit-fecha-fin" name="fecha_fin" class="w-full border p-2 rounded" required>
-                </div>
-            </div>
-            <div>
-                <label class="block text-sm font-bold">Estado</label>
-                <select id="edit-estado" name="estado" class="w-full border p-2 rounded">
-                    <option value="Pendiente">Pendiente</option>
-                    <option value="Activa">Activa</option>
-                    <option value="Finalizada">Finalizada</option>
-                </select>
-            </div>
-            <div class="flex justify-end space-x-2 pt-4 border-t">
-                <button type="button" onclick="cerrarModal('modal-editar-global')" class="px-4 py-2 bg-gray-400 text-white rounded">Cancelar</button>
-                <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded">Guardar</button>
+            <div class="flex justify-end gap-2 mt-4">
+                <button type="button" onclick="window.cerrarModal('modal-editar-global')" class="px-4 py-2 bg-gray-400 text-white rounded">Cerrar</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded font-bold">Guardar</button>
             </div>
         </form>
     </div>
-</div>
-          <% }) %>
-        <% } %>
-      </tbody>
-    </table>
-  </div>
 </div>
 
 <script src="/js/encuestas.js"></script>
