@@ -2,7 +2,7 @@ import obtenerDatosUsuarioToken from "../../libs/obtenerDatosUsuarioToken.js";
 import respuestasAlBack from "../../utils/respuestasAlBack.js";
 import ValidarCampos from "../ValidarCampos.js";
 
-export default async function validarObtenerEstudianteCedula(req) {
+export default async function validarBuscarUsuarioCedula(req) {
   try {
     const validaciones = await obtenerDatosUsuarioToken(req);
 
@@ -19,7 +19,9 @@ export default async function validarObtenerEstudianteCedula(req) {
 
     const paisBit = pais === "V" || pais === "v" ? 1 : 0;
 
-    if (pais === "V" || pais === "v") {
+    const paisUpper = pais.toUpperCase();
+
+    if (paisUpper !== "V" && paisUpper !== "E") {
       return respuestasAlBack(
         "error",
         "Error nacionalidad deber ser venezolano o extranjero",

@@ -82,6 +82,30 @@ export class UserModel {
   }
 
   /**
+   Busca un usuario por su cedula
+   @param {string} cedula - La cedula a buscar
+   @returns {Promise<Object|null>} - El usuario encontrado o null
+  */
+  static async buscarUsuarioCedula(cedula, pais) {
+    return new Promise((resolve, reject) => {
+      const sql = `
+      SELECT id, cedula, nombre, rol_id, pais, borrado, correo, foto
+      FROM users 
+      WHERE cedula = ? AND rol_id = 3 AND pais = ?
+      LIMIT 1
+    `;
+
+      db.get(sql, [cedula, pais], (err, row) => {
+        if (err) {
+          return reject(err);
+        }
+        // Si no hay errores, devolvemos la fila (o undefined si no existe)
+        resolve(row || null);
+      });
+    });
+  }
+
+  /**
    Busca un usuario por su id
    @param {string} id - El id a buscar
    @returns {Promise<Object|null>} - El usuario encontrado o null

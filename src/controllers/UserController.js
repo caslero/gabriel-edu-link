@@ -1,5 +1,6 @@
 import { UserModel } from "../models/UserModel.js";
 import validarActualizarUsuario from "../services/usuarios/validarActualizarUsuario.js";
+import validarBuscarUsuarioCedula from "../services/usuarios/validarBuscarUsuarioCedula.js";
 import validarCrearUsuario from "../services/usuarios/validarCrearUsuario.js";
 import validarEliminarUsuario from "../services/usuarios/validarEliminarUsuario.js";
 import validarObtenerTodosUsuarios from "../services/usuarios/validarObtenerTodosUsuarios.js";
@@ -229,6 +230,58 @@ export default class UserController {
         res,
         "error",
         "Error interno eliminar usuario",
+        {},
+        500,
+      );
+    }
+  }
+
+  // 1. Buscar usuario (estudiante = rol_id 3) por cédula y letra (V/E)
+  static async buscarUsuarioCedula(req, res) {
+    try {
+      const validaciones = await validarBuscarUsuarioCedula(req);
+
+      if (validaciones.status === "error") {
+        return respuestaAlFront(
+          res,
+          validaciones.status,
+          validaciones.message,
+          {},
+          validaciones.codigo ? validaciones.codigo : 400,
+        );
+      }
+
+      const estudiante = await UserModel.buscarUsuarioCedula(
+        validaciones.cedula,
+        validaciones.pais,
+      );
+
+      if (!estudiante) {
+        return respuestaAlFront(
+          res,
+          "error",
+          "Estudiante no se encontro",
+          {},
+          404,
+        );
+      }
+
+      return respuestaAlFront(
+        res,
+        "ok",
+        "Estudiante encontrado",
+        {
+          estudiante: estudiante,
+        },
+        201,
+      );
+    } catch (error) {
+      console.log("Error interno buscar estudiante cedula:", error);
+
+      return respuestaAlFront(
+        res,
+        "error",
+        "Error interno buscar estudiante cedula",
         {},
         500,
       );

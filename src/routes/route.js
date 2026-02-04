@@ -429,10 +429,11 @@ rutas.post(
   gestionLimiter,
   InscripcionController.gestionarSolicitud,
 );
+
 rutas.post(
   "/api/inscripcion/buscar-estudiante",
   busquedaLimiter,
-  InscripcionController.buscarEstudiante,
+  UserController.buscarUsuarioCedula,
 );
 
 rutas.get(
@@ -465,7 +466,7 @@ rutas.post(
 rutas.post(
   "/api/adicion-retiro/buscar-estudiante",
   busquedaLimiter,
-  AdicionRetiroController.buscarEstudiante,
+  UserController.buscarUsuarioCedula,
 );
 rutas.post(
   "/api/adicion-retiro/crear-adicion-retiro",
@@ -536,14 +537,29 @@ rutas.get(
   EncuestasController.listarMateriasPorSemestre,
 );
 // API para la tabla y selects del Admin
-rutas.get("/api/encuestas/listar-encuestas", EncuestasController.listarEncuestas);
-rutas.get("/api/encuestas/obtener-semestres", EncuestasController.listarSemestres);
-rutas.get("/api/encuestas/listar-materias", EncuestasController.listarMateriasPorSemestre);
+rutas.get(
+  "/api/encuestas/listar-encuestas",
+  EncuestasController.listarEncuestas,
+);
+rutas.get(
+  "/api/encuestas/obtener-semestres",
+  EncuestasController.listarSemestres,
+);
+rutas.get(
+  "/api/encuestas/listar-materias",
+  EncuestasController.listarMateriasPorSemestre,
+);
 
 // Acciones de CRUD (Admin)
 rutas.post("/api/encuestas/crear-encuesta", EncuestasController.crearEncuesta);
-rutas.patch("/api/encuestas/actualizar-encuesta", EncuestasController.actualizarEncuesta);
-rutas.patch("/api/encuestas/eliminar-encuesta", EncuestasController.eliminarEncuesta);
+rutas.patch(
+  "/api/encuestas/actualizar-encuesta",
+  EncuestasController.actualizarEncuesta,
+);
+rutas.patch(
+  "/api/encuestas/eliminar-encuesta",
+  EncuestasController.eliminarEncuesta,
+);
 
 rutas.get("/api/encuestas/obtener/:id", EncuestasController.obtenerPorId);
 

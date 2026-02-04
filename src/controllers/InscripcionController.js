@@ -4,57 +4,11 @@ import validarCrearInscripcion from "../services/inscripciones/validarCrearInscr
 import { validarGestion } from "../services/inscripciones/validarGestion.js";
 import { validarSolicitud } from "../services/inscripciones/validarSolicitud.js";
 
-import validarObtenerEstudianteCedula from "../services/inscripciones/validarBuscarEstudianteCedula.js";
 import { InscripcionModel } from "../models/InscripcionModel.js";
 import obtenerDatosUsuarioToken from "../libs/obtenerDatosUsuarioToken.js";
 import validarGestionarSolicitudInscripcion from "../services/inscripciones/validarGestionarSolicitudInscripcion.js";
 
 export default class InscripcionController {
-  // 1. Buscar estudiante por cédula y letra (V/E)
-  static async buscarEstudiante(req, res) {
-    try {
-      const validaciones = await validarObtenerEstudianteCedula(req);
-
-      if (validaciones.status === "error") {
-        respuestaAlFront(res, validaciones.status, validaciones.message, {});
-      }
-
-      const estudiante = await InscripcionModel.buscarEstudianteCedula(
-        validaciones.cedula,
-      );
-
-      if (!estudiante) {
-        return respuestaAlFront(
-          res,
-          "error",
-          "Estudiante no se encuentro",
-          {},
-          404,
-        );
-      }
-
-      return respuestaAlFront(
-        res,
-        "ok",
-        "Estudiante encontrado",
-        {
-          estudiante: estudiante,
-        },
-        201,
-      );
-    } catch (error) {
-      console.log("Error interno buscar estudiante cedula:", error);
-
-      return respuestaAlFront(
-        res,
-        "error",
-        "Error interno buscar estudiante cedula",
-        {},
-        500,
-      );
-    }
-  }
-
   // 2. Crear nueva inscripción (Manual o por solicitud)
   static async crearInscripcion(req, res) {
     try {

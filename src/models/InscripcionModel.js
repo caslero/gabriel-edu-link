@@ -1,23 +1,6 @@
 import { db } from "../config/database.js";
 
 export class InscripcionModel {
-  // 1. Buscar Estudiante (Solo usuarios con rol_id = 3)
-  static async buscarEstudianteCedula(cedula) {
-    return new Promise((resolve, reject) => {
-      const sql = `
-      SELECT id, cedula, nombre, rol_id, pais, borrado, correo, foto
-      FROM users 
-      WHERE cedula = ? AND rol_id = 3 
-      LIMIT 1
-    `;
-
-      db.get(sql, [cedula], (err, row) => {
-        if (err) return reject(err);
-        resolve(row);
-      });
-    });
-  }
-
   // 2. Obtener inscripciones (Ajustado a tus estados de tabla)
   static async obtenerConfirmadas() {
     return new Promise((resolve, reject) => {
