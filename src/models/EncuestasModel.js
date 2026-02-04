@@ -1,123 +1,188 @@
-import { db } from '../config/database.js';
+import { db } from "../config/database.js";
 
 class EncuestasModel {
-    // --- MÉTODOS EXISTENTES (ADMIN) ---
+  // --- MÉTODOS EXISTENTES (ADMIN) ---
 
-    static async crear({ titulo, descripcion, semestre, fecha_inicio, fecha_fin, materias, creado_por }) {
-        return new Promise((resolve, reject) => {
-            db.serialize(() => {
-                db.run("BEGIN TRANSACTION");
-                const sqlEncuesta = `
+  static async crear({
+    titulo,
+    descripcion,
+    semestre,
+    fecha_inicio,
+    fecha_fin,
+    materias,
+    creado_por,
+  }) {
+    return new Promise((resolve, reject) => {
+      db.serialize(() => {
+        db.run("BEGIN TRANSACTION");
+        const sqlEncuesta = `
                     INSERT INTO encuestas (titulo, descripcion, semestre, fecha_inicio, fecha_fin, creado_por, estado)
                     VALUES (?, ?, ?, ?, ?, ?, 'Pendiente')
                 `;
-                db.run(sqlEncuesta, [titulo, descripcion, semestre, fecha_inicio, fecha_fin, creado_por], function(err) {
-                    if (err) { db.run("ROLLBACK"); return reject(err); }
-                    const encuestaId = this.lastID;
-                    const stmt = db.prepare(`INSERT INTO encuesta_materias (encuesta_id, materia_id) VALUES (?, ?)`);
-                    if (!materias || materias.length === 0) {
-                        stmt.finalize(); db.run("COMMIT"); return resolve({ id: encuestaId });
-                    }
-                    materias.forEach(mId => stmt.run([encuestaId, mId]));
-                    stmt.finalize((err) => {
-                        if (err) { db.run("ROLLBACK"); return reject(err); }
-                        db.run("COMMIT"); resolve({ id: encuestaId });
-                    });
-                });
+        db.run(
+          sqlEncuesta,
+          [titulo, descripcion, semestre, fecha_inicio, fecha_fin, creado_por],
+          function (err) {
+            if (err) {
+              db.run("ROLLBACK");
+              return reject(err);
+            }
+            const encuestaId = this.lastID;
+            const stmt = db.prepare(
+              `INSERT INTO encuesta_materias (encuesta_id, materia_id) VALUES (?, ?)`,
+            );
+            if (!materias || materias.length === 0) {
+              stmt.finalize();
+              db.run("COMMIT");
+              return resolve({ id: encuestaId });
+            }
+            materias.forEach((mId) => stmt.run([encuestaId, mId]));
+            stmt.finalize((err) => {
+              if (err) {
+                db.run("ROLLBACK");
+                return reject(err);
+              }
+              db.run("COMMIT");
+              resolve({ id: encuestaId });
             });
-        });
-    }
+          },
+        );
+      });
+    });
+  }
 
-    static async actualizar(id, { titulo, descripcion, semestre, fecha_inicio, fecha_fin, estado, materias }) {
-        return new Promise((resolve, reject) => {
-            db.serialize(() => {
-                db.run("BEGIN TRANSACTION");
-                const sql = `UPDATE encuestas SET titulo=?, descripcion=?, semestre=?, fecha_inicio=?, fecha_fin=?, estado=? WHERE id=?`;
-                db.run(sql, [titulo, descripcion, semestre, fecha_inicio, fecha_fin, estado, id], (err) => {
-                    if (err) { db.run("ROLLBACK"); return reject(err); }
-                    db.run("DELETE FROM encuesta_materias WHERE encuesta_id = ?", [id], (err) => {
-                        if (err) { db.run("ROLLBACK"); return reject(err); }
-                        const stmt = db.prepare("INSERT INTO encuesta_materias (encuesta_id, materia_id) VALUES (?, ?)");
-                        materias.forEach(matId => stmt.run([id, matId]));
-                        stmt.finalize((err) => {
-                            if (err) { db.run("ROLLBACK"); return reject(err); }
-                            db.run("COMMIT"); resolve();
-                        });
-                    });
+  static async actualizar(
+    id,
+    {
+      titulo,
+      descripcion,
+      semestre,
+      fecha_inicio,
+      fecha_fin,
+      estado,
+      materias,
+    },
+  ) {
+    return new Promise((resolve, reject) => {
+      db.serialize(() => {
+        db.run("BEGIN TRANSACTION");
+        const sql = `UPDATE encuestas SET titulo=?, descripcion=?, semestre=?, fecha_inicio=?, fecha_fin=?, estado=? WHERE id=?`;
+        db.run(
+          sql,
+          [titulo, descripcion, semestre, fecha_inicio, fecha_fin, estado, id],
+          (err) => {
+            if (err) {
+              db.run("ROLLBACK");
+              return reject(err);
+            }
+            db.run(
+              "DELETE FROM encuesta_materias WHERE encuesta_id = ?",
+              [id],
+              (err) => {
+                if (err) {
+                  db.run("ROLLBACK");
+                  return reject(err);
+                }
+                const stmt = db.prepare(
+                  "INSERT INTO encuesta_materias (encuesta_id, materia_id) VALUES (?, ?)",
+                );
+                materias.forEach((matId) => stmt.run([id, matId]));
+                stmt.finalize((err) => {
+                  if (err) {
+                    db.run("ROLLBACK");
+                    return reject(err);
+                  }
+                  db.run("COMMIT");
+                  resolve();
                 });
-            });
-        });
-    }
+              },
+            );
+          },
+        );
+      });
+    });
+  }
 
-    // --- MÉTODOS NUEVOS (PARA ESTUDIANTES Y VISTAS DETALLADAS) ---
+  // --- MÉTODOS NUEVOS (PARA ESTUDIANTES Y VISTAS DETALLADAS) ---
 
-    /**
-     * Obtiene encuestas filtradas por el semestre del estudiante y verifica si ya votó
-     */
-    static async obtenerEncuestasParaEstudiante(estudianteId, semestreEstudiante) {
-        return new Promise((resolve, reject) => {
-            // Buscamos encuestas que coincidan con el semestre del estudiante y no estén borradas
-            const sql = `
+  /**
+   * Obtiene encuestas filtradas por el semestre del estudiante y verifica si ya votó
+   */
+  static async obtenerEncuestasParaEstudiante(
+    estudianteId,
+    semestreEstudiante,
+  ) {
+    return new Promise((resolve, reject) => {
+      // Buscamos encuestas que coincidan con el semestre del estudiante y no estén borradas
+      const sql = `
                 SELECT id, titulo, descripcion, semestre, fecha_inicio, fecha_fin, estado
                 FROM encuestas
                 WHERE semestre = ? AND borrado = 0 AND estado != 'Pendiente'
                 ORDER BY fecha_inicio DESC
             `;
-            db.all(sql, [semestreEstudiante], async (err, rows) => {
-                if (err) return reject(err);
-                
-                // Para cada encuesta, adjuntamos materias y estado de voto
-                const encuestasPromesas = rows.map(async (encuesta) => {
-                    encuesta.materias = await this.obtenerMateriasDeEncuesta(encuesta.id);
-                    encuesta.yaVoto = await this.verificarVoto(encuesta.id, estudianteId);
-                    if (encuesta.estado === 'Finalizada') {
-                        encuesta.resultados = await this.obtenerResultadosVotacion(encuesta.id);
-                    }
-                    return encuesta;
-                });
+      db.all(sql, [semestreEstudiante], async (err, rows) => {
+        if (err) return reject(err);
 
-                resolve(await Promise.all(encuestasPromesas));
-            });
+        // Para cada encuesta, adjuntamos materias y estado de voto
+        const encuestasPromesas = rows.map(async (encuesta) => {
+          encuesta.materias = await this.obtenerMateriasDeEncuesta(encuesta.id);
+          encuesta.yaVoto = await this.verificarVoto(encuesta.id, estudianteId);
+          if (encuesta.estado === "Finalizada") {
+            encuesta.resultados = await this.obtenerResultadosVotacion(
+              encuesta.id,
+            );
+          }
+          return encuesta;
         });
-    }
 
-    static async verificarVoto(encuestaId, estudianteId) {
-        return new Promise((resolve, reject) => {
-            const sql = `SELECT 1 FROM votos WHERE encuesta_id = ? AND estudiante_id = ? LIMIT 1`;
-            db.get(sql, [encuestaId, estudianteId], (err, row) => {
-                if (err) reject(err);
-                else resolve(!!row);
-            });
+        resolve(await Promise.all(encuestasPromesas));
+      });
+    });
+  }
+
+  static async verificarVoto(encuestaId, estudianteId) {
+    return new Promise((resolve, reject) => {
+      const sql = `SELECT 1 FROM votos WHERE encuesta_id = ? AND estudiante_id = ? LIMIT 1`;
+      db.get(sql, [encuestaId, estudianteId], (err, row) => {
+        if (err) reject(err);
+        else resolve(!!row);
+      });
+    });
+  }
+
+  /**
+   * Registra los votos de un estudiante en una transacción
+   */
+  static async registrarVotos(encuestaId, estudianteId, materiasIds) {
+    return new Promise((resolve, reject) => {
+      db.serialize(() => {
+        db.run("BEGIN TRANSACTION");
+        const stmt = db.prepare(
+          `INSERT INTO votos (encuesta_id, estudiante_id, materia_id) VALUES (?, ?, ?)`,
+        );
+
+        materiasIds.forEach((materiaId) => {
+          stmt.run([encuestaId, estudianteId, materiaId]);
         });
-    }
 
-    /**
-     * Registra los votos de un estudiante en una transacción
-     */
-    static async registrarVotos(encuestaId, estudianteId, materiasIds) {
-        return new Promise((resolve, reject) => {
-            db.serialize(() => {
-                db.run("BEGIN TRANSACTION");
-                const stmt = db.prepare(`INSERT INTO votos (encuesta_id, estudiante_id, materia_id) VALUES (?, ?, ?)`);
-                
-                materiasIds.forEach(materiaId => {
-                    stmt.run([encuestaId, estudianteId, materiaId]);
-                });
-
-                stmt.finalize((err) => {
-                    if (err) { db.run("ROLLBACK"); return reject(err); }
-                    db.run("COMMIT"); resolve();
-                });
-            });
+        stmt.finalize((err) => {
+          if (err) {
+            db.run("ROLLBACK");
+            return reject(err);
+          }
+          db.run("COMMIT");
+          resolve();
         });
-    }
+      });
+    });
+  }
 
-    /**
-     * Obtiene el conteo de votos por materia (Para Admin o Resultados Estudiante)
-     */
-    static async obtenerResultadosVotacion(encuestaId) {
-        return new Promise((resolve, reject) => {
-            const sql = `
+  /**
+   * Obtiene el conteo de votos por materia (Para Admin o Resultados Estudiante)
+   */
+  static async obtenerResultadosVotacion(encuestaId) {
+    return new Promise((resolve, reject) => {
+      const sql = `
                 SELECT m.nombre, COUNT(v.id) as total_votos
                 FROM encuesta_materias em
                 JOIN materias m ON em.materia_id = m.id
@@ -126,40 +191,45 @@ class EncuestasModel {
                 GROUP BY m.id
                 ORDER BY total_votos DESC
             `;
-            db.all(sql, [encuestaId], (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
-            });
-        });
-    }
+      db.all(sql, [encuestaId], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  }
 
-    // --- MÉTODOS DE APOYO ---
+  // --- MÉTODOS DE APOYO ---
 
-    static async obtenerTodas() {
-        return new Promise((resolve, reject) => {
-            db.all(`SELECT * FROM encuestas WHERE borrado = 0 ORDER BY id DESC`, [], (err, rows) => {
-                if (err) reject(err); else resolve(rows);
-            });
-        });
-    }
+  static async obtenerTodas() {
+    return new Promise((resolve, reject) => {
+      db.all(
+        `SELECT * FROM encuestas WHERE borrado = 0 ORDER BY id DESC`,
+        [],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        },
+      );
+    });
+  }
 
-    static async obtenerMateriasDeEncuesta(encuesta_id) {
-        return new Promise((resolve, reject) => {
-            const sql = `
+  static async obtenerMateriasDeEncuesta(encuesta_id) {
+    return new Promise((resolve, reject) => {
+      const sql = `
                 SELECT m.id, m.nombre 
                 FROM materias m
                 JOIN encuesta_materias em ON m.id = em.materia_id
                 WHERE em.encuesta_id = ?`;
-            db.all(sql, [encuesta_id], (err, rows) => {
-                if (err) reject(err);
-                else resolve(rows);
-            });
-        });
-    }
+      db.all(sql, [encuesta_id], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  }
 
-    static async obtenerMateriasPorSemestre(semestre) {
-        return new Promise((resolve, reject) => {
-            const sql = `
+  static async obtenerMateriasPorSemestre(semestre) {
+    return new Promise((resolve, reject) => {
+      const sql = `
                 SELECT MIN(id) as id, nombre 
                 FROM materias 
                 WHERE semestre = ? 
@@ -167,32 +237,38 @@ class EncuestasModel {
                 GROUP BY nombre 
                 ORDER BY nombre ASC
             `;
-            db.all(sql, [semestre], (err, rows) => {
-                if (err) {
-                    console.error("SQL Error:", err);
-                    reject(err);
-                } else {
-                    resolve(rows);
-                }
-            });
-        });
-    }
-    
-    static async borradoLogico(id) {
-        return new Promise((resolve, reject) => {
-            db.run(`UPDATE encuestas SET borrado = 1 WHERE id = ?`, [id], (err) => {
-                if (err) reject(err); else resolve();
-            });
-        });
-    }
+      db.all(sql, [semestre], (err, rows) => {
+        if (err) {
+          console.error("SQL Error:", err);
+          reject(err);
+        } else {
+          resolve(rows);
+        }
+      });
+    });
+  }
 
-    static async obtenerSemestres() {
-        return new Promise((resolve, reject) => {
-            db.all(`SELECT DISTINCT semestre FROM materias WHERE borrado = 0 AND semestre IS NOT NULL ORDER BY semestre ASC`, [], (err, rows) => {
-                if (err) reject(err); else resolve(rows);
-            });
-        });
-    }
+  static async borradoLogico(id) {
+    return new Promise((resolve, reject) => {
+      db.run(`UPDATE encuestas SET borrado = 1 WHERE id = ?`, [id], (err) => {
+        if (err) reject(err);
+        else resolve();
+      });
+    });
+  }
+
+  static async obtenerSemestres() {
+    return new Promise((resolve, reject) => {
+      db.all(
+        `SELECT DISTINCT semestre FROM materias WHERE borrado = 0 AND semestre IS NOT NULL ORDER BY semestre ASC`,
+        [],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows);
+        },
+      );
+    });
+  }
 }
 
 export default EncuestasModel;

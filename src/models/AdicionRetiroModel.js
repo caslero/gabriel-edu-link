@@ -1,67 +1,48 @@
-import { db } from '../config/database.js';
+import { db } from "../config/database.js";
 
 export class AdicionRetiroModel {
-    /**
-     * Busca un usuario por cédula
-     */
-    static async buscarEstudiantePorCedula(cedula) {
-        return new Promise((resolve, reject) => {
-            const sql = `
-                SELECT id, nombre, rol_id, pais, borrado
-                FROM users 
-                WHERE TRIM(cedula) = TRIM(?) 
-                AND borrado = 0
-                LIMIT 1
-            `;
-            db.get(sql, [cedula], (err, row) => {
-                if (err) return reject(err);
-                resolve(row);
-            });
-        });
-    }
-
-    /**
-     * Obtiene semestres únicos de la tabla materias
-     */
-    static async obtenerSemestresUnicos() {
-        return new Promise((resolve, reject) => {
-            const sql = `
+  /**
+   * Obtiene semestres únicos de la tabla materias
+   */
+  static async obtenerSemestresUnicos() {
+    return new Promise((resolve, reject) => {
+      const sql = `
                 SELECT DISTINCT semestre 
                 FROM materias 
                 WHERE borrado = 0 
                 ORDER BY semestre ASC
             `;
-            db.all(sql, [], (err, rows) => {
-                if (err) return reject(err);
-                resolve(rows);
-            });
-        });
-    }
+      db.all(sql, [], (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      });
+    });
+  }
 
-    /**
-     * Obtiene nombres de materias por semestre
-     */
-    static async obtenerMateriasPorSemestre(semestre) {
-        return new Promise((resolve, reject) => {
-            const sql = `
+  /**
+   * Obtiene nombres de materias por semestre
+   */
+  static async obtenerMateriasPorSemestre(semestre) {
+    return new Promise((resolve, reject) => {
+      const sql = `
                 SELECT DISTINCT nombre 
                 FROM materias 
                 WHERE semestre = ? AND borrado = 0 
                 ORDER BY nombre ASC
             `;
-            db.all(sql, [semestre], (err, rows) => {
-                if (err) return reject(err);
-                resolve(rows);
-            });
-        });
-    }
+      db.all(sql, [semestre], (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      });
+    });
+  }
 
-    /**
-     * Obtiene secciones por el nombre de la materia
-     */
-    static async obtenerSeccionesPorNombreMateria(nombreMateria) {
-        return new Promise((resolve, reject) => {
-            const sql = `
+  /**
+   * Obtiene secciones por el nombre de la materia
+   */
+  static async obtenerSeccionesPorNombreMateria(nombreMateria) {
+    return new Promise((resolve, reject) => {
+      const sql = `
                 SELECT s.id, s.seccion_nombre, s.cupos 
                 FROM secciones s
                 JOIN materias m ON s.materia_id = m.id
@@ -70,19 +51,19 @@ export class AdicionRetiroModel {
                   AND m.borrado = 0
                 ORDER BY s.seccion_nombre ASC
             `;
-            db.all(sql, [nombreMateria], (err, rows) => {
-                if (err) return reject(err);
-                resolve(rows);
-            });
-        });
-    }
+      db.all(sql, [nombreMateria], (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      });
+    });
+  }
 
-    /**
-     * Obtiene solicitudes pendientes
-     */
-    static async obtenerPendientes() {
-        return new Promise((resolve, reject) => {
-            const sql = `
+  /**
+   * Obtiene solicitudes pendientes
+   */
+  static async obtenerPendientes() {
+    return new Promise((resolve, reject) => {
+      const sql = `
                 SELECT ar.id, u.nombre AS estudiante_nombre, m.nombre AS materia, ar.tipo, ar.estado
                 FROM adicion_retiro ar
                 JOIN users u ON ar.usuario_id = u.id
@@ -91,19 +72,19 @@ export class AdicionRetiroModel {
                 WHERE ar.estado = 'Pendiente' AND ar.borrado = 0
                 ORDER BY ar.id DESC
             `;
-            db.all(sql, [], (err, rows) => {
-                if (err) return reject(err);
-                resolve(rows);
-            });
-        });
-    }
+      db.all(sql, [], (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      });
+    });
+  }
 
-    /**
-     * Obtiene solicitudes procesadas
-     */
-    static async obtenerProcesadas() {
-        return new Promise((resolve, reject) => {
-            const sql = `
+  /**
+   * Obtiene solicitudes procesadas
+   */
+  static async obtenerProcesadas() {
+    return new Promise((resolve, reject) => {
+      const sql = `
                 SELECT 
                     ar.id, 
                     u.nombre AS estudiante_nombre, 
@@ -115,18 +96,18 @@ export class AdicionRetiroModel {
                 AND ar.borrado = 0
                 ORDER BY ar.id DESC
             `;
-            db.all(sql, [], (err, rows) => {
-                if (err) return reject(err);
-                resolve(rows);
-            });
-        });
-    }
+      db.all(sql, [], (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      });
+    });
+  }
 
-    // obtener la materias aprobadas
-    static async obtenerSoloAprobadas() {
-        return new Promise((resolve, reject) => {
-            // Usamos u.id porque verificamos que así se llama en tu tabla 'users'
-            const sql = `
+  // obtener la materias aprobadas
+  static async obtenerSoloAprobadas() {
+    return new Promise((resolve, reject) => {
+      // Usamos u.id porque verificamos que así se llama en tu tabla 'users'
+      const sql = `
                 SELECT 
                     ar.id, 
                     u.nombre AS estudiante_nombre, 
@@ -137,62 +118,60 @@ export class AdicionRetiroModel {
                 WHERE ar.borrado = 0
                 ORDER BY ar.id DESC
             `;
-            
-            db.all(sql, [], (err, rows) => {
-                if (err) {
-                    // ESTA LÍNEA TE DIRÁ EL ERROR REAL EN LA CONSOLA NEGRA
-                    console.error("❌ ERROR EN CONSULTA SQL:", err.message);
-                    return reject(err);
-                }
-                resolve(rows);
-            });
-        });
-    }
 
-    /**
-     * CREAR SOLICITUD
-     */
-    static async crearSolicitud({ estudiante_id, seccion_id, tipo, estado }) {
-        return new Promise((resolve, reject) => {
-            const sql = `
+      db.all(sql, [], (err, rows) => {
+        if (err) {
+          // ESTA LÍNEA TE DIRÁ EL ERROR REAL EN LA CONSOLA NEGRA
+          console.error("❌ ERROR EN CONSULTA SQL:", err.message);
+          return reject(err);
+        }
+        resolve(rows);
+      });
+    });
+  }
+
+  /**
+   * CREAR SOLICITUD
+   */
+  static async crearSolicitud({ estudiante_id, seccion_id, tipo, estado }) {
+    return new Promise((resolve, reject) => {
+      const sql = `
                 INSERT INTO adicion_retiro (estudiante_id, seccion_id, tipo, estado, borrado)
                 VALUES (?, ?, ?, ?, 0)
             `;
-            db.run(sql, [estudiante_id, seccion_id, tipo, estado], function(err) {
-                if (err) {
-                    console.error(" Error SQL al insertar:", err.message);
-                    return reject(err);
-                }
-                resolve({ id: this.lastID });
-            });
-        });
-    }
+      db.run(sql, [estudiante_id, seccion_id, tipo, estado], function (err) {
+        if (err) {
+          console.error(" Error SQL al insertar:", err.message);
+          return reject(err);
+        }
+        resolve({ id: this.lastID });
+      });
+    });
+  }
 
-   
+  /**
+   * Actualiza el estado (Aprobada/Rechazada)
+   */
+  static async actualizarEstado(id, estado) {
+    return new Promise((resolve, reject) => {
+      const sql = `UPDATE adicion_retiro SET estado = ? WHERE id = ?`;
+      db.run(sql, [estado, id], function (err) {
+        if (err) return reject(err);
+        resolve(this.changes);
+      });
+    });
+  }
 
-    /**
-     * Actualiza el estado (Aprobada/Rechazada)
-     */
-    static async actualizarEstado(id, estado) {
-        return new Promise((resolve, reject) => {
-            const sql = `UPDATE adicion_retiro SET estado = ? WHERE id = ?`;
-            db.run(sql, [estado, id], function(err) {
-                if (err) return reject(err);
-                resolve(this.changes);
-            });
-        });
-    }
-
-    /**
-     * Borrado lógico
-     */
-    static async eliminarLogico(id) {
-        return new Promise((resolve, reject) => {
-            const sql = `UPDATE adicion_retiro SET borrado = 1 WHERE id = ?`;
-            db.run(sql, [id], function(err) {
-                if (err) return reject(err);
-                resolve(this.changes);
-            });
-        });
-    }
+  /**
+   * Borrado lógico
+   */
+  static async eliminarLogico(id) {
+    return new Promise((resolve, reject) => {
+      const sql = `UPDATE adicion_retiro SET borrado = 1 WHERE id = ?`;
+      db.run(sql, [id], function (err) {
+        if (err) return reject(err);
+        resolve(this.changes);
+      });
+    });
+  }
 }

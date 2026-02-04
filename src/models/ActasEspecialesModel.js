@@ -1,26 +1,28 @@
 import { db } from "../config/database.js";
 
 export class ActasEspecialesModel {
-    static async crear(datos) {
-        const { titulo, descripcion, tipo, docente_id, estudiante_id, creado_por } = datos;
-        return new Promise((resolve, reject) => {
-            const sql = `INSERT INTO actas_especiales 
+  static async crear(datos) {
+    const { titulo, descripcion, tipo, docente_id, estudiante_id, creado_por } =
+      datos;
+    return new Promise((resolve, reject) => {
+      const sql = `INSERT INTO actas_especiales 
                         (titulo, descripcion, tipo, docente_id, estudiante_id, creado_por, estado) 
                         VALUES (?, ?, ?, ?, ?, ?, 'Pendiente')`;
-            
-            db.run(sql, [titulo, descripcion, tipo, docente_id, estudiante_id, creado_por], function(err) {
-                if (err) return reject(err);
-                resolve({ id: this.lastID });
-            });
-        });
-    }
 
+      db.run(
+        sql,
+        [titulo, descripcion, tipo, docente_id, estudiante_id, creado_por],
+        function (err) {
+          if (err) return reject(err);
+          resolve({ id: this.lastID });
+        },
+      );
+    });
+  }
 
-
-    
-    static async obtenerTodas() {
-        return new Promise((resolve, reject) => {
-            const sql = `
+  static async obtenerTodas() {
+    return new Promise((resolve, reject) => {
+      const sql = `
                 SELECT 
                     a.id, 
                     a.titulo, 
@@ -35,47 +37,44 @@ export class ActasEspecialesModel {
                 WHERE a.borrado = 0
                 ORDER BY a.id DESC
             `;
-            db.all(sql, [], (err, rows) => {
-                if (err) return reject(err);
-                resolve(rows);
-            });
-        });
-    }
+      db.all(sql, [], (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      });
+    });
+  }
 
-
-    static async obtenerDocentes() {
-        return new Promise((resolve, reject) => {
-            // Seleccionamos id y nombre de los usuarios con rol de docente (2) que no estén borrados
-            const sql = `
+  static async obtenerDocentes() {
+    return new Promise((resolve, reject) => {
+      // Seleccionamos id y nombre de los usuarios con rol de docente (2) que no estén borrados
+      const sql = `
                 SELECT id, nombre 
                 FROM users 
                 WHERE rol_id = 2 AND borrado = 0 
                 ORDER BY nombre ASC
             `;
-            db.all(sql, [], (err, rows) => {
-                if (err) return reject(err);
-                resolve(rows);
-            });
-        });
-    }
-    static async obtenerEstudiantes() {
-        return new Promise((resolve, reject) => {
-            // Seleccionamos id y nombre de los usuarios con rol de estudiante (3)
-            const sql = `
+      db.all(sql, [], (err, rows) => {
+        if (err) return reject(err);
+        resolve(rows);
+      });
+    });
+  }
+  static async obtenerEstudiantes() {
+    return new Promise((resolve, reject) => {
+      // Seleccionamos id y nombre de los usuarios con rol de estudiante (3)
+      const sql = `
                 SELECT id, nombre 
                 FROM users 
                 WHERE rol_id = 3 AND borrado = 0 
                 ORDER BY nombre ASC
             `;
-            db.all(sql, [], (err, rows) => {
-                if (err) {
-                    console.error("ERROR SQL en obtenerEstudiantes:", err.message);
-                    return reject(err);
-                }
-                resolve(rows || []);
-            });
-        });
-    }
-    
-
+      db.all(sql, [], (err, rows) => {
+        if (err) {
+          console.error("ERROR SQL en obtenerEstudiantes:", err.message);
+          return reject(err);
+        }
+        resolve(rows || []);
+      });
+    });
+  }
 }

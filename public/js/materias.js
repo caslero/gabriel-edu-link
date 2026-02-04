@@ -46,7 +46,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     );
   };
 
-
   // --- 3. EVENTOS ---
   semestreSelect?.addEventListener("change", () => {
     // Al cambiar semestre, reseteamos todo lo de abajo
@@ -449,7 +448,7 @@ async function listarSecciones() {
       fila.innerHTML = `
         <td class="px-4 py-2 text-center text-gray-600 font-medium">#${sec.id}</td>
         <td class="px-4 py-2 text-center font-semibold">${sec.semestre}°</td>
-        <td class="px-4 py-2 text-center text-sm ${sec.borrado ? 'text-red-500' : 'text-gray-700'}">${sec.materia_nombre}</td>
+        <td class="px-4 py-2 text-center text-sm ${sec.borrado ? "text-red-500" : "text-gray-700"}">${sec.materia_nombre}</td>
         <td class="px-4 py-2 text-center">
           <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold uppercase">
             ${sec.seccion_nombre}

@@ -225,10 +225,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const data = await res.json();
 
-          if (data.status === "ok") {
-            // mostrarNotificacion("Inscripción realizada con éxito"); <-- Opcional quitarlo
-            mostrarModalExito("La inscripción del estudiante se ha realizado correctamente.");
-          }  else {
+        if (data.status === "ok") {
+          // mostrarNotificacion("Inscripción realizada con éxito"); <-- Opcional quitarlo
+          mostrarModalExito(
+            "La inscripción del estudiante se ha realizado correctamente.",
+          );
+        } else {
           // Aquí capturamos el mensaje del validador (ej. "Ya está inscrito")
           mostrarNotificacion(data.message || "Error al inscribir", "error");
         }
@@ -455,26 +457,26 @@ function mostrarNotificacion(mensaje, tipo = "exito") {
 }
 
 function mostrarModalExito(mensaje) {
-    const modal = document.getElementById('successModal');
-    const container = document.getElementById('modalContainer');
-    const textElement = document.getElementById('successModalMessage');
+  const modal = document.getElementById("successModal");
+  const container = document.getElementById("modalContainer");
+  const textElement = document.getElementById("successModalMessage");
 
-    if (mensaje) textElement.innerText = mensaje;
+  if (mensaje) textElement.innerText = mensaje;
 
-    // Mostrar el fondo (flex lo hace visible)
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
+  // Mostrar el fondo (flex lo hace visible)
+  modal.classList.remove("hidden");
+  modal.classList.add("flex");
 
-    // Trigger de la animación de entrada (escala y opacidad)
-    setTimeout(() => {
-        container.classList.remove('scale-90', 'opacity-0');
-        container.classList.add('scale-100', 'opacity-100');
-    }, 10);
+  // Trigger de la animación de entrada (escala y opacidad)
+  setTimeout(() => {
+    container.classList.remove("scale-90", "opacity-0");
+    container.classList.add("scale-100", "opacity-100");
+  }, 10);
 
-    // Redirección o recarga después de 2.5 segundos
-    setTimeout(() => {
-        window.location.reload();
-    }, 2500);
+  // Redirección o recarga después de 2.5 segundos
+  setTimeout(() => {
+    window.location.reload();
+  }, 2500);
 }
 
 // Hacer toggleModal global para los onclick del HTML

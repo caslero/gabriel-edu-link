@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const terms = get("termsCheck");
 
   // --- CAMBIOS DE ROL ---
-  const roleId = 3;             // ID que espera el backend
+  const roleId = 3; // ID que espera el backend
   const roleLabel = "Estudiante"; // Texto para el usuario
 
   // --- VER/OCULTAR CONTRASEÑA ---
@@ -118,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
       // --- MOSTRAR NOMBRE DEL ROL AL USUARIO ---
       summaryEmail.textContent = email.value;
       summaryName.textContent = name.value;
-      summaryRol.textContent = roleLabel; 
+      summaryRol.textContent = roleLabel;
 
       alertContainer.innerHTML = "";
       step2.classList.add("hidden");
@@ -127,16 +127,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  if (step2Prev) step2Prev.onclick = () => {
-    step2.classList.add("hidden");
-    step1.classList.remove("hidden");
-    activarPaso(1);
-  };
-  if (step3Prev) step3Prev.onclick = () => {
-    step3.classList.add("hidden");
-    step2.classList.remove("hidden");
-    activarPaso(2);
-  };
+  if (step2Prev)
+    step2Prev.onclick = () => {
+      step2.classList.add("hidden");
+      step1.classList.remove("hidden");
+      activarPaso(1);
+    };
+  if (step3Prev)
+    step3Prev.onclick = () => {
+      step3.classList.add("hidden");
+      step2.classList.remove("hidden");
+      activarPaso(2);
+    };
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -154,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
       correo: email.value,
       clave: password.value,
       confirmarClave: confirmPassword.value,
-      rol: roleId, 
+      rol: roleId,
       texto: "",
     };
 
@@ -176,7 +178,10 @@ document.addEventListener("DOMContentLoaded", () => {
           window.location.href = resultado.redirect || "/login";
         }, 2000);
       } else {
-        mostrarAlerta(resultado.message || "No se pudo procesar el registro.", "error");
+        mostrarAlerta(
+          resultado.message || "No se pudo procesar el registro.",
+          "error",
+        );
       }
     } catch (error) {
       console.error("Error en la petición fetch:", error);
