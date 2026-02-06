@@ -110,7 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (step2Next) {
     step2Next.addEventListener("click", () => {
-      if (!name.value || !cedulaInput.value) {
+      if (!name.value ||!pais || !cedulaInput.value) {
         mostrarAlerta("Completa el nombre y la cédula.");
         return;
       }

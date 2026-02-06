@@ -42,8 +42,8 @@
             id="pais"
             class="inline-flex items-center px-3 rounded-l-md border border-gray-300 bg-gray-50 text-gray-700 text-sm focus:outline-none"
           >
-            <option value="1">V-</option>
-            <option value="0">E-</option>
+            <option value="v">V-</option>
+            <option value="e">E-</option>
           </select>
           <input
             type="text"
@@ -185,7 +185,14 @@
                       <option value="Admin" <%= usuario.rol === 'Admin' ? 'selected' : '' %>>Admin</option>
                     </select>
                   </div>
-                  
+                  <div>
+                    <label class="block text-sm font-semibold">Pais</label>
+                    <select name="pais" class="w-full border p-2 rounded">
+                      <option value="v">V-</option>
+                      <option value="e">E-</option>
+                    </select>
+                  </div>
+
                   <div class="flex justify-end mt-4 space-x-2">
                     <button type="button" 
                             onclick="document.getElementById('modal-<%= usuario.id %>').classList.add('hidden')" 

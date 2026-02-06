@@ -94,7 +94,7 @@ function confirmarEliminacion(id) {
 }
 
 // FUNCIÓN PARA MANEJAR EL MODAL editar
-function abrirModalEditar(id, nombre, correo, rolId) {
+function abrirModalEditar(id, nombre, correo, rolId, pais) {
   let modal = document.getElementById("modal-editar-container");
   if (!modal) {
     modal = document.createElement("div");
@@ -120,6 +120,10 @@ function abrirModalEditar(id, nombre, correo, rolId) {
             <label class="block text-sm font-semibold">ID Rol</label>
             <input type="number" name="rol_id" value="${rolId}" class="w-full border p-2 rounded" required>
           </div>
+         <div>
+            <label class="block text-sm font-semibold">País</label>
+            <input type="text" name="pais" value="${pais}" class="w-full border p-2 rounded" required>
+          </div>
           <div class="flex justify-end mt-4 space-x-2">
             <button type="button" onclick="document.getElementById('modal-editar-container').innerHTML=''" 
                     class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500">
@@ -140,6 +144,12 @@ function abrirModalEditar(id, nombre, correo, rolId) {
       e.preventDefault();
       const formData = new FormData(e.target);
       const info = Object.fromEntries(formData.entries());
+        console.log("Datos a enviar:", info); 
+
+        if (!info.pais) {
+            mostrarNotificacion("El campo país es obligatorio", "error");
+            return;
+        }
 
       try {
         const response = await fetch("/api/usuarios/actualizar-usuario", {
@@ -150,6 +160,7 @@ function abrirModalEditar(id, nombre, correo, rolId) {
             nombre: info.nombre,
             correo: info.correo,
             rol_id: info.rol_id,
+            pais: info.pais,
           }),
         });
 
@@ -224,7 +235,7 @@ document
       clave: data.clave,
       confirmarClave: data.clave, // El controlador lo pide para validar
       rol: data.rol, // En el HTML el select debe tener name="rol"
-      pais: data.pais === "1" ? "v" : "e", // El controlador espera "v" para poner 1
+      pais: data.pais, // Enviará "v" o "e"
       texto: "", // El controlador pide 'texto' (posiblemente para la imagen)
     };
 
