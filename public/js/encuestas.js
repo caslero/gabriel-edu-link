@@ -161,6 +161,57 @@ async function listarEncuestas() {
 }
 
 // --- FUNCIONES GLOBALES ---
+// Aseguramos que abrirModalEditar sea global y maneje bien el flujo
+window.abrirModalEditar = async function (id) {
+    const modal = document.getElementById("modal-editar-global");
+    if (!modal) return;
+
+    modal.classList.remove("hidden");
+    
+    try {
+        const res = await fetch(`/api/encuestas/obtener/${id}`);
+        const result = await res.json();
+
+        if (result.status === "ok") {
+            const e = result.data;
+            document.getElementById("edit-id").value = e.id;
+            document.getElementById("edit-titulo").value = e.titulo;
+
+            // Cargamos las materias del semestre de esa encuesta
+            // y marcamos las que ya estaban seleccionadas
+            await cargarMateriasEdicion(e.semestre, e.materias_seleccionadas);
+        }
+    } catch (err) {
+        console.error("Error:", err);
+    }
+};
+
+// Nueva función auxiliar para el modal
+async function cargarMateriasEdicion(semestre, seleccionadas = []) {
+    const lista = document.getElementById("edit-materias-list");
+    if (!lista) return;
+
+    try {
+        const res = await fetch(`/api/encuestas/listar-materias?semestre=${semestre}`);
+        const result = await res.json();
+
+        if (result.status === "ok") {
+            // seleccionadas es un array de objetos [{id, nombre}, ...]
+            const idsSeleccionados = seleccionadas.map(m => m.id);
+
+            lista.innerHTML = result.data.map(mat => `
+                <div class="flex items-center p-2 hover:bg-white transition">
+                    <input type="checkbox" name="materias[]" value="${mat.id}" 
+                        ${idsSeleccionados.includes(mat.id) ? 'checked' : ''} 
+                        class="mr-2">
+                    <label class="text-sm">${mat.nombre}</label>
+                </div>
+            `).join("");
+        }
+    } catch (err) {
+        lista.innerHTML = "Error al cargar materias.";
+    }
+}
 
 window.abrirModalEditar = async function (id) {
   const modal = document.getElementById("modal-editar-global");

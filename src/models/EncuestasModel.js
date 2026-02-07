@@ -3,6 +3,26 @@ import { db } from "../config/database.js";
 class EncuestasModel {
   // --- MÉTODOS EXISTENTES (ADMIN) ---
 
+  static async obtenerTodas() {
+    return new Promise((resolve, reject) => {
+      // Usamos CASE de SQL para determinar el estado según la fecha actual ('now')
+      const sql = `
+        SELECT id, titulo, descripcion, semestre, fecha_inicio, fecha_fin,
+        CASE 
+          WHEN date('now') < date(fecha_inicio) THEN 'Pendiente'
+          WHEN date('now') BETWEEN date(fecha_inicio) AND date(fecha_fin) THEN 'Activa'
+          ELSE 'Finalizada'
+        END as estado
+        FROM encuestas 
+        WHERE borrado = 0 
+        ORDER BY id DESC`;
+        
+      db.all(sql, [], (err, rows) => {
+        if (err) reject(err);
+        else resolve(rows);
+      });
+    });
+  }
   static async crear({
     titulo,
     descripcion,

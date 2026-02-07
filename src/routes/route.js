@@ -48,7 +48,10 @@ rutas.get('/perfil', (req, res) => {
 
     res.render('perfil', { 
         title: 'Mi Perfil - EduLink',
-        users: datosUsuario       
+        paginaActual: 'perfil',
+        users: datosUsuario ,
+        user: "Usuarios",
+              
     });
 })
 
@@ -97,18 +100,7 @@ rutas.get(
   },
 );
 
-/*// Perfil
-rutas.get(
-  "/admin/perfil",
-  AuthMiddleware.authenticado,
-  AuthMiddleware.soloAdmin,
-  (req, res) => {
-    res.render("admin/perfil", {
-      title: "Perfil - EduLink",
-      users: "Admin",
-    });
-  },
-);**/
+
 
 // Gestionar Usuarios
 rutas.get(
@@ -227,18 +219,7 @@ rutas.get(
   },
 );
 
-/*// Perfil
-rutas.get(
-  "/docente/perfil",
-  AuthMiddleware.authenticado,
-  AuthMiddleware.soloProfesor,
-  (req, res) => {
-    res.render("docente/perfil", {
-      title: "Perfil - EduLink",
-      user: "Docente",
-    });
-  },
-);**/
+
 
 // Gestionar Actas Especiales
 rutas.get(
@@ -306,18 +287,6 @@ rutas.get(
   },
 );
 
-/*// Perfil
-rutas.get(
-  "/estudiante/perfil",
-  AuthMiddleware.authenticado,
-  AuthMiddleware.soloAlumno,
-  (req, res) => {
-    res.render("estudiante/perfil", {
-      title: "Perfil - EduLink",
-      user: "Estudiante",
-    });
-  },
-);**/
 
 // inscripcion
 rutas.get(
