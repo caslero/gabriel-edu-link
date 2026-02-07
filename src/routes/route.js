@@ -38,6 +38,21 @@ rutas.get("/no-autorizado", (req, res) => {
   });
 });
 
+/*rutas.get("/perfil", (req, res) => {
+  res.render("perfil", {
+    title: "Usuario perfil - EduLink",
+  });
+});**/
+rutas.get('/perfil', (req, res) => {
+    const datosUsuario = req.session?.user || {}; 
+
+    res.render('perfil', { 
+        title: 'Mi Perfil - EduLink',
+        users: datosUsuario       
+    });
+})
+
+
 //----------Rutas de Partials------
 // layout
 rutas.get("/partials/layout", (req, res) => {
@@ -82,7 +97,7 @@ rutas.get(
   },
 );
 
-// Perfil
+/*// Perfil
 rutas.get(
   "/admin/perfil",
   AuthMiddleware.authenticado,
@@ -93,7 +108,7 @@ rutas.get(
       users: "Admin",
     });
   },
-);
+);**/
 
 // Gestionar Usuarios
 rutas.get(
@@ -212,7 +227,7 @@ rutas.get(
   },
 );
 
-// Perfil
+/*// Perfil
 rutas.get(
   "/docente/perfil",
   AuthMiddleware.authenticado,
@@ -223,7 +238,7 @@ rutas.get(
       user: "Docente",
     });
   },
-);
+);**/
 
 // Gestionar Actas Especiales
 rutas.get(
@@ -291,7 +306,7 @@ rutas.get(
   },
 );
 
-// Perfil
+/*// Perfil
 rutas.get(
   "/estudiante/perfil",
   AuthMiddleware.authenticado,
@@ -302,7 +317,7 @@ rutas.get(
       user: "Estudiante",
     });
   },
-);
+);**/
 
 // inscripcion
 rutas.get(
@@ -548,6 +563,12 @@ rutas.get(
 rutas.get(
   "/api/encuestas/listar-materias",
   EncuestasController.listarMateriasPorSemestre,
+);
+
+rutas.get(
+    "/api/perfil/obtener-usuario", 
+    AuthMiddleware.authenticado, // <--- ESTO ES LO QUE CREA req.authData
+    UserController.obtenerDatosDeUsuario
 );
 
 // Acciones de CRUD (Admin)

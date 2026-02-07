@@ -287,4 +287,38 @@ export default class UserController {
       );
     }
   }
+
+  static async obtenerDatosDeUsuario(req, res) {
+      try {
+          // CAMBIO CLAVE: Usamos 'usuarioId' que es como viene en tu token
+          const userId = req.authData?.usuarioId;
+
+          if (!userId) {
+              console.error("Error: No se encontró usuarioId en el token");
+              return res.status(401).json({ 
+                  status: 'error', 
+                  message: 'No hay usuarioId en el token' 
+              });
+          }
+
+          // Llamamos al modelo con el ID correcto
+          const usuario = await UserModel.buscarUsuarioPorId(userId);
+
+          if (!usuario) {
+              return res.status(404).json({ 
+                  status: 'error', 
+                  message: 'Usuario no existe en la base de datos' 
+              });
+          }
+
+          // Enviamos los datos al frontend
+          res.json(usuario);
+      } catch (error) {
+          console.error("Error en obtenerDatosDeUsuario:", error);
+          res.status(500).json({ 
+              status: 'error', 
+              message: 'Error interno de servidor' 
+          });
+      }
+  }
 }
