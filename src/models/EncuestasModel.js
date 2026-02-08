@@ -22,7 +22,7 @@ class EncuestasModel {
         else resolve(rows);
       });
     });
-  }
+  } 
   static async crear({
     titulo,
     descripcion,
@@ -159,7 +159,19 @@ class EncuestasModel {
       });
     });
   }
-
+  static async obtenerPorId(id) {
+      return new Promise((resolve, reject) => {
+          const sql = `SELECT * FROM encuestas WHERE id = ? AND borrado = 0`;
+          db.get(sql, [id], (err, row) => {
+              if (err) {
+                  console.error("Error SQL en obtenerPorId:", err);
+                  reject(err);
+              } else {
+                  resolve(row);
+              }
+          });
+      });
+  }
   static async verificarVoto(encuestaId, estudianteId) {
     return new Promise((resolve, reject) => {
       const sql = `SELECT 1 FROM votos WHERE encuesta_id = ? AND estudiante_id = ? LIMIT 1`;
@@ -289,6 +301,156 @@ class EncuestasModel {
       );
     });
   }
+    static async actualizar(data) {
+      const { id, titulo, descripcion, semestre, fecha_inicio, fecha_fin, estado, materias } = data;
+      return new Promise((resolve, reject) => {
+          db.serialize(() => {
+              db.run("BEGIN TRANSACTION");
+
+              const sql = `UPDATE encuestas SET 
+                          titulo = ?, descripcion = ?, semestre = ?, 
+                          fecha_inicio = ?, fecha_fin = ?, estado = ? 
+                          WHERE id = ?`;
+
+              db.run(sql, [titulo, descripcion, semestre, fecha_inicio, fecha_fin, estado, id], (err) => {
+                  if (err) {
+                      db.run("ROLLBACK");
+                      return reject(err);
+                  }
+                  
+                  // ... (aquí sigue tu lógica de borrar e insertar materias que ya tenías)
+                  db.run("DELETE FROM encuesta_materias WHERE encuesta_id = ?", [id], (err) => {
+                      if (err) { db.run("ROLLBACK"); return reject(err); }
+                      
+                      const stmt = db.prepare("INSERT INTO encuesta_materias (encuesta_id, materia_id) VALUES (?, ?)");
+                      materias.forEach(mId => stmt.run([id, mId]));
+                      stmt.finalize(() => {
+                          db.run("COMMIT");
+                          resolve();
+                      });
+                  });
+              });
+          });
+      });
+  }
+
+  static async obtenerResultados(encuestaId) {
+      return new Promise((resolve, reject) => {
+          // Esta consulta hace lo siguiente:
+          // 1. Obtiene el título de la encuesta.
+          // 2. Cuenta los votos por cada materia vinculada a esa encuesta.
+          // 3. Incluye materias incluso si tienen 0 votos (LEFT JOIN).
+          const sql = `
+              SELECT 
+                  e.titulo AS encuesta_titulo,
+                  m.nombre AS materia_nombre,
+                  COUNT(v.id) AS total_votos
+              FROM encuestas e
+              JOIN encuesta_materias em ON e.id = em.encuesta_id
+              JOIN materias m ON em.materia_id = m.id
+              LEFT JOIN votos v ON v.encuesta_id = e.id AND v.materia_id = m.id
+              WHERE e.id = ?
+              GROUP BY m.id
+              ORDER BY total_votos DESC
+          `;
+
+          db.all(sql, [encuestaId], (err, rows) => {
+              if (err) return reject(err);
+              
+              if (rows.length === 0) {
+                  return resolve({ titulo: "Sin datos", resultados: [] });
+              }
+
+              // Formateamos la respuesta
+              const respuesta = {
+                  titulo: rows[0].encuesta_titulo,
+                  resultados: rows.map(r => ({
+                      nombre: r.materia_nombre,
+                      votos: r.total_votos
+                  }))
+              };
+              
+              resolve(respuesta);
+          });
+      });
+  }
+
+  static async registrarVoto(estudianteId, encuestaId, materiaId) {
+      return new Promise((resolve, reject) => {
+          const sql = `INSERT INTO votos (estudiante_id, encuesta_id, materia_id) VALUES (?, ?, ?)`;
+          
+          db.run(sql, [estudianteId, encuestaId, materiaId], function(err) {
+              if (err) {
+                  if (err.message.includes("UNIQUE constraint failed")) {
+                      return reject(new Error("Ya has participado en esta encuesta."));
+                  }
+                  return reject(err);
+              }
+              resolve({ id: this.lastID });
+          });
+      });
+  }
+
+    // Obtener encuestas básicas
+  static async listarParaEstudiantes() {
+      return new Promise((resolve, reject) => {
+          db.all("SELECT * FROM encuestas ORDER BY fecha_inicio DESC", [], (err, rows) => {
+              if (err) reject(err);
+              resolve(rows);
+          });
+      });
+  }
+
+  // Verificar si ya existe un voto (para el campo 'votado')
+  static async verificarVoto(estudianteId, encuestaId) {
+      return new Promise((resolve, reject) => {
+          const sql = "SELECT id FROM votos WHERE estudiante_id = ? AND encuesta_id = ? LIMIT 1";
+          db.get(sql, [estudianteId, encuestaId], (err, row) => {
+              if (err) reject(err);
+              resolve(!!row); // Devuelve true si existe, false si no
+          });
+      });
+  }
+
+    static async listarTodas() {
+      return new Promise((resolve, reject) => {
+          // Traemos todas las encuestas, puedes filtrar por semestre si lo deseas
+          const sql = `SELECT * FROM encuestas ORDER BY fecha_inicio DESC`;
+          
+          db.all(sql, [], (err, rows) => {
+              if (err) return reject(err);
+              resolve(rows);
+          });
+      });
+  }
+
+static async listarEncuestasAPI(req, res) {
+    try {
+        const estudianteId = 1; // Luego lo obtendrás del JWT
+        const listaEncuestas = await EncuestasModel.listarTodasConMaterias();
+
+        // Procesamos los datos igual que antes
+        const data = await Promise.all(listaEncuestas.map(async (encuesta) => {
+            const yaVoto = await EncuestasModel.verificarVotoExistente(estudianteId, encuesta.id);
+            return { ...encuesta, votado: yaVoto };
+        }));
+
+        // IMPORTANTE: Devolver JSON con status ok
+        return res.json({ status: "ok", data: data });
+    } catch (error) {
+        console.error("Error API:", error);
+        res.status(500).json({ status: "error", message: error.message });
+    }
+}
+  static async verificarVotoExistente(estudianteId, encuestaId) {
+    return new Promise((resolve, reject) => {
+        const sql = `SELECT id FROM votos WHERE estudiante_id = ? AND encuesta_id = ? LIMIT 1`;
+        db.get(sql, [estudianteId, encuestaId], (err, row) => {
+            if (err) return reject(err);
+            resolve(!!row); // Retorna true si existe un registro, false si no
+        });
+    });
+}
 }
 
 export default EncuestasModel;

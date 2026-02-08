@@ -86,12 +86,67 @@
             <div class="space-y-4">
                 <input type="text" name="titulo" id="edit-titulo" class="w-full border p-2 rounded" placeholder="Título">
                 <div id="edit-materias-list" class="border p-2 max-h-40 overflow-y-auto bg-gray-50"></div>
+                <div>
+                  <div>
+                    <label class="block text-sm font-semibold">Semestre</label>
+                    <input type="text" id="edit-semestre" name="semestre" class="w-full border p-2 rounded bg-gray-100" readonly>
+                  </div>
+                  <div class="flex space-x-4">
+                    <div class="flex-1">
+                        <label for="edit-fecha-inicio" class="block text-sm font-semibold">Fecha de Inicio</label>
+                        <input type="date" id="edit-fecha-inicio" name="fecha_inicio" class="w-full border p-2 rounded" required>
+                    </div>
+                    <div class="flex-1">
+                        <label for="edit-fecha-fin" class="block text-sm font-semibold">Fecha de Fin</label>
+                        <input type="date" id="edit-fecha-fin" name="fecha_fin" class="w-full border p-2 rounded" required>
+                    </div>
+                </div>
+                <label for="edit-estado" class="block text-sm font-semibold">Estado de la Encuesta</label>
+                <select id="edit-estado" name="estado" class="w-full border p-2 rounded bg-white">
+                  <option value="Pendiente">Pendiente</option>
+                  <option value="Activa">Activa</option>
+                  <option value="Finalizada">Finalizada</option>
+                </select>
+              </div>
             </div>
+            
             <div class="flex justify-end gap-2 mt-4">
                 <button type="button" onclick="window.cerrarModal('modal-editar-global')" class="px-4 py-2 bg-gray-400 text-white rounded">Cerrar</button>
                 <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded font-bold">Guardar</button>
             </div>
         </form>
+    </div>
+</div>
+
+<div id="modal-resultados" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden">
+        <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
+            <h3 class="text-xl font-bold" id="res-titulo">Resultados de la Encuesta</h3>
+            <button onclick="cerrarModal('modal-resultados')" class="text-white hover:text-gray-200">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+        
+        <div class="p-6">
+            <h4 class="text-lg font-semibold mb-4 text-gray-700 flex items-center gap-2">
+                🏆 Materias más votadas
+            </h4>
+            
+            <div id="ganadores-container" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                </div>
+
+            <hr class="my-4">
+
+            <h4 class="text-sm font-bold uppercase text-gray-500 mb-2">Desglose General</h4>
+            <div id="lista-detallada-resultados" class="space-y-2 max-h-60 overflow-y-auto">
+                </div>
+        </div>
+
+        <div class="bg-gray-50 p-4 text-right">
+            <button onclick="cerrarModal('modal-resultados')" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition">
+                Cerrar
+            </button>
+        </div>
     </div>
 </div>
 

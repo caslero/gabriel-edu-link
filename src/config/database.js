@@ -247,6 +247,28 @@ export const initEncuestasMateriasTable = () => {
     }
   });
 };
+export const initVotosTable = () => {
+  const sql = `
+    CREATE TABLE IF NOT EXISTS votos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        estudiante_id INTEGER NOT NULL,
+        encuesta_id INTEGER NOT NULL,
+        materia_id INTEGER NOT NULL,
+        fecha_voto DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (estudiante_id) REFERENCES usuarios(id),
+        FOREIGN KEY (encuesta_id) REFERENCES encuestas(id) ON DELETE CASCADE,
+        FOREIGN KEY (materia_id) REFERENCES materias(id), 
+        UNIQUE(estudiante_id, encuesta_id)
+    );
+    `;
+  db.run(sql, (err) => {
+    if (err) {
+      console.error("Error al crear tabla votos:", err.message);
+    } else {
+      console.log("Tabla de votos preparada.");
+    }
+  });
+};
 
 export const initDatabase = () => {
   initRolesTable();
@@ -258,6 +280,7 @@ export const initDatabase = () => {
   initActasEspecialesTable();
   initEncuestasTable();
   initEncuestasMateriasTable();
+  initVotosTable();
 };
 
 /**

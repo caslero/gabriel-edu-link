@@ -1,202 +1,168 @@
-<div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
-  <h2 class="text-2xl font-bold mb-6 text-blue-700">Encuestas Pendientes</h2>
-  <% const pendientes = encuestas.filter(e => e.estado === 'Pendiente'); %>
-  <% if (pendientes.length === 0) { %>
-    <p class="text-gray-500">No hay encuestas pendientes.</p>
-  <% } else { %>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <% pendientes.forEach(encuesta => { %>
-        <div class="bg-yellow-50 p-6 rounded shadow">
-          <h3 class="text-center text-lg font-semibold text-yellow-700"><%= encuesta.titulo %></h3>
-          <p class="text-center text-gray-600 mb-2"><%= encuesta.descripcion %></p>
-          <div class="flex justify-center space-x-4">
-            <h4 class="text-sm text-green-500">Inicio: <%= encuesta.fecha_inicio %></h4>
-            <h4 class="text-sm text-red-500">Fin: <%= encuesta.fecha_fin %></h4>
-          </div>
-        </div>
-      <% }) %>
+<div class="container mx-auto pb-10">
+  <div class="bg-black text-green-400 p-4 font-mono text-xs">
+  <div id="contenedor-encuestas" class="grid grid-cols-1 md:grid-cols-2 gap-6">
     </div>
-  <% } %>
 </div>
-
-<!--Activas-->
-<div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
-  <h2 class="text-2xl font-bold mb-6 text-blue-700">Encuestas Activas</h2>
-  <% const activas = encuestas.filter(e => e.estado === 'Activa'); %>
-  <% if (activas.length === 0) { %>
-    <p class="text-gray-500">No hay encuestas activas.</p>
-  <% } else { %>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <% activas.forEach(encuesta => { %>
-        <div class="bg-green-50 p-6 rounded shadow">
-          <h3 class="text-center text-lg font-semibold text-green-700"><%= encuesta.titulo %></h3>
-          <p class="text-center text-gray-600 mb-2"><%= encuesta.descripcion %></p>
-          <div class="flex justify-center space-x-4">
-            <h4 class="text-sm text-green-500">Inicio: <%= encuesta.fecha_inicio %></h4>
-            <h4 class="text-sm text-red-500">Fin: <%= encuesta.fecha_fin %></h4>
+  <div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
+    <h2 class="text-2xl font-bold mb-6 text-blue-700">Encuestas Pendientes</h2>
+    <% const pendientes = encuestas.filter(e => e.estado === 'Pendiente'); %>
+    
+    <% if (pendientes.length === 0) { %>
+      <p class="text-gray-500 text-center">No hay encuestas pendientes.</p>
+    <% } else { %>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <% pendientes.forEach(encuesta => { %>
+          <div class="bg-yellow-50 p-6 rounded shadow">
+            <h3 class="text-center text-lg font-semibold text-yellow-700"><%= encuesta.titulo %></h3>
+            <p class="text-center text-gray-600 mb-2"><%= encuesta.descripcion %></p>
+            <div class="flex justify-center space-x-4">
+              <h4 class="text-sm text-green-500">Inicio: <%= encuesta.fecha_inicio %></h4>
+              <h4 class="text-sm text-red-500">Fin: <%= encuesta.fecha_fin %></h4>
+            </div>
           </div>
-          <% if (encuesta.votado) { %>
-            <span class="inline-block bg-gray-200 text-gray-700 px-3 py-1 rounded mt-4">
-              Esperando resultados
-            </span>
-          <% } else { %>
-            <div class="flex justify-center">
-            <button onclick="document.getElementById('modal-<%= encuesta.id %>').classList.remove('hidden')"
-                    class="flex justify-center items-center bg-blue-600 text-white px-4 py-2 rounded hover:bg-gradient-to-r from-cyan-200 to-blue-500 to-blue-700 transition mt-4">
-              Votar
-            </button>
-            </div>
-          <% } %>
-        </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
 
-        <!-- Modal de votación -->
-        <div id="modal-<%= encuesta.id %>" 
-            class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div class="bg-white rounded-lg shadow-lg p-6 w-[600px]">
-            <h3 class="text-center text-lg font-semibold text-blue-700 mb-4">Votación - <%= encuesta.titulo %></h3>
+  <hr class="my-10 border-gray-200">
 
-            <!-- Notificación de error -->
-            <div id="error-msg-<%= encuesta.id %>" 
-                class="hidden mb-4 p-3 rounded bg-red-100 text-red-700 border border-red-300 text-sm">
-              Debes seleccionar entre 1 y 3 materias.
-            </div>
-
-            <form onsubmit="return validarVotos('<%= encuesta.id %>', this)">
+  <div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
+    <h2 class="text-2xl font-bold mb-6 text-green-700">Encuestas Activas</h2>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <% const activas = encuestas.filter(e => e.estado === 'Activa' && e.borrado === 0); %>
+      
+      <% if (activas.length > 0) { %>
+        <% activas.forEach(encuesta => { %>
+          <div class="bg-white border p-6 rounded-lg shadow-md">
+            <h2 class="font-bold text-xl text-gray-800"><%= encuesta.titulo %></h2>
+            <p class="text-gray-600 my-2"><%= encuesta.descripcion %></p>
+            
+            <h3 class="mt-4 font-semibold text-gray-700">Materias disponibles:</h3>
+            <ul class="mt-2 space-y-1">
               <% if (encuesta.materias && encuesta.materias.length > 0) { %>
-                <% encuesta.materias.forEach(mat => { %>
-                  <div class="flex items-center space-x-2 mb-2">
-                    <input type="checkbox" name="materias[]" value="<%= mat.id %>" 
-                          class="h-4 w-4 materia-checkbox">
-                    <label><%= mat.nombre %> (Semestre <%= mat.semestre %>)</label>
-                  </div>
+                <% encuesta.materias.forEach(materia => { %>
+                  <li class="text-sm text-gray-800">• <%= materia.nombre %></li>
                 <% }) %>
               <% } else { %>
-                <p class="text-gray-500">No hay materias asociadas a esta encuesta.</p>
+                <li class="text-sm text-gray-400 italic">No hay materias asignadas</li>
               <% } %>
-              <div class="flex justify-center mt-4 space-x-2">
-                <button type="submit" 
-                        class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">
-                  Confirmar votación
+            </ul>
+
+            <div class="mt-6">
+              <% if (encuesta.votado) { %>
+                <button disabled class="w-full bg-gray-200 text-gray-500 py-2 rounded font-medium">
+                   <i class="bi bi-check-circle mr-2"></i>Ya has votado
                 </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      <% }) %>
-    </div>
-  <% } %>
-</div>
-
-<!--finalizadas-->
-<div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
-  <h2 class= text-2xl font-bold mb-6 text-blue-700">Encuestas Finalizadas</h2>
-  <% const finalizadas = encuestas.filter(e => e.estado === 'Finalizada'); %>
-  <% if (finalizadas.length === 0) { %>
-    <p class="text-gray-500">No hay encuestas finalizadas.</p>
-  <% } else { %>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      <% finalizadas.forEach(encuesta => { %>
-        <div class="bg-gray-50 p-6 rounded shadow">
-          <h3 class="text-center ext-lg font-semibold text-gray-700"><%= encuesta.titulo %></h3>
-          <div class="flex justify-center space-x-4">
-            <h4 class="text-sm text-green-500">Inicio: <%= encuesta.fecha_inicio %></h4>
-            <h4 class="text-sm text-red-500">Fin: <%= encuesta.fecha_fin %></h4>
-          </div>
-          <div class="flex justify-center">
-          <button onclick="document.getElementById('modal-resultados-<%= encuesta.id %>').classList.remove('hidden')"
-                  class="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 mt-4">
-            Ver detalles
-          </button>
-          </div>
-        </div>
-
-        <!-- Modal de resultados -->
-        <div id="modal-resultados-<%= encuesta.id %>" 
-            class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div class="bg-white rounded-lg shadow-lg p-6 w-[600px]">
-            <h3 class="text-center text-lg font-semibold text-purple-700 mb-4">Resultados - <%= encuesta.titulo %></h3>
-
-            <% if (encuesta.resultados && encuesta.resultados.length > 0) { %>
-              <table class="w-full border-collapse">
-                <thead>
-                  <tr class="bg-gray-100">
-                    <th class="border px-4 py-2 text-left">Materia</th>
-                    <th class="border px-4 py-2 text-left">Semestre</th>
-                    <th class="border px-4 py-2 text-center">Total votos</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <% encuesta.resultados.forEach(r => { %>
-                    <tr>
-                      <td class="border px-4 py-2"><%= r.materia %></td>
-                      <td class="border px-4 py-2"><%= r.semestre %></td>
-                      <td class="border px-4 py-2 text-center font-semibold text-green-700"><%= r.total_votos %></td>
-                    </tr>
-                  <% }) %>
-                </tbody>
-              </table>
-            <% } else { %>
-              <p class="text-gray-500">No hay resultados disponibles.</p>
-            <% } %>
-
-            <div class="flex justify-center mt-4">
-              <button type="button" 
-                      onclick="document.getElementById('modal-resultados-<%= encuesta.id %>').classList.add('hidden')" 
-                      class="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500 transition">
-                Cerrar
-              </button>
+              <% } else { %>
+                <button onclick="document.getElementById('modal-<%= encuesta.id %>').classList.remove('hidden')" 
+                        class="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition font-medium">
+                  Participar en la encuesta
+                </button>
+              <% } %>
             </div>
           </div>
-        </div>
-      <% }) %>
+
+          <div id="modal-<%= encuesta.id %>" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-2xl">
+              <h3 class="text-center text-xl font-bold text-blue-700 mb-4">Votación - <%= encuesta.titulo %></h3>
+              
+              <p class="text-sm text-gray-500 mb-4">Selecciona las materias que desees inscribir (Máximo 3):</p>
+
+              <form onsubmit="event.preventDefault(); return validarVotos('<%= encuesta.id %>', this)">
+                <div class="max-h-60 overflow-y-auto border rounded p-4 mb-4">
+                  <% if (encuesta.materias) { %>
+                    <% encuesta.materias.forEach(m => { %>
+                      <div class="flex items-center mb-2">
+                        <input type="checkbox" name="materias" value="<%= m.id %>" class="mr-2">
+                        <label class="text-gray-700"><%= m.nombre %></label>
+                      </div>
+                    <% }) %>
+                  <% } %>
+                </div>
+
+                <div id="error-msg-<%= encuesta.id %>" class="hidden mb-4 p-3 rounded bg-red-100 text-red-700 border border-red-300 text-sm">
+                  Debes seleccionar entre 1 y 3 materias.
+                </div>
+
+                <div class="flex justify-end space-x-3">
+                  <button type="button" onclick="document.getElementById('modal-<%= encuesta.id %>').classList.add('hidden')"
+                          class="bg-gray-400 text-white px-6 py-2 rounded hover:bg-gray-500 transition">
+                    Cancelar
+                  </button>
+                  <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 transition font-bold">
+                    Confirmar Votación
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        <% }) %>
+      <% } else { %>
+        <p class="col-span-2 text-gray-500 italic text-center py-10">No hay encuestas activas en este momento.</p>
+      <% } %>
     </div>
-  <% } %>
+  </div>
+
+  <div class="max-w-6xl mx-auto mt-10 bg-white rounded-lg shadow-lg p-8">
+    <h2 class="text-2xl font-bold mb-6 text-gray-700">Encuestas Finalizadas</h2>
+    <% const finalizadas = encuestas.filter(e => e.estado === 'Finalizada'); %>
+    
+    <% if (finalizadas.length === 0) { %>
+      <p class="text-gray-500 text-center">No hay encuestas finalizadas.</p>
+    <% } else { %>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <% finalizadas.forEach(encuesta => { %>
+          <div class="bg-gray-50 p-6 rounded shadow border border-gray-200">
+            <h3 class="text-center text-lg font-semibold text-gray-700 mb-2"><%= encuesta.titulo %></h3>
+            <div class="flex justify-center space-x-4 text-xs mb-4">
+              <span class="text-green-600">Inicio: <%= encuesta.fecha_inicio %></span>
+              <span class="text-red-600">Fin: <%= encuesta.fecha_fin %></span>
+            </div>
+            <button onclick="document.getElementById('modal-resultados-<%= encuesta.id %>').classList.remove('hidden')"
+                    class="w-full bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition">
+              Ver resultados
+            </button>
+          </div>
+
+          <div id="modal-resultados-<%= encuesta.id %>" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-2xl">
+              <h3 class="text-center text-lg font-semibold text-purple-700 mb-4">Resultados - <%= encuesta.titulo %></h3>
+              <div class="overflow-x-auto">
+                <table class="w-full border-collapse">
+                  <thead>
+                    <tr class="bg-gray-100 text-sm">
+                      <th class="border px-4 py-2 text-left">Materia</th>
+                      <th class="border px-4 py-2 text-center">Votos</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% if (encuesta.resultados && encuesta.resultados.length > 0) { %>
+                      <% encuesta.resultados.forEach(r => { %>
+                        <tr class="text-sm">
+                          <td class="border px-4 py-2"><%= r.materia %></td>
+                          <td class="border px-4 py-2 text-center font-bold text-green-700"><%= r.total_votos %></td>
+                        </tr>
+                      <% }) %>
+                    <% } else { %>
+                      <tr><td colspan="2" class="text-center p-4 text-gray-400">Sin datos</td></tr>
+                    <% } %>
+                  </tbody>
+                </table>
+              </div>
+              <div class="flex justify-center mt-6">
+                <button onclick="document.getElementById('modal-resultados-<%= encuesta.id %>').classList.add('hidden')" 
+                        class="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition">
+                  Cerrar
+                </button>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </div>
 </div>
 
-<script>
-  function validarVotos(encuestaId, form) {
-    const checks = form.querySelectorAll('.materia-checkbox:checked');
-    const errorMsg = document.getElementById('error-msg-' + encuestaId);
-
-    if (checks.length < 1 || checks.length > 3) {
-      errorMsg.classList.remove('hidden');
-      return false;
-    } else {
-      errorMsg.classList.add('hidden');
-      return true;
-    }
-  }
-
-  // Control dinámico de checkboxes
-  function controlarCheckboxes(encuestaId) {
-    const allChecks = document.querySelectorAll('#modal-' + encuestaId + ' .materia-checkbox');
-    const checked = document.querySelectorAll('#modal-' + encuestaId + ' .materia-checkbox:checked');
-
-    if (checked.length >= 3) {
-      // Bloquear los no seleccionados
-      allChecks.forEach(chk => {
-        if (!chk.checked) {
-          chk.disabled = true;
-          chk.classList.add('cursor-not-allowed', 'opacity-50');
-        }
-      });
-    } else {
-      // Rehabilitar todos
-      allChecks.forEach(chk => {
-        chk.disabled = false;
-        chk.classList.remove('cursor-not-allowed', 'opacity-50');
-      });
-    }
-  }
-
-  <!--// Escuchar cambios en cada modal
-  document.addEventListener('DOMContentLoaded', () => {
-    <% encuestas.forEach(encuesta => { %>
-      const checks_<%= encuesta.id %> = document.querySelectorAll('#modal-<%= encuesta.id %> .materia-checkbox');
-      checks_<%= encuesta.id %>.forEach(chk => {
-        chk.addEventListener('change', () => controlarCheckboxes('<%= encuesta.id %>'));
-      });
-    <% }) %>
-  });
-  -->
-</script>
+<script src="/js/encuestas.js"></script>

@@ -17,7 +17,8 @@ import {
 } from "../middlewares/rateLimited.js";
 import AuthMiddleware from "../middlewares/authMiddleware.js";
 import { ActasEspecialesController } from "../controllers/ActasEspecialesController.js";
-import EncuestasController from "../controllers/EncuestasController.js";
+import EncuestasController from '../controllers/EncuestasController.js';
+
 
 const rutas = express.Router();
 
@@ -551,10 +552,11 @@ rutas.patch(
   EncuestasController.eliminarEncuesta,
 );
 
-rutas.get("/api/encuestas/obtener/:id", EncuestasController.obtenerPorId);
+rutas.get('/api/encuestas/obtener/:id', EncuestasController.obtenerPorId);
+rutas.put('/api/encuestas/actualizar-encuesta', EncuestasController.actualizarEncuesta);
 
-// Vista de encuestas disponibles para el estudiante
-rutas.get("/estudiante/encuestas", EncuestasController.vistaEstudiante);
+rutas.post('/api/encuestas/votar', EncuestasController.registrarVoto);
+rutas.get('/api/encuesta/encuestas', EncuestasController.verVistaEstudiante);
 
 // Acción de votar (Recibe encuestaId por URL y materias por Body)
 rutas.post("/api/encuestas/votar/:encuestaId", EncuestasController.votar);
