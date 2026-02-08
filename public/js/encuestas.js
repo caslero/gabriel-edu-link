@@ -381,7 +381,7 @@ function crearCardEncuesta(encuesta) {
 
 async function obtenerEncuestasEstudiante() {
     try {
-        const response = await fetch('/api/encuesta/encuestas');
+        const response = await fetch('/api/encuestas/mostrar-encuestas');
         const result = await response.json();
 
         const contenedor = document.getElementById('contenedor-encuestas');
@@ -418,7 +418,7 @@ async function validarVotos(encuestaId, form) {
     const materiasSeleccionadas = Array.from(checks).map(chk => chk.value);
 
     try {
-        const response = await fetch('/api/encuestas/votar', {
+        const response = await fetch('/api/encuestas/votar-encuestas', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
