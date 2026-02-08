@@ -38,7 +38,7 @@ export class RolModel {
    @param {string} nombre - El nombre a buscar
    @returns {Promise<Object|null>} - El rol encontrado o null
   */
-  static async buscarUsuarioPorNombre(nombre) {
+  static async buscarRolPorNombre(nombre) {
     return new Promise((resolve, reject) => {
       const sql = `SELECT * FROM roles WHERE nombre = ? LIMIT 1`;
 

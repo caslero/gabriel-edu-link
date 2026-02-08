@@ -556,7 +556,7 @@ rutas.get('/api/encuestas/obtener/:id', EncuestasController.obtenerPorId);
 rutas.put('/api/encuestas/actualizar-encuesta', EncuestasController.actualizarEncuesta);
 
 rutas.post('/api/encuestas/votar-encuestas', EncuestasController.registrarVoto);
-rutas.get('/api/encuestas/mostrar-encuestas', EncuestasController.verVistaEstudiante);
+rutas.get('/api/encuestas/mostrar-encuestas', EncuestasController.todasEncuestasEstudiantes);
 
 // Acción de votar (Recibe encuestaId por URL y materias por Body)
 rutas.post("/api/encuestas/votar/:encuestaId", EncuestasController.votar);
